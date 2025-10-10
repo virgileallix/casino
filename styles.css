@@ -48,11 +48,62 @@ body {
     border: 1px solid var(--border-color);
 }
 
-.logo h1 {
-    text-align: center;
-    font-size: 2.5rem;
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.logo:hover {
+    color: inherit;
+}
+
+.logo-icon {
+    width: 46px;
+    height: 46px;
+    display: block;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.logo-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.logo-subtitle {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.logo--centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 30px;
-    color: var(--accent-primary);
+}
+
+.logo--xl .logo-icon {
+    width: 54px;
+    height: 54px;
+}
+
+.logo--xl .logo-title {
+    font-size: 1.9rem;
+}
+
+.logo--xl .logo-subtitle {
+    font-size: 0.85rem;
 }
 
 .tabs {
@@ -231,9 +282,16 @@ body {
     gap: 40px;
 }
 
-.logo h1 {
-    font-size: 1.5rem;
-    margin: 0;
+.header .logo {
+    flex-shrink: 0;
+}
+
+.header .logo-title {
+    font-size: 1.35rem;
+}
+
+.header .logo-subtitle {
+    font-size: 0.68rem;
 }
 
 .nav {

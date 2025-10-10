@@ -17,6 +17,7 @@ let balanceLoaded = false;
 const resultNumberElement = document.getElementById('resultNumber');
 const sliderRollElement = document.getElementById('sliderRoll');
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
 // Constants
 const HOUSE_EDGE = 0.01; // 1% house edge like Stake
@@ -266,8 +267,8 @@ async function playGame() {
         const profit = parseFloat((payout - betAmount).toFixed(2));
 
         await runPreRollAnimation();
-        animateResult(result, won);
-        await wait(1500);
+        await animateResult(result, won);
+        await wait(250);
 
         let transactionSucceeded = false;
 
@@ -299,49 +300,86 @@ async function playGame() {
 }
 
 // Animate result
-function animateResult(result, won) {
+async function animateResult(result, won) {
     const resultNumber = document.getElementById('resultNumber');
     const resultMarker = document.getElementById('resultMarker');
 
-    // Remove previous classes
+    if (!resultNumber || !resultMarker) {
+        drawCanvas(result, won);
+        return;
+    }
+
     resultNumber.classList.remove('win', 'loss');
+    resultMarker.classList.remove('win', 'loss', 'show');
 
-    // Animate number counting
-    let start = 0;
-    const duration = 1000;
-    const startTime = Date.now();
+    const previousNumber = parseFloat(resultNumber.dataset.value ?? resultNumber.textContent);
+    const previousMarker = parseFloat(resultMarker.dataset.position ?? previousNumber);
+    const safePreviousNumber = Number.isFinite(previousNumber) ? previousNumber : result;
+    const safePreviousMarker = Number.isFinite(previousMarker) ? previousMarker : result;
 
-    const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+    const jitterEnd = performance.now() + 420;
+    while (performance.now() < jitterEnd) {
+        resultNumber.textContent = (Math.random() * 100).toFixed(2);
+        await wait(36);
+    }
 
-        // Easing function
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = start + (result - start) * eased;
+    await Promise.all([
+        animateNumberTransition(resultNumber, safePreviousNumber, result, 640),
+        animateMarkerTransition(resultMarker, safePreviousMarker, result, 640)
+    ]);
 
-        resultNumber.textContent = current.toFixed(2);
+    const finalValue = result.toFixed(2);
+    resultNumber.dataset.value = finalValue;
+    resultNumber.textContent = finalValue;
+    resultNumber.classList.add(won ? 'win' : 'loss');
 
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            resultNumber.textContent = result.toFixed(2);
-            resultNumber.classList.remove('rolling');
-            resultNumber.classList.add(won ? 'win' : 'loss');
-        }
-    };
+    resultMarker.dataset.position = finalValue;
+    resultMarker.style.left = `${result}%`;
+    resultMarker.classList.add('show');
+    resultMarker.classList.toggle('win', won);
+    resultMarker.classList.toggle('loss', !won);
 
-    animate();
-
-    // Animate marker
-    const position = (result / 100) * 100;
-    resultMarker.style.left = `${position}%`;
-    resultMarker.classList.remove('show');
-    setTimeout(() => {
-        resultMarker.classList.add('show');
-    }, 50);
-
-    // Update canvas
     drawCanvas(result, won);
+}
+
+function animateNumberTransition(element, from, to, duration) {
+    return new Promise((resolve) => {
+        const startTime = performance.now();
+        const step = (time) => {
+            const progress = Math.min((time - startTime) / duration, 1);
+            const eased = easeOutCubic(progress);
+            const current = from + (to - from) * eased;
+            element.textContent = current.toFixed(2);
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                resolve();
+            }
+        };
+
+        requestAnimationFrame(step);
+    });
+}
+
+function animateMarkerTransition(element, from, to, duration) {
+    return new Promise((resolve) => {
+        const startTime = performance.now();
+        const step = (time) => {
+            const progress = Math.min((time - startTime) / duration, 1);
+            const eased = easeOutCubic(progress);
+            const current = from + (to - from) * eased;
+            element.style.left = `${current}%`;
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                resolve();
+            }
+        };
+
+        requestAnimationFrame(step);
+    });
 }
 
 // Update balance display

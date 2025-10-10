@@ -1,27 +1,28 @@
 .mines-main {
-    padding: 30px 20px 60px;
-    max-width: 1700px;
+    padding: 24px 20px 48px;
+    max-width: 1280px;
     margin: 0 auto;
 }
 
 .mines-container {
     display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 30px;
+    grid-template-columns: minmax(290px, 320px) minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
 }
 
 .mines-controls {
-    background: linear-gradient(160deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
-    border: 1px solid rgba(0, 208, 132, 0.08);
-    border-radius: 18px;
-    padding: 28px;
+    background: linear-gradient(155deg, rgba(27, 32, 46, 0.95) 0%, rgba(16, 21, 31, 0.9) 100%);
+    border: 1px solid rgba(0, 208, 132, 0.06);
+    border-radius: 16px;
+    padding: 24px;
     position: sticky;
-    top: 20px;
+    top: 18px;
     align-self: start;
     display: flex;
     flex-direction: column;
-    gap: 26px;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    gap: 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
 .control-header {
@@ -70,25 +71,27 @@
 }
 
 .mines-btn {
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(79, 89, 110, 0.4);
-    background: rgba(16, 21, 31, 0.9);
+    padding: 10px 0;
+    border-radius: 12px;
+    border: 1px solid rgba(79, 89, 110, 0.35);
+    background: rgba(15, 20, 31, 0.85);
     color: rgba(177, 186, 211, 0.8);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .mines-btn.active {
-    background: rgba(0, 208, 132, 0.15);
-    border-color: rgba(0, 208, 132, 0.5);
+    background: rgba(0, 208, 132, 0.14);
+    border-color: rgba(0, 208, 132, 0.45);
     color: #f4f6fb;
+    box-shadow: 0 10px 22px rgba(0, 208, 132, 0.18);
 }
 
 .mines-btn:hover:not(.active) {
     border-color: rgba(0, 208, 132, 0.35);
     color: var(--accent-primary);
+    transform: translateY(-1px);
 }
 
 .selector-slider {
@@ -111,46 +114,80 @@
 
 .action-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .btn-primary-action,
 .btn-secondary-action {
+    position: relative;
     padding: 14px;
     border-radius: 14px;
-    border: 1px solid rgba(79, 89, 110, 0.4);
+    border: 1px solid rgba(79, 89, 110, 0.35);
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    overflow: hidden;
 }
 
 .btn-primary-action {
-    background: linear-gradient(120deg, #00d084 0%, #00e0a1 100%);
+    background: rgba(0, 208, 132, 0.2);
     color: #0f141f;
     border: none;
 }
 
+.btn-primary-action::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #00d084 0%, #00e0a1 50%, #34f5c5 100%);
+    opacity: 0.92;
+    transition: opacity 0.25s ease;
+}
+
+.btn-primary-action span {
+    position: relative;
+    z-index: 1;
+    color: #061019;
+    letter-spacing: 0.02em;
+}
+
 .btn-primary-action:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 18px 35px rgba(0, 208, 132, 0.4);
+    box-shadow: 0 16px 30px rgba(0, 208, 132, 0.32);
+}
+
+.btn-primary-action:hover:not(:disabled)::before {
+    opacity: 1;
 }
 
 .btn-primary-action:disabled,
 .btn-secondary-action:disabled {
-    opacity: 0.5;
+    opacity: 0.55;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
+}
+
+.btn-primary-action:disabled::before {
+    opacity: 0.6;
+    filter: saturate(70%);
 }
 
 .btn-secondary-action {
-    background: rgba(16, 21, 31, 0.9);
-    color: rgba(177, 186, 211, 0.8);
+    background: rgba(15, 20, 31, 0.9);
+    color: rgba(177, 186, 211, 0.85);
+}
+
+.btn-secondary-action span {
+    position: relative;
+    z-index: 1;
 }
 
 .btn-secondary-action:hover:not(:disabled) {
     color: var(--accent-primary);
-    border-color: rgba(0, 208, 132, 0.5);
+    border-color: rgba(0, 208, 132, 0.55);
+    transform: translateY(-2px);
 }
 
 .stats-section,
@@ -201,16 +238,16 @@
 }
 
 .mines-board-area {
-    background: radial-gradient(circle at top, rgba(0, 208, 132, 0.15), rgba(16, 21, 31, 0.95));
-    border: 1px solid rgba(0, 208, 132, 0.12);
-    border-radius: 24px;
-    padding: 28px 34px 34px;
+    background: radial-gradient(circle at 20% 20%, rgba(0, 208, 132, 0.18), rgba(16, 21, 31, 0.92));
+    border: 1px solid rgba(0, 208, 132, 0.1);
+    border-radius: 22px;
+    padding: 24px 28px 30px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 .board-header {
@@ -271,15 +308,17 @@
 
 .mines-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 14px;
-    padding: 24px 0;
+    grid-template-columns: repeat(5, minmax(88px, 1fr));
+    gap: 12px;
+    padding: 18px 0 10px;
+    max-width: 520px;
+    margin: 0 auto;
 }
 
 .tile {
     position: relative;
     width: 100%;
-    padding-top: 100%;
+    aspect-ratio: 1;
     background: rgba(16, 21, 31, 0.92);
     border: 1px solid rgba(79, 89, 110, 0.35);
     border-radius: 14px;
@@ -407,5 +446,36 @@
 
     .mines-controls {
         position: static;
+    }
+
+    .mines-board-area {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 900px) {
+    .mines-grid {
+        grid-template-columns: repeat(5, minmax(72px, 1fr));
+        gap: 10px;
+    }
+}
+
+@media (max-width: 620px) {
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .mines-grid {
+        grid-template-columns: repeat(5, minmax(58px, 1fr));
+        gap: 8px;
+    }
+
+    .board-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .status-pill {
+        flex: initial;
     }
 }

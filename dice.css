@@ -384,6 +384,16 @@
     animation: resultPulse 0.9s ease-in-out infinite;
 }
 
+.result-number.win {
+    color: var(--accent-primary);
+    text-shadow: 0 0 18px rgba(0, 208, 132, 0.35);
+}
+
+.result-number.loss {
+    color: #ff6666;
+    text-shadow: 0 0 18px rgba(255, 68, 68, 0.3);
+}
+
 .dice-info-cards {
     display: flex;
     gap: 14px;
@@ -479,8 +489,9 @@
     height: 20px;
     border-radius: 50%;
     border: 3px solid rgba(15, 20, 31, 0.9);
-    box-shadow: 0 0 12px rgba(0, 208, 132, 0.4);
-    transition: left 0.3s ease;
+    background: #ffffff;
+    box-shadow: 0 0 12px rgba(0, 208, 132, 0.25);
+    transition: left 0.45s ease-out, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .slider-marker {
@@ -494,6 +505,16 @@
 
 .result-marker.show {
     opacity: 1;
+}
+
+.result-marker.win {
+    background: var(--accent-primary);
+    box-shadow: 0 0 18px rgba(0, 208, 132, 0.45);
+}
+
+.result-marker.loss {
+    background: #ff6666;
+    box-shadow: 0 0 18px rgba(255, 68, 68, 0.35);
 }
 
 .slider-labels {
