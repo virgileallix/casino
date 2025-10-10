@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino - Accueil</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎰 CASINO</h1>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link active">Casino</a>
+                <a href="plinko.html" class="nav-link">Plinko</a>
+                <a href="#" class="nav-link">Live</a>
+                <a href="#" class="nav-link">Promotions</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Banner -->
+        <section class="banner">
+            <div class="banner-content">
+                <h2>Bienvenue sur Casino</h2>
+                <p>Profitez de nos jeux de casino en ligne</p>
+                <button class="btn-primary">Bonus de bienvenue - 100%</button>
+            </div>
+        </section>
+
+        <!-- Game Categories -->
+        <section class="game-categories">
+            <button class="category-btn active">
+                <span class="category-icon">🎰</span>
+                <span>Slots</span>
+            </button>
+            <button class="category-btn">
+                <span class="category-icon">🃏</span>
+                <span>Table</span>
+            </button>
+            <button class="category-btn">
+                <span class="category-icon">🎲</span>
+                <span>Dice</span>
+            </button>
+            <button class="category-btn">
+                <span class="category-icon">🎯</span>
+                <span>Roulette</span>
+            </button>
+            <button class="category-btn">
+                <span class="category-icon">♠️</span>
+                <span>Blackjack</span>
+            </button>
+            <button class="category-btn">
+                <span class="category-icon">⭐</span>
+                <span>Favoris</span>
+            </button>
+        </section>
+
+        <!-- Games Grid -->
+        <section class="games-section">
+            <h2 class="section-title">Jeux populaires</h2>
+            <div class="games-grid" id="gamesGrid">
+                <!-- Game cards will be generated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>À propos</h3>
+                <a href="#">À propos de nous</a>
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Politique de confidentialité</a>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <a href="#">Centre d'aide</a>
+                <a href="#">Contact</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h3>Responsable</h3>
+                <a href="#">Jeu responsable</a>
+                <a href="#">18+</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Casino. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+/* Plinko Specific Styles */
+
+.plinko-main {
+    min-height: calc(100vh - 80px);
+    padding: 20px;
+}
+
+.plinko-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 300px 1fr 300px;
+    gap: 20px;
+    height: calc(100vh - 120px);
+}
+
+/* Left Panel - Controls */
+.plinko-controls {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    overflow-y: auto;
+    height: fit-content;
+    max-height: 100%;
+}
+
+.plinko-controls h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: var(--accent-primary);
+}
+
+.game-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.control-section {
+    margin-bottom: 25px;
+}
+
+.control-section label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.bet-input-group {
+    position: relative;
+}
+
+.bet-input-group input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.bet-input-group input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.bet-input-group .currency {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.quick-bet-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.quick-bet {
+    padding: 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-bet:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.risk-buttons,
+.rows-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.risk-btn,
+.rows-btn {
+    padding: 10px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.risk-btn:hover,
+.rows-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.risk-btn.active,
+.rows-btn.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.btn-play-plinko {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent-primary);
+    border: none;
+    border-radius: 8px;
+    color: var(--bg-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-play-plinko:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 208, 132, 0.4);
+}
+
+.btn-play-plinko:active {
+    transform: translateY(0);
+}
+
+.stats-section {
+    background: var(--bg-tertiary);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.stats-section h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.stat-row span:first-child {
+    color: var(--text-secondary);
+}
+
+.stat-row span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.win-amount {
+    color: var(--accent-primary) !important;
+}
+
+/* Center - Game Board */
+.plinko-game {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#plinkoCanvas {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.multipliers-top,
+.multipliers-bottom {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    width: 600px;
+    margin: 10px 0;
+}
+
+.multiplier-box {
+    flex: 1;
+    padding: 8px 4px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.multiplier-box.very-low {
+    background: rgba(74, 85, 104, 0.3);
+    color: #a0aec0;
+    border-color: #4a5568;
+}
+
+.multiplier-box.low {
+    background: rgba(0, 208, 132, 0.2);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.multiplier-box.medium {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border-color: #ffa500;
+}
+
+.multiplier-box.high {
+    background: rgba(255, 68, 68, 0.2);
+    color: #ff4444;
+    border-color: #ff4444;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+    }
+}
+
+/* Right Panel - History */
+.plinko-history {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-y: auto;
+    height: fit-content;
+    max-height: 100%;
+}
+
+.plinko-history h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.no-history {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px 20px;
+    font-size: 0.9rem;
+}
+
+.history-item {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateX(-2px);
+}
+
+.history-bet {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.history-multiplier {
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.history-multiplier.loss {
+    background: rgba(74, 85, 104, 0.3);
+    color: #a0aec0;
+}
+
+.history-multiplier.small-win {
+    background: rgba(0, 208, 132, 0.2);
+    color: var(--accent-primary);
+}
+
+.history-multiplier.medium-win {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+}
+
+.history-multiplier.big-win {
+    background: rgba(255, 68, 68, 0.2);
+    color: #ff4444;
+}
+
+.history-win {
+    text-align: right;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.history-win.loss {
+    color: #a0aec0;
+}
+
+.history-win.small-win {
+    color: var(--accent-primary);
+}
+
+.history-win.medium-win {
+    color: #ffa500;
+}
+
+.history-win.big-win {
+    color: #ff4444;
+    animation: winGlow 0.5s ease-out;
+}
+
+@keyframes winGlow {
+    0% {
+        text-shadow: 0 0 10px currentColor;
+    }
+    100% {
+        text-shadow: none;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .plinko-container {
+        grid-template-columns: 280px 1fr 280px;
+    }
+
+    #plinkoCanvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .multipliers-top,
+    .multipliers-bottom {
+        width: 100%;
+        max-width: 600px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .plinko-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        gap: 15px;
+        height: auto;
+    }
+
+    .plinko-controls,
+    .plinko-history {
+        max-height: none;
+    }
+
+    .plinko-game {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .plinko-main {
+        padding: 10px;
+    }
+
+    .plinko-controls,
+    .plinko-history,
+    .plinko-game {
+        padding: 15px;
+    }
+
+    #plinkoCanvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .multiplier-box {
+        font-size: 0.7rem;
+        padding: 6px 2px;
+    }
+
+    .history-item {
+        font-size: 0.85rem;
+        padding: 10px;
+    }
+}
