@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      // Autorise uniquement le propriétaire du document à lire ou écrire son profil
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Par défaut, rien d'autre n'est accessible tant que tu n'ajoutes pas de règles spécifiques
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -41,37 +41,83 @@
             </div>
         </section>
 
+        <!-- Stats Panel -->
+        <section class="stats-section">
+            <div class="stats-header">
+                <h2 class="section-title">Vos statistiques</h2>
+                <p class="stats-subtitle">Suivez vos performances globales et par jeu</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Global</h3>
+                        <span class="stats-chip">📊</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Total misé</span>
+                        <span id="statTotalWagered">0.00 €</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Total gagné</span>
+                        <span id="statTotalWon">0.00 €</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Résultat net</span>
+                        <span id="statNetProfit" class="stat-net">0.00 €</span>
+                    </div>
+                    <div class="stats-footnote" id="statGamesPlayed">0 parties jouées</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Dice</h3>
+                        <span class="stats-chip">🎲</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Parties</span>
+                        <span id="statDiceGames">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Victoires</span>
+                        <span id="statDiceWins">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Taux de victoire</span>
+                        <span id="statDiceWinRate">0%</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Meilleur profit</span>
+                        <span id="statDiceBestWin">0.00 €</span>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Plinko</h3>
+                        <span class="stats-chip">🎯</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Parties</span>
+                        <span id="statPlinkoGames">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Total gagné</span>
+                        <span id="statPlinkoTotalWon">0.00 €</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Plus gros gain</span>
+                        <span id="statPlinkoBestWin">0.00 €</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Game Categories -->
-        <section class="game-categories">
-            <button class="category-btn active">
-                <span class="category-icon">🎰</span>
-                <span>Slots</span>
-            </button>
-            <button class="category-btn">
-                <span class="category-icon">🃏</span>
-                <span>Table</span>
-            </button>
-            <button class="category-btn">
-                <span class="category-icon">🎲</span>
-                <span>Dice</span>
-            </button>
-            <button class="category-btn">
-                <span class="category-icon">🎯</span>
-                <span>Roulette</span>
-            </button>
-            <button class="category-btn">
-                <span class="category-icon">♠️</span>
-                <span>Blackjack</span>
-            </button>
-            <button class="category-btn">
-                <span class="category-icon">⭐</span>
-                <span>Favoris</span>
-            </button>
+        <section class="game-categories" id="categoriesContainer">
+            <!-- Category buttons generated dynamically -->
         </section>
 
         <!-- Games Grid -->
         <section class="games-section">
-            <h2 class="section-title">Jeux populaires</h2>
+            <h2 class="section-title" id="gamesSectionTitle">Jeux populaires</h2>
             <div class="games-grid" id="gamesGrid">
                 <!-- Game cards will be generated here -->
             </div>

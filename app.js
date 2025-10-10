@@ -4,6 +4,161 @@ import { initializeUserBalance, subscribeToUserData, addFunds } from './balance-
 let currentUser = null;
 let unsubscribeBalance = null;
 
+const balanceElement = document.querySelector('.balance-amount');
+const statsElements = {
+    totalWagered: document.getElementById('statTotalWagered'),
+    totalWon: document.getElementById('statTotalWon'),
+    netProfit: document.getElementById('statNetProfit'),
+    gamesPlayed: document.getElementById('statGamesPlayed'),
+    diceGames: document.getElementById('statDiceGames'),
+    diceWins: document.getElementById('statDiceWins'),
+    diceWinRate: document.getElementById('statDiceWinRate'),
+    diceBestWin: document.getElementById('statDiceBestWin'),
+    plinkoGames: document.getElementById('statPlinkoGames'),
+    plinkoTotalWon: document.getElementById('statPlinkoTotalWon'),
+    plinkoBestWin: document.getElementById('statPlinkoBestWin')
+};
+
+const categoriesContainer = document.getElementById('categoriesContainer');
+const gamesGrid = document.getElementById('gamesGrid');
+const gamesSectionTitle = document.getElementById('gamesSectionTitle');
+
+const categoryIconMap = {
+    'Tous': '⭐',
+    'Originaux': '🎯',
+    'Slots': '🎰',
+    'Live': '🎥',
+    'Jackpots': '💰',
+    'Populaire': '🔥',
+    'Nouveautés': '🆕'
+};
+
+const categorySortOrder = ['Originaux', 'Slots', 'Live', 'Jackpots', 'Populaire', 'Nouveautés'];
+
+const games = [
+    {
+        id: 'plinko',
+        name: 'Plinko',
+        provider: 'Casino Originals',
+        image: '🎯',
+        link: 'plinko.html',
+        categories: ['Originaux', 'Populaire'],
+        badge: { label: 'Populaire', tone: 'popular' }
+    },
+    {
+        id: 'dice',
+        name: 'Dice',
+        provider: 'Casino Originals',
+        image: '🎲',
+        link: 'dice.html',
+        categories: ['Originaux', 'Nouveautés'],
+        badge: { label: 'Nouveau', tone: 'new' }
+    },
+    {
+        id: 'sweet-bonanza',
+        name: 'Sweet Bonanza',
+        provider: 'Pragmatic Play',
+        image: '🍬',
+        categories: ['Slots', 'Populaire'],
+        badge: { label: 'Populaire', tone: 'popular' }
+    },
+    {
+        id: 'gates-of-olympus',
+        name: 'Gates of Olympus',
+        provider: 'Pragmatic Play',
+        image: '⚡',
+        categories: ['Slots', 'Nouveautés']
+    },
+    {
+        id: 'book-of-dead',
+        name: 'Book of Dead',
+        provider: "Play'n GO",
+        image: '📖',
+        categories: ['Slots']
+    },
+    {
+        id: 'crazy-time',
+        name: 'Crazy Time',
+        provider: 'Evolution',
+        image: '🎡',
+        categories: ['Live', 'Populaire'],
+        badge: { label: 'Populaire', tone: 'popular' }
+    },
+    {
+        id: 'mega-moolah',
+        name: 'Mega Moolah',
+        provider: 'Microgaming',
+        image: '🦁',
+        categories: ['Slots', 'Jackpots']
+    },
+    {
+        id: 'starburst',
+        name: 'Starburst',
+        provider: 'NetEnt',
+        image: '💎',
+        categories: ['Slots', 'Populaire'],
+        badge: { label: 'Populaire', tone: 'popular' }
+    },
+    {
+        id: 'gonzos-quest',
+        name: "Gonzo's Quest",
+        provider: 'NetEnt',
+        image: '🗿',
+        categories: ['Slots']
+    },
+    {
+        id: 'dead-or-alive',
+        name: 'Dead or Alive',
+        provider: 'NetEnt',
+        image: '🤠',
+        categories: ['Slots']
+    },
+    {
+        id: 'reactoonz',
+        name: 'Reactoonz',
+        provider: "Play'n GO",
+        image: '👾',
+        categories: ['Slots', 'Populaire']
+    },
+    {
+        id: 'fire-joker',
+        name: 'Fire Joker',
+        provider: "Play'n GO",
+        image: '🔥',
+        categories: ['Slots']
+    },
+    {
+        id: 'big-bass-bonanza',
+        name: 'Big Bass Bonanza',
+        provider: 'Pragmatic Play',
+        image: '🎣',
+        categories: ['Slots', 'Nouveautés']
+    },
+    {
+        id: 'wolf-gold',
+        name: 'Wolf Gold',
+        provider: 'Pragmatic Play',
+        image: '🐺',
+        categories: ['Slots']
+    }
+];
+
+const uniqueCategories = Array.from(new Set(games.flatMap((game) => game.categories || [])));
+uniqueCategories.sort((a, b) => {
+    const indexA = categorySortOrder.indexOf(a);
+    const indexB = categorySortOrder.indexOf(b);
+
+    if (indexA === -1 && indexB === -1) {
+        return a.localeCompare(b);
+    }
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+});
+
+const categories = ['Tous', ...uniqueCategories];
+let activeCategory = 'Tous';
+
 // Check if user is logged in
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -12,16 +167,20 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         console.log('User logged in:', user.email);
 
-        // Initialize user balance if needed
         await initializeUserBalance(user);
 
-        // Subscribe to real-time balance updates
+        if (unsubscribeBalance) {
+            unsubscribeBalance();
+        }
+
         unsubscribeBalance = subscribeToUserData(user.uid, (userData) => {
             if (!userData) {
                 updateBalanceDisplay(null);
+                updateStatsPanel(null);
                 return;
             }
             updateBalanceDisplay(userData.balance);
+            updateStatsPanel(userData);
         });
     }
 });
@@ -39,9 +198,27 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     }
 });
 
-// Update balance display
+// Deposit button
+document.getElementById('depositBtn').addEventListener('click', async () => {
+    if (!currentUser) {
+        alert('Veuillez vous connecter');
+        return;
+    }
+
+    const amount = prompt('Montant à déposer (€):');
+    const depositAmount = parseFloat(amount);
+    if (amount && !isNaN(depositAmount) && depositAmount > 0) {
+        try {
+            await addFunds(currentUser.uid, depositAmount);
+            alert(`${depositAmount.toFixed(2)} € ajoutés à votre solde!`);
+        } catch (error) {
+            console.error('Error adding funds:', error);
+            alert('Erreur lors du dépôt');
+        }
+    }
+});
+
 function updateBalanceDisplay(balance) {
-    const balanceElement = document.querySelector('.balance-amount');
     if (!balanceElement) return;
 
     if (balance === null || balance === undefined || isNaN(balance)) {
@@ -52,85 +229,167 @@ function updateBalanceDisplay(balance) {
     balanceElement.textContent = `${balance.toFixed(2)} €`;
 }
 
-// Sample games data
-const games = [
-    { id: 0, name: 'Plinko', provider: 'Casino', image: '🎯', type: 'original', link: 'plinko.html' },
-    { id: 1, name: 'Dice', provider: 'Casino', image: '🎲', type: 'original', link: 'dice.html' },
-    { id: 2, name: 'Sweet Bonanza', provider: 'Pragmatic Play', image: '🍬', type: 'slot' },
-    { id: 2, name: 'Gates of Olympus', provider: 'Pragmatic Play', image: '⚡', type: 'slot' },
-    { id: 3, name: 'Book of Dead', provider: 'Play\'n GO', image: '📖', type: 'slot' },
-    { id: 4, name: 'Crazy Time', provider: 'Evolution', image: '🎡', type: 'live' },
-    { id: 5, name: 'Mega Moolah', provider: 'Microgaming', image: '🦁', type: 'slot' },
-    { id: 6, name: 'Starburst', provider: 'NetEnt', image: '💎', type: 'slot' },
-    { id: 7, name: 'Gonzo\'s Quest', provider: 'NetEnt', image: '🗿', type: 'slot' },
-    { id: 8, name: 'Dead or Alive', provider: 'NetEnt', image: '🤠', type: 'slot' },
-    { id: 9, name: 'Reactoonz', provider: 'Play\'n GO', image: '👾', type: 'slot' },
-    { id: 10, name: 'Fire Joker', provider: 'Play\'n GO', image: '🔥', type: 'slot' },
-    { id: 11, name: 'Big Bass Bonanza', provider: 'Pragmatic Play', image: '🎣', type: 'slot' },
-    { id: 12, name: 'Wolf Gold', provider: 'Pragmatic Play', image: '🐺', type: 'slot' }
-];
+function updateStatsPanel(userData) {
+    const defaults = {
+        totalWagered: 0,
+        totalWon: 0,
+        gamesPlayed: 0,
+        diceGamesPlayed: 0,
+        diceWins: 0,
+        diceLosses: 0,
+        diceBestWin: 0,
+        plinkoGamesPlayed: 0,
+        plinkoTotalWon: 0,
+        plinkoBestWin: 0
+    };
 
-// Render games
-function renderGames() {
-    const gamesGrid = document.getElementById('gamesGrid');
-    gamesGrid.innerHTML = '';
+    const stats = { ...defaults, ...(userData || {}) };
+    const netProfit = stats.totalWon - stats.totalWagered;
+    const diceWinRate = stats.diceGamesPlayed > 0
+        ? (stats.diceWins / stats.diceGamesPlayed) * 100
+        : 0;
 
-    games.forEach(game => {
-        const gameCard = document.createElement('div');
-        gameCard.className = 'game-card';
-        gameCard.innerHTML = `
-            <div class="game-image">
-                <div class="game-icon">${game.image}</div>
-            </div>
-            <div class="game-info">
-                <h3 class="game-name">${game.name}</h3>
-                <p class="game-provider">${game.provider}</p>
-            </div>
-            <div class="game-overlay">
-                <button class="btn-play">Jouer</button>
-            </div>
+    setTextContent(statsElements.totalWagered, formatCurrency(stats.totalWagered));
+    setTextContent(statsElements.totalWon, formatCurrency(stats.totalWon));
+
+    if (statsElements.netProfit) {
+        statsElements.netProfit.classList.remove('stat-positive', 'stat-negative');
+        setTextContent(statsElements.netProfit, formatCurrency(netProfit));
+
+        if (netProfit > 0.01) {
+            statsElements.netProfit.classList.add('stat-positive');
+        } else if (netProfit < -0.01) {
+            statsElements.netProfit.classList.add('stat-negative');
+        }
+    }
+
+    setTextContent(statsElements.gamesPlayed, formatGamesPlayed(stats.gamesPlayed));
+    setTextContent(statsElements.diceGames, stats.diceGamesPlayed);
+    setTextContent(statsElements.diceWins, stats.diceWins);
+    setTextContent(statsElements.diceWinRate, formatPercentage(diceWinRate));
+    setTextContent(statsElements.diceBestWin, formatCurrency(stats.diceBestWin));
+    setTextContent(statsElements.plinkoGames, stats.plinkoGamesPlayed);
+    setTextContent(statsElements.plinkoTotalWon, formatCurrency(stats.plinkoTotalWon));
+    setTextContent(statsElements.plinkoBestWin, formatCurrency(stats.plinkoBestWin));
+}
+
+function formatCurrency(value) {
+    const amount = Number.isFinite(value) ? value : 0;
+    return `${amount.toFixed(2)} €`;
+}
+
+function formatPercentage(value) {
+    const percentage = Number.isFinite(value) ? value : 0;
+    return `${percentage.toFixed(1)}%`;
+}
+
+function formatGamesPlayed(count) {
+    const total = Number.isFinite(count) ? count : 0;
+    const label = total > 1 ? 'parties jouées' : 'partie jouée';
+    return `${total} ${label}`;
+}
+
+function setTextContent(element, value) {
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+function renderCategories() {
+    if (!categoriesContainer) return;
+    categoriesContainer.innerHTML = '';
+
+    categories.forEach((category) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `category-btn ${activeCategory === category ? 'active' : ''}`;
+        button.dataset.category = category;
+        button.setAttribute('aria-pressed', activeCategory === category);
+
+        const icon = categoryIconMap[category] || '🎮';
+        const count = getGamesForCategory(category).length;
+
+        button.innerHTML = `
+            <span class="category-icon">${icon}</span>
+            <span>${category}</span>
+            <span class="category-count">${count}</span>
         `;
 
-        gameCard.addEventListener('click', () => {
-            if (game.link) {
-                window.location.href = game.link;
-            } else {
-                alert(`Lancement de ${game.name}...`);
-            }
+        button.addEventListener('click', () => {
+            if (activeCategory === category) return;
+            activeCategory = category;
+            renderCategories();
+            renderGames();
         });
 
-        gamesGrid.appendChild(gameCard);
+        categoriesContainer.appendChild(button);
     });
 }
 
-// Deposit button
-document.getElementById('depositBtn').addEventListener('click', async () => {
-    if (!currentUser) {
-        alert('Veuillez vous connecter');
+function getGamesForCategory(category) {
+    if (category === 'Tous') {
+        return games;
+    }
+    return games.filter((game) => (game.categories || []).includes(category));
+}
+
+function renderGames() {
+    if (!gamesGrid || !gamesSectionTitle) return;
+
+    const filteredGames = getGamesForCategory(activeCategory);
+    gamesGrid.innerHTML = '';
+
+    gamesSectionTitle.textContent = activeCategory === 'Tous'
+        ? 'Jeux populaires'
+        : `Jeux – ${activeCategory}`;
+
+    if (!filteredGames.length) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'Aucun jeu disponible dans cette catégorie pour le moment.';
+        gamesGrid.appendChild(emptyState);
         return;
     }
 
-    const amount = prompt('Montant à déposer (€):');
-    if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
-        try {
-            await addFunds(currentUser.uid, parseFloat(amount));
-            alert(`${parseFloat(amount).toFixed(2)} € ajoutés à votre solde!`);
-        } catch (error) {
-            console.error('Error adding funds:', error);
-            alert('Erreur lors du dépôt');
-        }
-    }
-});
-
-// Category buttons
-const categoryButtons = document.querySelectorAll('.category-btn');
-categoryButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        categoryButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    filteredGames.forEach((game) => {
+        gamesGrid.appendChild(createGameCard(game));
     });
-});
+}
 
-// Initialize
+function createGameCard(game) {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+
+    const badgeHtml = game.badge
+        ? `<div class="game-badge ${game.badge.tone === 'new' ? 'badge-new' : 'badge-popular'}">${game.badge.label}</div>`
+        : '';
+
+    card.innerHTML = `
+        <div class="game-image">
+            ${badgeHtml}
+            <div class="game-icon">${game.image}</div>
+        </div>
+        <div class="game-info">
+            <h3 class="game-name">${game.name}</h3>
+            <p class="game-provider">${game.provider}</p>
+        </div>
+        <div class="game-overlay">
+            <button class="btn-play">Jouer</button>
+        </div>
+    `;
+
+    card.addEventListener('click', () => {
+        if (game.link) {
+            window.location.href = game.link;
+        } else {
+            alert(`Lancement de ${game.name}...`);
+        }
+    });
+
+    return card;
+}
+
 updateBalanceDisplay(null);
+updateStatsPanel(null);
+renderCategories();
 renderGames();
