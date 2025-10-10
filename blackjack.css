@@ -1,0 +1,378 @@
+/* Blackjack Styles */
+
+.blackjack-main {
+    padding: 30px 20px 50px;
+    max-width: 1700px;
+    margin: 0 auto;
+}
+
+.blackjack-container {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 30px;
+}
+
+.blackjack-controls {
+    background: linear-gradient(160deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
+    border: 1px solid rgba(0, 208, 132, 0.08);
+    border-radius: 18px;
+    padding: 28px;
+    position: sticky;
+    top: 20px;
+    align-self: start;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.control-header h2 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #f4f6fb;
+}
+
+.control-tag {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(0, 208, 132, 0.2);
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.game-description {
+    color: rgba(177, 186, 211, 0.75);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.control-section label {
+    display: block;
+    margin-bottom: 12px;
+    color: rgba(177, 186, 211, 0.85);
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.bet-input-group {
+    position: relative;
+}
+
+.bet-input-group input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
+    background: rgba(16, 21, 31, 0.9);
+    border: 1px solid rgba(79, 89, 110, 0.4);
+    border-radius: 12px;
+    color: #f4f6fb;
+    font-size: 1.05rem;
+    font-weight: 600;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bet-input-group input:focus {
+    outline: none;
+    border-color: rgba(0, 208, 132, 0.6);
+    box-shadow: 0 6px 20px rgba(0, 208, 132, 0.1);
+}
+
+.currency {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(177, 186, 211, 0.7);
+    font-weight: 600;
+}
+
+.quick-bet-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.quick-bet {
+    padding: 10px;
+    background: rgba(16, 21, 31, 0.9);
+    border: 1px solid rgba(79, 89, 110, 0.4);
+    border-radius: 10px;
+    color: rgba(177, 186, 211, 0.8);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-bet:hover {
+    color: var(--accent-primary);
+    border-color: rgba(0, 208, 132, 0.6);
+    transform: translateY(-1px);
+}
+
+.btn-primary-action {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    background: linear-gradient(120deg, #00d084 0%, #00e0a1 100%);
+    border: none;
+    color: #0f141f;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 35px rgba(0, 208, 132, 0.4);
+}
+
+.btn-primary-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.btn-secondary-action {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(79, 89, 110, 0.4);
+    background: rgba(16, 21, 31, 0.9);
+    color: rgba(177, 186, 211, 0.8);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary-action:not(:disabled):hover {
+    color: var(--accent-primary);
+    border-color: rgba(0, 208, 132, 0.6);
+}
+
+.stats-section {
+    background: rgba(16, 21, 31, 0.9);
+    border: 1px solid rgba(79, 89, 110, 0.4);
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.stats-section h3,
+.rules-section h3 {
+    font-size: 1rem;
+    margin-bottom: 14px;
+    color: #f4f6fb;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    color: rgba(177, 186, 211, 0.6);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.stat-value {
+    color: #f4f6fb;
+    font-weight: 700;
+}
+
+.rules-section ul {
+    list-style: disc;
+    padding-left: 20px;
+    color: rgba(177, 186, 211, 0.7);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.blackjack-table {
+    background: radial-gradient(circle at top, rgba(0, 208, 132, 0.18), rgba(16, 21, 31, 0.92));
+    border-radius: 24px;
+    border: 1px solid rgba(0, 208, 132, 0.12);
+    padding: 30px 40px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.blackjack-table::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at top right, rgba(0, 208, 132, 0.15), transparent 55%);
+}
+
+.table-header {
+    position: relative;
+    z-index: 1;
+}
+
+.table-status {
+    background: rgba(15, 20, 31, 0.85);
+    border: 1px solid rgba(79, 89, 110, 0.3);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #f4f6fb;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+.dealer-area,
+.player-area {
+    position: relative;
+    z-index: 1;
+    background: rgba(15, 20, 31, 0.85);
+    border: 1px solid rgba(79, 89, 110, 0.25);
+    border-radius: 16px;
+    padding: 18px 20px 26px;
+}
+
+.dealer-area h3,
+.player-area h3 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(177, 186, 211, 0.65);
+    margin-bottom: 14px;
+}
+
+.hand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 120px;
+}
+
+.card {
+    width: 92px;
+    aspect-ratio: 3 / 4;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.card.face-down {
+    background-image: url('assets/cards/back.png');
+}
+
+.hand-total {
+    margin-top: 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #f4f6fb;
+}
+
+.table-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0, 208, 132, 0.35), transparent);
+    margin: 0 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.chip-tray {
+    position: relative;
+    z-index: 1;
+    background: rgba(15, 20, 31, 0.85);
+    border: 1px solid rgba(79, 89, 110, 0.25);
+    border-radius: 16px;
+    padding: 18px 20px;
+}
+
+.tray-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    color: rgba(177, 186, 211, 0.55);
+    margin-bottom: 10px;
+}
+
+.results-log {
+    max-height: 140px;
+    overflow-y: auto;
+    display: grid;
+    gap: 8px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: rgba(177, 186, 211, 0.8);
+}
+
+.result-item.win {
+    color: var(--accent-primary);
+}
+
+.result-item.loss {
+    color: #ff6666;
+}
+
+.result-item.push {
+    color: rgba(177, 186, 211, 0.6);
+}
+
+.no-history {
+    text-align: center;
+    padding: 10px 0;
+    color: rgba(177, 186, 211, 0.5);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1200px) {
+    .blackjack-container {
+        grid-template-columns: 1fr;
+    }
+
+    .blackjack-controls {
+        position: static;
+    }
+
+    .hand {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

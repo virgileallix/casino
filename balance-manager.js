@@ -13,7 +13,11 @@ const DEFAULT_USER_FIELDS = {
     diceBestWin: 0,
     plinkoGamesPlayed: 0,
     plinkoTotalWon: 0,
-    plinkoBestWin: 0
+    plinkoBestWin: 0,
+    blackjackHandsPlayed: 0,
+    blackjackWins: 0,
+    blackjackBlackjacks: 0,
+    blackjackTotalProfit: 0
 };
 
 function roundCurrency(value) {
@@ -28,6 +32,7 @@ function mergeWithDefaults(data = {}) {
     merged.diceBestWin = roundCurrency(merged.diceBestWin);
     merged.plinkoTotalWon = roundCurrency(merged.plinkoTotalWon);
     merged.plinkoBestWin = roundCurrency(merged.plinkoBestWin);
+    merged.blackjackTotalProfit = roundCurrency(merged.blackjackTotalProfit);
     return merged;
 }
 
@@ -111,7 +116,7 @@ export async function addFunds(userId, amount) {
     return newBalance;
 }
 
-export async function applyGameResult(userId, { betAmount, payout, game }) {
+export async function applyGameResult(userId, { betAmount, payout, game, metadata = {} }) {
     if (!betAmount || isNaN(betAmount) || betAmount <= 0) {
         throw new Error('Bet amount must be positive');
     }
@@ -158,6 +163,17 @@ export async function applyGameResult(userId, { betAmount, payout, game }) {
             if (payout > 0) {
                 updates.plinkoBestWin = Math.max(current.plinkoBestWin, payout);
             }
+        }
+
+        if (game === 'blackjack') {
+            updates.blackjackHandsPlayed = current.blackjackHandsPlayed + 1;
+            if (metadata.result === 'win') {
+                updates.blackjackWins = current.blackjackWins + 1;
+            }
+            if (metadata.blackjack) {
+                updates.blackjackBlackjacks = current.blackjackBlackjacks + 1;
+            }
+            updates.blackjackTotalProfit = roundCurrency((current.blackjackTotalProfit || 0) + profit);
         }
 
         transaction.update(userRef, updates);

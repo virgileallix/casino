@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack - Casino</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="blackjack.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎰 CASINO</h1>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="dice.html" class="nav-link">Dice</a>
+                <a href="plinko.html" class="nav-link">Plinko</a>
+                <a href="blackjack.html" class="nav-link active">Blackjack</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="blackjack-main">
+        <div class="blackjack-container">
+            <!-- Left Controls -->
+            <aside class="blackjack-controls">
+                <div class="control-section">
+                    <div class="control-header">
+                        <h2>🃏 Blackjack</h2>
+                        <span class="control-tag">3:2</span>
+                    </div>
+                    <p class="game-description">
+                        Visez 21 sans le dépasser. Le croupier s'arrête sur 17. Blackjack paie 3:2.
+                    </p>
+                </div>
+
+                <div class="control-section">
+                    <label>Mise</label>
+                    <div class="bet-input-group">
+                        <input type="number" id="betAmount" value="5.00" min="1" step="1">
+                        <span class="currency">€</span>
+                    </div>
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet" data-action="half">½</button>
+                        <button class="quick-bet" data-action="double">2x</button>
+                        <button class="quick-bet" data-action="min">Min</button>
+                        <button class="quick-bet" data-action="max">Max</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <button class="btn-primary-action" id="dealBtn">Distribuer</button>
+                </div>
+
+                <div class="control-section action-buttons">
+                    <button class="btn-secondary-action" id="hitBtn" disabled>Carte</button>
+                    <button class="btn-secondary-action" id="standBtn" disabled>Rester</button>
+                    <button class="btn-secondary-action" id="doubleBtn" disabled>Double</button>
+                </div>
+
+                <div class="control-section stats-section">
+                    <h3>Statistiques</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Mains jouées</span>
+                            <span class="stat-value" id="handsPlayed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Victoires</span>
+                            <span class="stat-value" id="handsWon">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Blackjacks</span>
+                            <span class="stat-value" id="blackjacks">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Profit total</span>
+                            <span class="stat-value" id="totalProfit">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section rules-section">
+                    <h3>Règles</h3>
+                    <ul>
+                        <li>Blackjack naturel paie 3:2</li>
+                        <li>Le croupier pioche jusqu'à 17 (soft 17 inclus)</li>
+                        <li>Double uniquement sur les deux premières cartes</li>
+                        <li>Pas de split ni d'assurance</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Game Table -->
+            <section class="blackjack-table">
+                <div class="table-header">
+                    <div class="table-status" id="gameStatus">Placez votre mise et cliquez sur Distribuer.</div>
+                </div>
+
+                <div class="dealer-area">
+                    <h3>Croupier</h3>
+                    <div class="hand" id="dealerHand"></div>
+                    <div class="hand-total" id="dealerTotal">Total : 0</div>
+                </div>
+
+                <div class="table-divider"></div>
+
+                <div class="player-area">
+                    <h3>Joueur</h3>
+                    <div class="hand" id="playerHand"></div>
+                    <div class="hand-total" id="playerTotal">Total : 0</div>
+                </div>
+
+                <div class="chip-tray">
+                    <div class="tray-label">Derniers résultats</div>
+                    <div class="results-log" id="resultsLog">
+                        <div class="no-history">Aucune main jouée</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="blackjack.js"></script>
+</body>
+</html>

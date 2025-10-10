@@ -32,7 +32,11 @@ service cloud.firestore {
       'diceBestWin',
       'plinkoGamesPlayed',
       'plinkoTotalWon',
-      'plinkoBestWin'
+      'plinkoBestWin',
+      'blackjackHandsPlayed',
+      'blackjackWins',
+      'blackjackBlackjacks',
+      'blackjackTotalProfit'
     ];
   }
 
@@ -50,7 +54,11 @@ service cloud.firestore {
       'diceBestWin',
       'plinkoGamesPlayed',
       'plinkoTotalWon',
-      'plinkoBestWin'
+      'plinkoBestWin',
+      'blackjackHandsPlayed',
+      'blackjackWins',
+      'blackjackBlackjacks',
+      'blackjackTotalProfit'
     ];
   }
 
@@ -69,6 +77,10 @@ service cloud.firestore {
            request.resource.data[field] >= 0;
   }
 
+  function isNumber(field) {
+    return request.resource.data[field] is number;
+  }
+
   function hasValidNumberFields() {
     return isNonNegativeNumber('balance') &&
            isNonNegativeNumber('totalWagered') &&
@@ -80,7 +92,11 @@ service cloud.firestore {
            isNonNegativeInt('diceGamesPlayed') &&
            isNonNegativeInt('diceWins') &&
            isNonNegativeInt('diceLosses') &&
-           isNonNegativeInt('plinkoGamesPlayed');
+           isNonNegativeInt('plinkoGamesPlayed') &&
+           isNonNegativeInt('blackjackHandsPlayed') &&
+           isNonNegativeInt('blackjackWins') &&
+           isNonNegativeInt('blackjackBlackjacks') &&
+           isNumber('blackjackTotalProfit');
   }
 
   function hasValidCreateMetadata() {

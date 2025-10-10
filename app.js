@@ -16,7 +16,11 @@ const statsElements = {
     diceBestWin: document.getElementById('statDiceBestWin'),
     plinkoGames: document.getElementById('statPlinkoGames'),
     plinkoTotalWon: document.getElementById('statPlinkoTotalWon'),
-    plinkoBestWin: document.getElementById('statPlinkoBestWin')
+    plinkoBestWin: document.getElementById('statPlinkoBestWin'),
+    blackjackHands: document.getElementById('statBlackjackHands'),
+    blackjackWins: document.getElementById('statBlackjackWins'),
+    blackjackBlackjacks: document.getElementById('statBlackjackBlackjacks'),
+    blackjackProfit: document.getElementById('statBlackjackProfit')
 };
 
 const categoriesContainer = document.getElementById('categoriesContainer');
@@ -28,12 +32,13 @@ const categoryIconMap = {
     'Originaux': '🎯',
     'Slots': '🎰',
     'Live': '🎥',
+    'Table': '🃏',
     'Jackpots': '💰',
     'Populaire': '🔥',
     'Nouveautés': '🆕'
 };
 
-const categorySortOrder = ['Originaux', 'Slots', 'Live', 'Jackpots', 'Populaire', 'Nouveautés'];
+const categorySortOrder = ['Originaux', 'Slots', 'Live', 'Table', 'Jackpots', 'Populaire', 'Nouveautés'];
 
 const games = [
     {
@@ -52,6 +57,15 @@ const games = [
         image: '🎲',
         link: 'dice.html',
         categories: ['Originaux', 'Nouveautés'],
+        badge: { label: 'Nouveau', tone: 'new' }
+    },
+    {
+        id: 'blackjack',
+        name: 'Blackjack',
+        provider: 'Casino Originals',
+        image: '🃏',
+        link: 'blackjack.html',
+        categories: ['Originaux', 'Table', 'Populaire'],
         badge: { label: 'Nouveau', tone: 'new' }
     },
     {
@@ -240,7 +254,11 @@ function updateStatsPanel(userData) {
         diceBestWin: 0,
         plinkoGamesPlayed: 0,
         plinkoTotalWon: 0,
-        plinkoBestWin: 0
+        plinkoBestWin: 0,
+        blackjackHandsPlayed: 0,
+        blackjackWins: 0,
+        blackjackBlackjacks: 0,
+        blackjackTotalProfit: 0
     };
 
     const stats = { ...defaults, ...(userData || {}) };
@@ -271,6 +289,10 @@ function updateStatsPanel(userData) {
     setTextContent(statsElements.plinkoGames, stats.plinkoGamesPlayed);
     setTextContent(statsElements.plinkoTotalWon, formatCurrency(stats.plinkoTotalWon));
     setTextContent(statsElements.plinkoBestWin, formatCurrency(stats.plinkoBestWin));
+    setTextContent(statsElements.blackjackHands, stats.blackjackHandsPlayed);
+    setTextContent(statsElements.blackjackWins, stats.blackjackWins);
+    setTextContent(statsElements.blackjackBlackjacks, stats.blackjackBlackjacks);
+    setTextContent(statsElements.blackjackProfit, formatCurrency(stats.blackjackTotalProfit));
 }
 
 function formatCurrency(value) {
