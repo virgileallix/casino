@@ -14,6 +14,10 @@ let wins = 0;
 let losses = 0;
 let balanceLoaded = false;
 
+const resultNumberElement = document.getElementById('resultNumber');
+const sliderRollElement = document.getElementById('sliderRoll');
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Constants
 const HOUSE_EDGE = 0.01; // 1% house edge like Stake
 
@@ -76,6 +80,28 @@ function setPlayingState(playing) {
         playBtn.disabled = playing || !balanceLoaded;
         playBtn.innerHTML = playing ? '<span>Lancer en cours...</span>' : '<span>Lancer le dé</span>';
     }
+}
+
+function setRollingVisual(active) {
+    if (!resultNumberElement) return;
+    if (active) {
+        resultNumberElement.classList.add('rolling');
+        resultNumberElement.textContent = '...';
+    } else {
+        resultNumberElement.classList.remove('rolling');
+    }
+}
+
+async function runPreRollAnimation() {
+    if (!sliderRollElement) {
+        await wait(350);
+        return;
+    }
+    sliderRollElement.classList.remove('active');
+    void sliderRollElement.offsetWidth;
+    sliderRollElement.classList.add('active');
+    await wait(900);
+    sliderRollElement.classList.remove('active');
 }
 
 // Setup event listeners
@@ -230,46 +256,46 @@ async function playGame() {
 
     setPlayingState(true);
 
-    // Generate result
-    const result = generateResult();
-    const won = checkWin(result);
-    const multiplier = calculateMultiplier();
-    const payout = won ? parseFloat((betAmount * multiplier).toFixed(2)) : 0;
-    const profit = parseFloat((payout - betAmount).toFixed(2));
-
-    // Animate result
-    animateResult(result, won);
-
-    // Wait for animation
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    let transactionSucceeded = false;
-
-    // Update balance and stats in Firestore
     try {
-        const outcome = await applyGameResult(currentUser.uid, {
-            betAmount,
-            payout,
-            game: 'dice'
-        });
-        balance = outcome.balance;
-        updateBalance();
-        transactionSucceeded = true;
-    } catch (error) {
-        console.error('Error applying dice result:', error);
-        if (error.message === 'INSUFFICIENT_FUNDS') {
-            alert('Solde insuffisant pour cette mise.');
-        } else {
-            alert('Erreur lors de la mise à jour du solde.');
+        setRollingVisual(true);
+
+        const result = generateResult();
+        const won = checkWin(result);
+        const multiplier = calculateMultiplier();
+        const payout = won ? parseFloat((betAmount * multiplier).toFixed(2)) : 0;
+        const profit = parseFloat((payout - betAmount).toFixed(2));
+
+        await runPreRollAnimation();
+        animateResult(result, won);
+        await wait(1500);
+
+        let transactionSucceeded = false;
+
+        try {
+            const outcome = await applyGameResult(currentUser.uid, {
+                betAmount,
+                payout,
+                game: 'dice'
+            });
+            balance = outcome.balance;
+            updateBalance();
+            transactionSucceeded = true;
+        } catch (error) {
+            console.error('Error applying dice result:', error);
+            if (error.message === 'INSUFFICIENT_FUNDS') {
+                alert('Solde insuffisant pour cette mise.');
+            } else {
+                alert('Erreur lors de la mise à jour du solde.');
+            }
         }
-    }
 
-    if (transactionSucceeded) {
-        // Add to history
-        addToHistory(result, won, betAmount, profit);
+        if (transactionSucceeded) {
+            addToHistory(result, won, betAmount, profit);
+        }
+    } finally {
+        setRollingVisual(false);
+        setPlayingState(false);
     }
-
-    setPlayingState(false);
 }
 
 // Animate result
@@ -299,6 +325,7 @@ function animateResult(result, won) {
             requestAnimationFrame(animate);
         } else {
             resultNumber.textContent = result.toFixed(2);
+            resultNumber.classList.remove('rolling');
             resultNumber.classList.add(won ? 'win' : 'loss');
         }
     };

@@ -142,11 +142,16 @@ function renderHand(container, hand, hideHole = false) {
     hand.forEach((card, index) => {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
+        cardDiv.style.setProperty('--index', index);
         if (hideHole && index === 1) {
             cardDiv.classList.add('face-down');
+            cardDiv.removeAttribute('style');
+            cardDiv.style.setProperty('--index', index);
         } else {
             cardDiv.style.backgroundImage = `url('${getCardImage(card)}')`;
         }
+        cardDiv.classList.add('deal');
+        setTimeout(() => cardDiv.classList.remove('deal'), 600);
         container.appendChild(cardDiv);
     });
 }
@@ -157,8 +162,10 @@ function logResult(result, bet, profit) {
         noHistory.remove();
     }
 
+    elements.resultsLog.querySelectorAll('.result-item').forEach(item => item.classList.remove('recent'));
+
     const entry = document.createElement('div');
-    entry.className = `result-item ${result}`;
+    entry.className = `result-item ${result} recent`;
     const labelMap = {
         win: 'Victoire',
         loss: 'Défaite',
@@ -214,6 +221,8 @@ function startRound() {
     dealerHand = [drawCard(), drawCard()];
 
     renderHands(true);
+
+    elements.dealBtn.disabled = true;
 
     if (handTotal(playerHand) === 21) {
         playerBlackjack = true;
@@ -423,7 +432,11 @@ function setupEventListeners() {
                     elements.betInput.value = Math.max(1, currentBet / 2).toFixed(2);
                     break;
                 case 'double':
-                    elements.betInput.value = Math.min(balance, currentBet * 2).toFixed(2);
+                    {
+                        const doubled = Math.max(1, currentBet * 2);
+                        const target = balanceLoaded ? Math.min(balance, doubled) : doubled;
+                        elements.betInput.value = Math.max(1, target).toFixed(2);
+                    }
                     break;
                 case 'min':
                     elements.betInput.value = '1.00';
@@ -491,6 +504,7 @@ onAuthStateChanged(auth, async (user) => {
         if (!data) {
             balanceLoaded = false;
             updateBalanceDisplay();
+            elements.dealBtn.disabled = true;
             return;
         }
         balance = data.balance;

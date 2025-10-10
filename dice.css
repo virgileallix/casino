@@ -379,6 +379,11 @@
     letter-spacing: 0.04em;
 }
 
+.result-number.rolling {
+    color: rgba(177, 186, 211, 0.6);
+    animation: resultPulse 0.9s ease-in-out infinite;
+}
+
 .dice-info-cards {
     display: flex;
     gap: 14px;
@@ -430,6 +435,21 @@
     background: rgba(15, 20, 31, 0.8);
     margin: 20px 40px 12px;
     overflow: hidden;
+}
+
+.slider-roll {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -30%;
+    width: 30%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 100%);
+    opacity: 0;
+    transform: translateX(0);
+}
+
+.slider-roll.active {
+    animation: sliderSweep 0.9s ease-in-out forwards;
 }
 
 .slider-fill-under,
@@ -558,6 +578,17 @@
     padding: 24px 0;
     color: rgba(177, 186, 211, 0.5);
     font-size: 0.95rem;
+}
+
+@keyframes sliderSweep {
+    0% { opacity: 0; transform: translateX(-30%); }
+    10% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(130%); }
+}
+
+@keyframes resultPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.85; }
 }
 
 @media (max-width: 1200px) {

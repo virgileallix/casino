@@ -1,0 +1,30 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="plinkoBg" x1="60" y1="40" x2="340" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#142634"/>
+      <stop offset="1" stop-color="#1D3A47"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0" r="0.8">
+      <stop stop-color="#00D084" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#00D084" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="40" y="30" width="320" height="340" rx="38" fill="url(#plinkoBg)"/>
+  <rect x="40" y="30" width="320" height="340" rx="38" stroke="#00D084" stroke-opacity="0.2" stroke-width="4"/>
+  <circle cx="200" cy="100" r="120" fill="url(#glow)" opacity="0.7"/>
+  <g stroke="#2c4453" stroke-width="6" stroke-linecap="round">
+    <path d="M100 120 L200 300 L300 120"/>
+    <path d="M140 120 L200 285 L260 120"/>
+    <path d="M180 120 L200 270 L220 120"/>
+  </g>
+  <g fill="#00D084">
+    <circle cx="120" cy="150" r="10"/>
+    <circle cx="160" cy="180" r="10"/>
+    <circle cx="200" cy="210" r="10"/>
+    <circle cx="240" cy="180" r="10"/>
+    <circle cx="280" cy="150" r="10"/>
+    <circle cx="180" cy="250" r="10"/>
+    <circle cx="220" cy="250" r="10"/>
+  </g>
+  <rect x="110" y="320" width="180" height="26" rx="12" fill="#00D084" opacity="0.3"/>
+</svg>

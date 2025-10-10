@@ -5,8 +5,9 @@ Projet full front-end alimenté par Firebase (Auth + Firestore) proposant plusie
 ## Jeux disponibles
 
 - **Blackjack** – règles officielles (Blackjack 3:2, croupier stand sur soft 17, double sur deux premières cartes). Jeu complet avec visuels haute définition issus du dépôt open source [`hayeah/playing-cards-assets`](https://github.com/hayeah/playing-cards-assets).
-- **Dice** – reproduction du jeu « Roll Over / Under » façon Stake, calcul de house edge, historique détaillé.
+- **Dice** – reproduction du jeu « Roll Over / Under » façon Stake, house edge configurée à 1 %, nouvelle animation de roulage avec pré-révélation et slider dynamique pour ajouter du suspense.
 - **Plinko** – moteur physique Matter.js avec tables de multiplicateurs basées sur les probabilités binomiales.
+- **Mines** – grille 5×5 configurable (2 à 24 mines), calcul dynamique des multiplicateurs, cashout progressif et historique détaillé.
 
 Chaque jeu :
 - se connecte au profil Firebase de l’utilisateur,
@@ -26,9 +27,11 @@ Chaque jeu :
 
 ```
 assets/cards/        # jeu complet de cartes PNG (52 cartes + dos) issu du repo open source
+assets/images/       # vignettes SVG custom pour les jeux
 blackjack.html/.css/.js
 dice.html/.css/.js
 plinko.html/.css/.js
+mines.html/.css/.js
 balance-manager.js   # gestion Firestore (solde + stats)
 firebase-config.js
 index.html / styles.css

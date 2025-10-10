@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mines - Casino</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mines.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎰 CASINO</h1>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="dice.html" class="nav-link">Dice</a>
+                <a href="plinko.html" class="nav-link">Plinko</a>
+                <a href="mines.html" class="nav-link active">Mines</a>
+                <a href="blackjack.html" class="nav-link">Blackjack</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mines-main">
+        <div class="mines-container">
+            <!-- Controls -->
+            <aside class="mines-controls">
+                <div class="control-section">
+                    <div class="control-header">
+                        <h2>💣 Mines</h2>
+                        <span class="control-tag">Stake Style</span>
+                    </div>
+                    <p class="game-description">
+                        Choisis ton nombre de mines, découvre les gemmes et encaisse avant l'explosion !
+                    </p>
+                </div>
+
+                <div class="control-section">
+                    <label>Mise</label>
+                    <div class="bet-input-group">
+                        <input type="number" id="betAmount" value="5.00" min="0.5" step="0.5">
+                        <span class="currency">€</span>
+                    </div>
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet" data-action="half">½</button>
+                        <button class="quick-bet" data-action="double">2x</button>
+                        <button class="quick-bet" data-action="min">Min</button>
+                        <button class="quick-bet" data-action="max">Max</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Nombre de mines</label>
+                    <div class="mines-selector">
+                        <button class="mines-btn" data-mines="3">3</button>
+                        <button class="mines-btn active" data-mines="5">5</button>
+                        <button class="mines-btn" data-mines="10">10</button>
+                        <button class="mines-btn" data-mines="15">15</button>
+                    </div>
+                    <div class="selector-slider">
+                        <input type="range" id="minesRange" min="2" max="24" value="5">
+                        <span id="minesRangeValue">5 mines</span>
+                    </div>
+                </div>
+
+                <div class="control-section action-buttons">
+                    <button class="btn-primary-action" id="startBtn">Commencer</button>
+                    <button class="btn-secondary-action" id="cashoutBtn" disabled>Cashout</button>
+                </div>
+
+                <div class="control-section stats-section">
+                    <h3>Statistiques</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Parties</span>
+                            <span class="stat-value" id="minesGamesPlayed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Cashouts</span>
+                            <span class="stat-value" id="minesCashouts">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Meilleur multi</span>
+                            <span class="stat-value" id="minesBestMultiplier">0.00x</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Profit total</span>
+                            <span class="stat-value" id="minesTotalProfit">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section rules-section">
+                    <h3>Règles</h3>
+                    <ul>
+                        <li>25 cases, entre 1 et 24 mines.</li>
+                        <li>Chaque gemme augmente le multiplicateur.</li>
+                        <li>Clique sur Cashout pour encaisser.</li>
+                        <li>Si tu touches une mine tu perds ta mise.</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Game Board -->
+            <section class="mines-board-area">
+                <div class="board-header">
+                    <div class="status-pill" id="gameStatus">Choisis ta mise et clique sur Commencer.</div>
+                    <div class="multiplier-pill">
+                        <span class="pill-label">Multiplicateur</span>
+                        <span class="pill-value" id="currentMultiplier">1.00x</span>
+                    </div>
+                    <div class="multiplier-pill">
+                        <span class="pill-label">Potentiel</span>
+                        <span class="pill-value" id="potentialPayout">0.00 €</span>
+                    </div>
+                </div>
+
+                <div class="mines-grid" id="minesGrid">
+                    <!-- Tiles generated dynamically -->
+                </div>
+
+                <div class="history-panel">
+                    <div class="history-header">
+                        <h3>Historique</h3>
+                        <span class="history-subtitle">Derniers cashouts / explosions</span>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="no-history">Aucun tour joué</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="mines.js"></script>
+</body>
+</html>

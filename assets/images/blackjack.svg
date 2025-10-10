@@ -1,0 +1,29 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bjBg" x1="80" y1="60" x2="320" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102B25"/>
+      <stop offset="1" stop-color="#184132"/>
+    </linearGradient>
+    <linearGradient id="card1" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F4F4F8"/>
+    </linearGradient>
+    <linearGradient id="card2" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#E9EDF4"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect x="45" y="35" width="310" height="330" rx="36" fill="url(#bjBg)"/>
+  <rect x="45" y="35" width="310" height="330" rx="36" stroke="#00D084" stroke-opacity="0.22" stroke-width="4"/>
+  <path d="M80 180 C160 120 240 120 320 180" stroke="rgba(0,208,132,0.35)" stroke-width="16" stroke-linecap="round"/>
+  <g filter="url(#shadow)">
+    <rect x="130" y="110" width="120" height="170" rx="18" fill="url(#card1)" transform="rotate(-12 130 110)"/>
+    <rect x="180" y="120" width="120" height="170" rx="18" fill="url(#card2)" transform="rotate(8 180 120)"/>
+  </g>
+  <text x="205" y="210" text-anchor="middle" font-size="72" font-family="Helvetica, Arial, sans-serif" fill="#FF4D6D" transform="rotate(-12 205 210)">A♥</text>
+  <text x="250" y="240" text-anchor="middle" font-size="68" font-family="Helvetica, Arial, sans-serif" fill="#1F2A44" transform="rotate(8 250 240)">K♠</text>
+  <rect x="130" y="310" width="140" height="32" rx="16" fill="#00D084" opacity="0.25"/>
+</svg>

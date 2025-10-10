@@ -222,17 +222,17 @@
 }
 
 .blackjack-table {
-    background: radial-gradient(circle at top, rgba(0, 208, 132, 0.18), rgba(16, 21, 31, 0.92));
-    border-radius: 24px;
-    border: 1px solid rgba(0, 208, 132, 0.12);
-    padding: 30px 40px;
+    background: radial-gradient(circle at 10% 0%, rgba(0, 208, 132, 0.2), rgba(16, 21, 31, 0.92));
+    border-radius: 26px;
+    border: 1px solid rgba(0, 208, 132, 0.18);
+    padding: 34px 48px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-    min-height: 640px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+    min-height: 660px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 }
 
 .blackjack-table::after {
@@ -249,23 +249,42 @@
 }
 
 .table-status {
-    background: rgba(15, 20, 31, 0.85);
-    border: 1px solid rgba(79, 89, 110, 0.3);
-    border-radius: 14px;
-    padding: 14px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(15, 20, 31, 0.9);
+    border: 1px solid rgba(0, 208, 132, 0.18);
+    border-radius: 16px;
+    padding: 14px 22px;
     color: #f4f6fb;
     font-size: 0.95rem;
     letter-spacing: 0.02em;
+    box-shadow: inset 0 0 0 1px rgba(0, 208, 132, 0.08);
+}
+
+.table-status.success {
+    color: var(--accent-primary);
+    border-color: rgba(0, 208, 132, 0.35);
+}
+
+.table-status.warning {
+    color: var(--error-color);
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.table-status.info {
+    color: rgba(177, 186, 211, 0.8);
 }
 
 .dealer-area,
 .player-area {
     position: relative;
     z-index: 1;
-    background: rgba(15, 20, 31, 0.85);
+    background: rgba(15, 20, 31, 0.88);
     border: 1px solid rgba(79, 89, 110, 0.25);
-    border-radius: 16px;
-    padding: 18px 20px 26px;
+    border-radius: 18px;
+    padding: 22px 24px 32px;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.35);
 }
 
 .dealer-area h3,
@@ -279,26 +298,53 @@
 
 .hand {
     display: flex;
-    align-items: center;
-    gap: 16px;
-    min-height: 120px;
+    align-items: flex-end;
+    min-height: 150px;
+    position: relative;
+    perspective: 800px;
+    --deal-from-x: -240px;
+    --deal-from-y: -170px;
+    padding-left: 140px;
+    overflow: visible;
 }
 
 .card {
-    width: 92px;
+    --index: 0;
+    width: 104px;
     aspect-ratio: 3 / 4;
     background-size: cover;
     background-position: center;
-    border-radius: 12px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    border-radius: 14px;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transform-origin: bottom center;
+    transform: translateX(calc(var(--index) * -52px)) rotate(calc(var(--index) * 1.5deg));
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    position: relative;
+    z-index: calc(10 + var(--index));
+    background-color: #101622;
 }
 
 .card.face-down {
-    background-image: url('assets/cards/back.png');
+    background-image: none;
+    background: linear-gradient(135deg, rgba(24, 30, 45, 1) 0%, rgba(41, 53, 76, 1) 100%);
+    box-shadow: inset 0 0 0 2px rgba(0, 208, 132, 0.25), 0 18px 32px rgba(0, 0, 0, 0.5);
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.card.deal {
+    animation: deal-card 0.55s cubic-bezier(0.17, 0.67, 0.38, 1) forwards;
 }
 
 .hand-total {
-    margin-top: 12px;
+    margin-top: 16px;
     font-size: 1.05rem;
     font-weight: 600;
     color: #f4f6fb;
@@ -341,6 +387,8 @@
     justify-content: space-between;
     font-size: 0.85rem;
     color: rgba(177, 186, 211, 0.8);
+    border-bottom: 1px solid rgba(79, 89, 110, 0.15);
+    padding-bottom: 8px;
 }
 
 .result-item.win {
@@ -355,11 +403,41 @@
     color: rgba(177, 186, 211, 0.6);
 }
 
+.result-item.recent {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
 .no-history {
     text-align: center;
     padding: 10px 0;
     color: rgba(177, 186, 211, 0.5);
     font-size: 0.9rem;
+}
+
+@keyframes deal-card {
+    0% {
+        opacity: 0;
+        transform: translateX(calc(var(--index) * -52px + var(--deal-from-x))) translateY(calc(var(--deal-from-y))) scale(0.65) rotate(-12deg);
+    }
+    65% {
+        opacity: 1;
+        transform: translateX(calc(var(--index) * -52px - 12px)) translateY(-10px) scale(1.08) rotate(4deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(calc(var(--index) * -52px));
+    }
+}
+
+.dealer-area .hand {
+    --deal-from-x: -220px;
+    --deal-from-y: -190px;
+}
+
+.player-area .hand {
+    --deal-from-x: -220px;
+    --deal-from-y: 180px;
 }
 
 @media (max-width: 1200px) {

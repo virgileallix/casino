@@ -17,7 +17,11 @@ const DEFAULT_USER_FIELDS = {
     blackjackHandsPlayed: 0,
     blackjackWins: 0,
     blackjackBlackjacks: 0,
-    blackjackTotalProfit: 0
+    blackjackTotalProfit: 0,
+    minesGamesPlayed: 0,
+    minesCashouts: 0,
+    minesBestMultiplier: 0,
+    minesTotalProfit: 0
 };
 
 function roundCurrency(value) {
@@ -33,6 +37,8 @@ function mergeWithDefaults(data = {}) {
     merged.plinkoTotalWon = roundCurrency(merged.plinkoTotalWon);
     merged.plinkoBestWin = roundCurrency(merged.plinkoBestWin);
     merged.blackjackTotalProfit = roundCurrency(merged.blackjackTotalProfit);
+    merged.minesBestMultiplier = roundCurrency(merged.minesBestMultiplier);
+    merged.minesTotalProfit = roundCurrency(merged.minesTotalProfit);
     return merged;
 }
 
@@ -174,6 +180,15 @@ export async function applyGameResult(userId, { betAmount, payout, game, metadat
                 updates.blackjackBlackjacks = current.blackjackBlackjacks + 1;
             }
             updates.blackjackTotalProfit = roundCurrency((current.blackjackTotalProfit || 0) + profit);
+        }
+
+        if (game === 'mines') {
+            updates.minesGamesPlayed = current.minesGamesPlayed + 1;
+            if (metadata.cashout) {
+                updates.minesCashouts = current.minesCashouts + 1;
+                updates.minesBestMultiplier = Math.max(current.minesBestMultiplier || 0, metadata.multiplier || 0);
+            }
+            updates.minesTotalProfit = roundCurrency((current.minesTotalProfit || 0) + profit);
         }
 
         transaction.update(userRef, updates);

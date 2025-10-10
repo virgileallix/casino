@@ -1,0 +1,22 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="diceGradient" x1="60" y1="40" x2="340" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1F2A44"/>
+      <stop offset="1" stop-color="#3C4B70"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="80" y1="60" x2="220" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect x="60" y="40" width="280" height="320" rx="45" fill="url(#diceGradient)"/>
+  <rect x="60" y="40" width="280" height="320" rx="45" stroke="#00D084" stroke-width="4" opacity="0.2"/>
+  <path d="M120 90 C200 30 280 120 300 170" stroke="url(#shine)" stroke-width="35" stroke-linecap="round" opacity="0.65"/>
+  <g fill="#00D084">
+    <circle cx="140" cy="140" r="22"/>
+    <circle cx="260" cy="260" r="22"/>
+    <circle cx="260" cy="140" r="22"/>
+    <circle cx="140" cy="260" r="22"/>
+    <circle cx="200" cy="200" r="22"/>
+  </g>
+</svg>

@@ -20,7 +20,11 @@ const statsElements = {
     blackjackHands: document.getElementById('statBlackjackHands'),
     blackjackWins: document.getElementById('statBlackjackWins'),
     blackjackBlackjacks: document.getElementById('statBlackjackBlackjacks'),
-    blackjackProfit: document.getElementById('statBlackjackProfit')
+    blackjackProfit: document.getElementById('statBlackjackProfit'),
+    minesGames: document.getElementById('statMinesGames'),
+    minesCashouts: document.getElementById('statMinesCashouts'),
+    minesBestMultiplier: document.getElementById('statMinesBestMultiplier'),
+    minesProfit: document.getElementById('statMinesProfit')
 };
 
 const categoriesContainer = document.getElementById('categoriesContainer');
@@ -30,130 +34,47 @@ const gamesSectionTitle = document.getElementById('gamesSectionTitle');
 const categoryIconMap = {
     'Tous': '⭐',
     'Originaux': '🎯',
-    'Slots': '🎰',
-    'Live': '🎥',
-    'Table': '🃏',
-    'Jackpots': '💰',
-    'Populaire': '🔥',
-    'Nouveautés': '🆕'
+    'Table': '🃏'
 };
 
-const categorySortOrder = ['Originaux', 'Slots', 'Live', 'Table', 'Jackpots', 'Populaire', 'Nouveautés'];
+const categorySortOrder = ['Originaux', 'Table'];
 
 const games = [
     {
         id: 'plinko',
         name: 'Plinko',
         provider: 'Casino Originals',
-        image: '🎯',
+        image: 'assets/images/plinko.svg',
         link: 'plinko.html',
-        categories: ['Originaux', 'Populaire'],
-        badge: { label: 'Populaire', tone: 'popular' }
+        categories: ['Originaux'],
+        badge: { label: 'Classique', tone: 'popular' }
     },
     {
         id: 'dice',
         name: 'Dice',
         provider: 'Casino Originals',
-        image: '🎲',
+        image: 'assets/images/dice.svg',
         link: 'dice.html',
-        categories: ['Originaux', 'Nouveautés'],
+        categories: ['Originaux'],
         badge: { label: 'Nouveau', tone: 'new' }
     },
     {
         id: 'blackjack',
         name: 'Blackjack',
         provider: 'Casino Originals',
-        image: '🃏',
+        image: 'assets/images/blackjack.svg',
         link: 'blackjack.html',
-        categories: ['Originaux', 'Table', 'Populaire'],
+        categories: ['Originaux', 'Table'],
         badge: { label: 'Nouveau', tone: 'new' }
     },
     {
-        id: 'sweet-bonanza',
-        name: 'Sweet Bonanza',
-        provider: 'Pragmatic Play',
-        image: '🍬',
-        categories: ['Slots', 'Populaire'],
-        badge: { label: 'Populaire', tone: 'popular' }
-    },
-    {
-        id: 'gates-of-olympus',
-        name: 'Gates of Olympus',
-        provider: 'Pragmatic Play',
-        image: '⚡',
-        categories: ['Slots', 'Nouveautés']
-    },
-    {
-        id: 'book-of-dead',
-        name: 'Book of Dead',
-        provider: "Play'n GO",
-        image: '📖',
-        categories: ['Slots']
-    },
-    {
-        id: 'crazy-time',
-        name: 'Crazy Time',
-        provider: 'Evolution',
-        image: '🎡',
-        categories: ['Live', 'Populaire'],
-        badge: { label: 'Populaire', tone: 'popular' }
-    },
-    {
-        id: 'mega-moolah',
-        name: 'Mega Moolah',
-        provider: 'Microgaming',
-        image: '🦁',
-        categories: ['Slots', 'Jackpots']
-    },
-    {
-        id: 'starburst',
-        name: 'Starburst',
-        provider: 'NetEnt',
-        image: '💎',
-        categories: ['Slots', 'Populaire'],
-        badge: { label: 'Populaire', tone: 'popular' }
-    },
-    {
-        id: 'gonzos-quest',
-        name: "Gonzo's Quest",
-        provider: 'NetEnt',
-        image: '🗿',
-        categories: ['Slots']
-    },
-    {
-        id: 'dead-or-alive',
-        name: 'Dead or Alive',
-        provider: 'NetEnt',
-        image: '🤠',
-        categories: ['Slots']
-    },
-    {
-        id: 'reactoonz',
-        name: 'Reactoonz',
-        provider: "Play'n GO",
-        image: '👾',
-        categories: ['Slots', 'Populaire']
-    },
-    {
-        id: 'fire-joker',
-        name: 'Fire Joker',
-        provider: "Play'n GO",
-        image: '🔥',
-        categories: ['Slots']
-    },
-    {
-        id: 'big-bass-bonanza',
-        name: 'Big Bass Bonanza',
-        provider: 'Pragmatic Play',
-        image: '🎣',
-        categories: ['Slots', 'Nouveautés']
-    },
-    {
-        id: 'wolf-gold',
-        name: 'Wolf Gold',
-        provider: 'Pragmatic Play',
-        image: '🐺',
-        categories: ['Slots']
+        id: 'mines',
+        name: 'Mines',
+        provider: 'Casino Originals',
+        image: 'assets/images/mines.svg',
+        link: 'mines.html',
+        categories: ['Originaux'],
+        badge: { label: 'Nouveau', tone: 'new' }
     }
 ];
 
@@ -258,7 +179,11 @@ function updateStatsPanel(userData) {
         blackjackHandsPlayed: 0,
         blackjackWins: 0,
         blackjackBlackjacks: 0,
-        blackjackTotalProfit: 0
+        blackjackTotalProfit: 0,
+        minesGamesPlayed: 0,
+        minesCashouts: 0,
+        minesBestMultiplier: 0,
+        minesTotalProfit: 0
     };
 
     const stats = { ...defaults, ...(userData || {}) };
@@ -293,6 +218,10 @@ function updateStatsPanel(userData) {
     setTextContent(statsElements.blackjackWins, stats.blackjackWins);
     setTextContent(statsElements.blackjackBlackjacks, stats.blackjackBlackjacks);
     setTextContent(statsElements.blackjackProfit, formatCurrency(stats.blackjackTotalProfit));
+    setTextContent(statsElements.minesGames, stats.minesGamesPlayed);
+    setTextContent(statsElements.minesCashouts, stats.minesCashouts);
+    setTextContent(statsElements.minesBestMultiplier, `${(stats.minesBestMultiplier ?? 0).toFixed(2)}x`);
+    setTextContent(statsElements.minesProfit, formatCurrency(stats.minesTotalProfit));
 }
 
 function formatCurrency(value) {
@@ -386,10 +315,14 @@ function createGameCard(game) {
         ? `<div class="game-badge ${game.badge.tone === 'new' ? 'badge-new' : 'badge-popular'}">${game.badge.label}</div>`
         : '';
 
+    const mediaHtml = game.image
+        ? `<img src="${game.image}" alt="${game.name}">`
+        : `<div class="game-icon">${game.icon || ''}</div>`;
+
     card.innerHTML = `
         <div class="game-image">
             ${badgeHtml}
-            <div class="game-icon">${game.image}</div>
+            ${mediaHtml}
         </div>
         <div class="game-info">
             <h3 class="game-name">${game.name}</h3>

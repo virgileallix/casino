@@ -36,7 +36,11 @@ service cloud.firestore {
       'blackjackHandsPlayed',
       'blackjackWins',
       'blackjackBlackjacks',
-      'blackjackTotalProfit'
+      'blackjackTotalProfit',
+      'minesGamesPlayed',
+      'minesCashouts',
+      'minesBestMultiplier',
+      'minesTotalProfit'
     ];
   }
 
@@ -58,7 +62,11 @@ service cloud.firestore {
       'blackjackHandsPlayed',
       'blackjackWins',
       'blackjackBlackjacks',
-      'blackjackTotalProfit'
+      'blackjackTotalProfit',
+      'minesGamesPlayed',
+      'minesCashouts',
+      'minesBestMultiplier',
+      'minesTotalProfit'
     ];
   }
 
@@ -96,7 +104,11 @@ service cloud.firestore {
            isNonNegativeInt('blackjackHandsPlayed') &&
            isNonNegativeInt('blackjackWins') &&
            isNonNegativeInt('blackjackBlackjacks') &&
-           isNumber('blackjackTotalProfit');
+           isNumber('blackjackTotalProfit') &&
+           isNonNegativeInt('minesGamesPlayed') &&
+           isNonNegativeInt('minesCashouts') &&
+           isNonNegativeNumber('minesBestMultiplier') &&
+           isNumber('minesTotalProfit');
   }
 
   function hasValidCreateMetadata() {
