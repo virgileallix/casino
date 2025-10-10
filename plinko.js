@@ -18,6 +18,10 @@ onAuthStateChanged(auth, async (user) => {
                 balanceLoaded = false;
                 setPlayingState(false);
                 updateBalance();
+                gamesPlayed = 0;
+                totalWon = 0;
+                biggestWin = 0;
+                updateStats();
                 return;
             }
 
@@ -71,6 +75,7 @@ function setPlayingState(playing) {
     const playBtn = document.getElementById('playBtn');
     if (playBtn) {
         playBtn.disabled = playing || !balanceLoaded;
+        playBtn.innerHTML = playing ? '<span>Drop en cours...</span>' : '<span>Lancer la bille</span>';
     }
 }
 
@@ -79,6 +84,24 @@ function syncStatsFromData(data) {
     totalWon = data.plinkoTotalWon ?? 0;
     biggestWin = data.plinkoBestWin ?? 0;
     updateStats();
+}
+
+function updateMetaLabels() {
+    const riskLabel = document.getElementById('currentRiskLabel');
+    const rowsLabel = document.getElementById('currentRowsLabel');
+    const riskTextMap = {
+        low: 'Risque faible',
+        medium: 'Risque moyen',
+        high: 'Risque élevé'
+    };
+
+    if (riskLabel) {
+        riskLabel.textContent = riskTextMap[currentRisk] ?? 'Risque';
+    }
+
+    if (rowsLabel) {
+        rowsLabel.textContent = `${currentRows} lignes`;
+    }
 }
 
 function renderMultiplierRow(containerId, values) {
@@ -91,7 +114,9 @@ function renderMultiplierRow(containerId, values) {
         const multiplierDiv = document.createElement('div');
         multiplierDiv.className = 'multiplier-box';
 
-        if (mult >= 10) {
+        if (mult >= 100) {
+            multiplierDiv.classList.add('big-win');
+        } else if (mult >= 10) {
             multiplierDiv.classList.add('high');
         } else if (mult >= 2) {
             multiplierDiv.classList.add('medium');
@@ -108,8 +133,8 @@ function renderMultiplierRow(containerId, values) {
 
 // Canvas dimensions
 const canvas = document.getElementById('plinkoCanvas');
-const canvasWidth = 600;
-const canvasHeight = 800;
+const canvasWidth = 720;
+const canvasHeight = 760;
 
 // Multipliers for different risk levels and rows (based on Stake.com)
 const multipliers = {
@@ -130,6 +155,46 @@ const multipliers = {
     }
 };
 
+function getCurrentMultipliers() {
+    return multipliers[currentRisk][currentRows] ?? [];
+}
+
+function getMultiplierColor(multiplier) {
+    if (multiplier >= 100) {
+        return '#8b5cf6';
+    }
+    if (multiplier >= 10) {
+        return '#ff6666';
+    }
+    if (multiplier >= 2) {
+        return '#f6c657';
+    }
+    if (multiplier >= 1) {
+        return '#00d084';
+    }
+    return '#4a5568';
+}
+
+function getBoardGeometry() {
+    const currentMultipliers = getCurrentMultipliers();
+    const slotCount = currentMultipliers.length;
+
+    if (slotCount === 0) {
+        return null;
+    }
+
+    const horizontalPadding = 80;
+    const usableWidth = canvasWidth - horizontalPadding * 2;
+    const slotSpacing = slotCount > 1 ? usableWidth / (slotCount - 1) : 0;
+    const startX = (canvasWidth - (slotCount - 1) * slotSpacing) / 2;
+    const boxWidth = Math.min(60, slotSpacing * 0.7 || 50);
+    const boxHeight = 70;
+    const pinGapY = 42;
+    const startY = 90;
+
+    return { slotCount, slotSpacing, startX, boxWidth, boxHeight, pinGapY, startY };
+}
+
 // Probabilities based on binomial distribution (more realistic)
 function calculateBinomialProbability(n, k) {
     if (k < 0 || k > n) return 0;
@@ -146,8 +211,9 @@ function calculateBinomialProbability(n, k) {
 }
 
 // Get weighted random multiplier based on true probabilities
-function getWeightedMultiplierIndex(rows) {
-    const numBoxes = rows + 3;
+function getWeightedMultiplierIndex(slotCount) {
+    if (slotCount <= 1) return 0;
+    const numBoxes = slotCount;
     const probabilities = [];
     const steps = numBoxes - 1;
 
@@ -229,27 +295,33 @@ function setupBoard() {
     // Clear existing pins and boxes
     pins.forEach(pin => World.remove(world, pin));
     pins = [];
+    balls.forEach(ball => World.remove(world, ball));
+    balls = [];
 
-    const pinRadius = 4;
-    const pinGap = 35;
-    const startY = 100;
-    const rows = currentRows;
+    const geometry = getBoardGeometry();
+    if (!geometry) {
+        return;
+    }
+
+    const { slotCount, slotSpacing, startX, boxWidth, boxHeight, pinGapY, startY } = geometry;
+    const currentMultipliers = getCurrentMultipliers();
+    const pinRadius = 4.5;
 
     // Create pins
-    for (let row = 0; row < rows; row++) {
-        const pinsInRow = row + 3;
-        const rowWidth = (pinsInRow - 1) * pinGap;
-        const startX = (canvasWidth - rowWidth) / 2;
+    for (let row = 0; row < currentRows; row++) {
+        const pinsInRow = row + 1;
+        const offset = (slotCount - pinsInRow) / 2;
 
         for (let col = 0; col < pinsInRow; col++) {
-            const x = startX + col * pinGap;
-            const y = startY + row * pinGap;
+            const x = startX + (offset + col) * slotSpacing;
+            const y = startY + row * pinGapY;
 
             const pin = Bodies.circle(x, y, pinRadius, {
                 isStatic: true,
                 restitution: 0.8,
+                friction: 0,
                 render: {
-                    fillStyle: '#4a5568'
+                    fillStyle: '#4f596e'
                 }
             });
             pins.push(pin);
@@ -258,31 +330,12 @@ function setupBoard() {
     }
 
     // Create multiplier boxes at bottom
-    const numBoxes = rows + 3;
-    const boxWidth = 40;
-    const boxHeight = 60;
-    const boxGap = 5;
-    const totalWidth = numBoxes * boxWidth + (numBoxes - 1) * boxGap;
-    const startXBox = (canvasWidth - totalWidth) / 2;
     const boxY = canvasHeight - 80;
 
-    const currentMultipliers = multipliers[currentRisk][rows];
-
-    for (let i = 0; i < numBoxes; i++) {
-        const x = startXBox + i * (boxWidth + boxGap) + boxWidth / 2;
-        const multiplier = currentMultipliers[i];
-
-        // Determine color based on multiplier value
-        let color;
-        if (multiplier >= 10) {
-            color = '#ff4444';
-        } else if (multiplier >= 2) {
-            color = '#ffa500';
-        } else if (multiplier >= 1) {
-            color = '#00d084';
-        } else {
-            color = '#4a5568';
-        }
+    for (let i = 0; i < slotCount; i++) {
+        const x = startX + i * slotSpacing;
+        const multiplier = currentMultipliers[i] ?? 0;
+        const color = getMultiplierColor(multiplier);
 
         const box = Bodies.rectangle(x, boxY, boxWidth, boxHeight, {
             isStatic: true,
@@ -292,36 +345,53 @@ function setupBoard() {
                 strokeStyle: color,
                 lineWidth: 2
             },
-            multiplier: multiplier
+            multiplier
         });
         pins.push(box);
         World.add(world, box);
     }
 
     // Create walls
-    const wallThickness = 20;
-    const leftWall = Bodies.rectangle(-10, canvasHeight / 2, wallThickness, canvasHeight, {
+    const wallThickness = 40;
+    const leftWall = Bodies.rectangle(-wallThickness / 2, canvasHeight / 2, wallThickness, canvasHeight, {
         isStatic: true,
         render: { fillStyle: '#2d3748' }
     });
-    const rightWall = Bodies.rectangle(canvasWidth + 10, canvasHeight / 2, wallThickness, canvasHeight, {
+    const rightWall = Bodies.rectangle(canvasWidth + wallThickness / 2, canvasHeight / 2, wallThickness, canvasHeight, {
         isStatic: true,
         render: { fillStyle: '#2d3748' }
     });
 
     World.add(world, [leftWall, rightWall]);
+    pins.push(leftWall, rightWall);
 }
 
 // Drop ball with improved physics and predetermined outcome
 function dropBall() {
+    const geometry = getBoardGeometry();
+    if (!geometry) {
+        activeBetAmount = 0;
+        setPlayingState(false);
+        return;
+    }
+
+    const { slotCount, slotSpacing, startX } = geometry;
+
+    if (!slotCount) {
+        activeBetAmount = 0;
+        setPlayingState(false);
+        return;
+    }
+
     const ballRadius = 6;
-    const startX = canvasWidth / 2 + (Math.random() - 0.5) * 10;
+    const boardCenterX = startX + ((slotCount - 1) * slotSpacing) / 2;
+    const spawnX = boardCenterX + (Math.random() - 0.5) * slotSpacing * 0.4;
     const startY = 30;
 
     // Pre-determine the outcome based on binomial probability
-    const targetIndex = getWeightedMultiplierIndex(currentRows);
+    const targetIndex = getWeightedMultiplierIndex(slotCount);
 
-    const ball = Bodies.circle(startX, startY, ballRadius, {
+    const ball = Bodies.circle(spawnX, startY, ballRadius, {
         restitution: 0.8,
         friction: 0.001,
         density: 0.002,
@@ -348,12 +418,7 @@ function dropBall() {
             return;
         }
 
-        const numBoxes = currentRows + 3;
-        const boxWidth = 40;
-        const boxGap = 5;
-        const totalWidth = numBoxes * boxWidth + (numBoxes - 1) * boxGap;
-        const startXBox = (canvasWidth - totalWidth) / 2;
-        const targetX = startXBox + targetIndex * (boxWidth + boxGap) + boxWidth / 2;
+        const targetX = startX + targetIndex * slotSpacing;
 
         const distanceToTarget = targetX - ball.position.x;
         const guidanceForce = distanceToTarget * 0.00008; // Subtle force
@@ -380,6 +445,7 @@ async function handleBallLanding(ball, box) {
     }
     const multiplier = box.multiplier;
     const winAmount = parseFloat((betAmount * multiplier).toFixed(2));
+    const profit = parseFloat((winAmount - betAmount).toFixed(2));
     let transactionSucceeded = false;
 
     try {
@@ -401,23 +467,19 @@ async function handleBallLanding(ball, box) {
     }
 
     if (transactionSucceeded) {
-        addToHistory(betAmount, multiplier, winAmount);
+        gamesPlayed += 1;
+        totalWon = parseFloat((totalWon + winAmount).toFixed(2));
+        if (winAmount > biggestWin) {
+            biggestWin = winAmount;
+        }
+        updateStats();
+        addToHistory(betAmount, multiplier, profit);
     }
 
     // Highlight winning box
     box.render.fillStyle = '#FFD700';
     setTimeout(() => {
-        let color;
-        if (multiplier >= 10) {
-            color = '#ff4444';
-        } else if (multiplier >= 2) {
-            color = '#ffa500';
-        } else if (multiplier >= 1) {
-            color = '#00d084';
-        } else {
-            color = '#4a5568';
-        }
-        box.render.fillStyle = color;
+        box.render.fillStyle = getMultiplierColor(multiplier);
     }, 1000);
 
     // Remove ball after delay
@@ -451,7 +513,7 @@ function updateStats() {
 }
 
 // Add to history
-function addToHistory(bet, multiplier, win) {
+function addToHistory(bet, multiplier, profit) {
     const historyList = document.getElementById('historyList');
 
     // Remove "no history" message
@@ -463,19 +525,24 @@ function addToHistory(bet, multiplier, win) {
     const historyItem = document.createElement('div');
     historyItem.className = 'history-item';
 
-    let resultClass = 'loss';
-    if (multiplier >= 10) {
-        resultClass = 'big-win';
+    let multiplierClass = 'loss';
+    if (multiplier >= 100) {
+        multiplierClass = 'big-win';
+    } else if (multiplier >= 10) {
+        multiplierClass = 'big-win';
     } else if (multiplier >= 2) {
-        resultClass = 'medium-win';
+        multiplierClass = 'medium-win';
     } else if (multiplier >= 1) {
-        resultClass = 'small-win';
+        multiplierClass = 'small-win';
     }
+
+    const profitClass = profit >= 0 ? (multiplierClass === 'loss' ? 'small-win' : multiplierClass) : 'loss';
+    const profitLabel = profit >= 0 ? `+${profit.toFixed(2)} €` : `${profit.toFixed(2)} €`;
 
     historyItem.innerHTML = `
         <div class="history-bet">${bet.toFixed(2)} €</div>
-        <div class="history-multiplier ${resultClass}">${multiplier}x</div>
-        <div class="history-win ${resultClass}">${win.toFixed(2)} €</div>
+        <div class="history-multiplier ${multiplierClass}">${multiplier}x</div>
+        <div class="history-win ${profitClass}">${profitLabel}</div>
     `;
 
     historyList.insertBefore(historyItem, historyList.firstChild);
@@ -488,7 +555,8 @@ function addToHistory(bet, multiplier, win) {
 
 // Update multipliers display
 function updateMultipliers() {
-    const currentMultipliers = multipliers[currentRisk][currentRows];
+    const currentMultipliers = getCurrentMultipliers();
+    updateMetaLabels();
     renderMultiplierRow('multipliersTop', currentMultipliers);
     renderMultiplierRow('multipliersBottom', currentMultipliers);
 }
@@ -529,12 +597,27 @@ document.querySelectorAll('.quick-bet').forEach(btn => {
             currentBet = 0;
         }
 
-        if (action === 'half') {
-            betInput.value = (currentBet / 2).toFixed(2);
-        } else if (action === 'double') {
-            const doubled = currentBet * 2;
-            const target = balanceLoaded ? Math.min(doubled, balance) : doubled;
-            betInput.value = target.toFixed(2);
+        switch (action) {
+            case 'half': {
+                betInput.value = (currentBet / 2).toFixed(2);
+                break;
+            }
+            case 'double': {
+                const doubled = currentBet * 2;
+                const target = balanceLoaded ? Math.min(doubled, balance) : doubled;
+                betInput.value = target.toFixed(2);
+                break;
+            }
+            case 'min': {
+                betInput.value = '0.10';
+                break;
+            }
+            case 'max': {
+                if (balanceLoaded) {
+                    betInput.value = balance.toFixed(2);
+                }
+                break;
+            }
         }
     });
 });
@@ -547,6 +630,8 @@ document.querySelectorAll('.risk-btn').forEach(btn => {
         currentRisk = btn.dataset.risk;
         setupBoard();
         updateMultipliers();
+        activeBetAmount = 0;
+        setPlayingState(false);
     });
 });
 
@@ -558,6 +643,8 @@ document.querySelectorAll('.rows-btn').forEach(btn => {
         currentRows = parseInt(btn.dataset.rows);
         setupBoard();
         updateMultipliers();
+        activeBetAmount = 0;
+        setPlayingState(false);
     });
 });
 

@@ -33,10 +33,13 @@
     <main class="plinko-main">
         <div class="plinko-container">
             <!-- Left Panel - Controls -->
-            <div class="plinko-controls">
+            <aside class="plinko-controls">
                 <div class="control-section">
-                    <h2>Plinko</h2>
-                    <p class="game-description">Laissez tomber la balle et gagnez jusqu'à 1000x votre mise!</p>
+                    <div class="control-header">
+                        <h2>🎯 Plinko</h2>
+                        <span class="control-tag">Original</span>
+                    </div>
+                    <p class="game-description">Choisis ton risque, sélectionne le nombre de lignes et laisse la bille tracer ta chance.</p>
                 </div>
 
                 <div class="control-section">
@@ -48,6 +51,8 @@
                     <div class="quick-bet-buttons">
                         <button class="quick-bet" data-action="half">½</button>
                         <button class="quick-bet" data-action="double">2x</button>
+                        <button class="quick-bet" data-action="min">Min</button>
+                        <button class="quick-bet" data-action="max">Max</button>
                     </div>
                 </div>
 
@@ -71,41 +76,64 @@
 
                 <div class="control-section">
                     <button class="btn-play-plinko" id="playBtn">
-                        <span>Jouer</span>
+                        <span>Lancer la bille</span>
                     </button>
                 </div>
 
                 <div class="control-section stats-section">
                     <h3>Statistiques</h3>
-                    <div class="stat-row">
-                        <span>Parties jouées:</span>
-                        <span id="gamesPlayed">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Total gagné:</span>
-                        <span id="totalWon" class="win-amount">0.00 €</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Plus gros gain:</span>
-                        <span id="biggestWin" class="win-amount">0.00 €</span>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Parties</span>
+                            <span class="stat-value" id="gamesPlayed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total gagné</span>
+                            <span class="stat-value win" id="totalWon">0.00 €</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Plus gros gain</span>
+                            <span class="stat-value win" id="biggestWin">0.00 €</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </aside>
 
-            <!-- Center - Game Board -->
-            <div class="plinko-game">
-                <div class="multipliers-top" id="multipliersTop"></div>
-                <canvas id="plinkoCanvas"></canvas>
-                <div class="multipliers-bottom" id="multipliersBottom"></div>
-            </div>
+            <section class="plinko-content">
+                <div class="plinko-game">
+                    <div class="plinko-game-header">
+                        <div class="risk-pill">
+                            <span id="currentRiskLabel">Risque moyen</span>
+                        </div>
+                        <div class="rows-pill">
+                            <span id="currentRowsLabel">16 lignes</span>
+                        </div>
+                    </div>
 
-            <!-- Right Panel - History -->
-            <div class="plinko-history">
-                <h3>Historique</h3>
-                <div class="history-list" id="historyList">
-                    <div class="no-history">Aucune partie jouée</div>
+                    <div class="plinko-multipliers" id="multipliersTop"></div>
+
+                    <div class="plinko-board">
+                        <canvas id="plinkoCanvas"></canvas>
+                    </div>
+
+                    <div class="plinko-multipliers" id="multipliersBottom"></div>
                 </div>
-            </div>
+
+                <div class="plinko-history">
+                    <div class="history-header">
+                        <h3>Historique des parties</h3>
+                        <span class="history-subtitle">Derniers 20 drops</span>
+                    </div>
+                    <div class="history-columns">
+                        <span>Mise</span>
+                        <span>Multiplicateur</span>
+                        <span>Profit</span>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="no-history">Aucune partie jouée</div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 

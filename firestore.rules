@@ -3,13 +3,104 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      // Autorise uniquement le propriétaire du document à lire ou écrire son profil
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow create: if isAuthenticatedOwner(userId) && isValidUserCreate();
+      allow read: if isAuthenticatedOwner(userId);
+      allow update: if isAuthenticatedOwner(userId) && isValidUserUpdate();
+      allow delete: if false;
     }
 
-    // Par défaut, rien d'autre n'est accessible tant que tu n'ajoutes pas de règles spécifiques
     match /{document=**} {
       allow read, write: if false;
     }
+  }
+
+  function isAuthenticatedOwner(userId) {
+    return request.auth != null && request.auth.uid == userId;
+  }
+
+  function allowedUserFields() {
+    return [
+      'email',
+      'createdAt',
+      'balance',
+      'totalWagered',
+      'totalWon',
+      'gamesPlayed',
+      'diceGamesPlayed',
+      'diceWins',
+      'diceLosses',
+      'diceBestWin',
+      'plinkoGamesPlayed',
+      'plinkoTotalWon',
+      'plinkoBestWin'
+    ];
+  }
+
+  function requiredUserFields() {
+    return [
+      'email',
+      'createdAt',
+      'balance',
+      'totalWagered',
+      'totalWon',
+      'gamesPlayed',
+      'diceGamesPlayed',
+      'diceWins',
+      'diceLosses',
+      'diceBestWin',
+      'plinkoGamesPlayed',
+      'plinkoTotalWon',
+      'plinkoBestWin'
+    ];
+  }
+
+  function hasAllowedKeys() {
+    return request.resource.data.keys().hasOnly(allowedUserFields()) &&
+           request.resource.data.keys().hasAll(requiredUserFields());
+  }
+
+  function isNonNegativeNumber(field) {
+    return request.resource.data[field] is number &&
+           request.resource.data[field] >= 0;
+  }
+
+  function isNonNegativeInt(field) {
+    return request.resource.data[field] is int &&
+           request.resource.data[field] >= 0;
+  }
+
+  function hasValidNumberFields() {
+    return isNonNegativeNumber('balance') &&
+           isNonNegativeNumber('totalWagered') &&
+           isNonNegativeNumber('totalWon') &&
+           isNonNegativeNumber('diceBestWin') &&
+           isNonNegativeNumber('plinkoTotalWon') &&
+           isNonNegativeNumber('plinkoBestWin') &&
+           isNonNegativeInt('gamesPlayed') &&
+           isNonNegativeInt('diceGamesPlayed') &&
+           isNonNegativeInt('diceWins') &&
+           isNonNegativeInt('diceLosses') &&
+           isNonNegativeInt('plinkoGamesPlayed');
+  }
+
+  function hasValidCreateMetadata() {
+    return (request.resource.data.email == null ||
+            (request.resource.data.email is string &&
+             (request.auth.token.email == null ||
+              request.auth.token.email == request.resource.data.email))) &&
+           request.resource.data.createdAt is string;
+  }
+
+  function isValidUserCreate() {
+    return hasAllowedKeys() &&
+           hasValidNumberFields() &&
+           hasValidCreateMetadata();
+  }
+
+  function isValidUserUpdate() {
+    return hasAllowedKeys() &&
+           hasValidNumberFields() &&
+           request.resource.data.email == resource.data.email &&
+           request.resource.data.createdAt == resource.data.createdAt;
   }
 }

@@ -74,6 +74,7 @@ function setPlayingState(playing) {
     const playBtn = document.getElementById('playBtn');
     if (playBtn) {
         playBtn.disabled = playing || !balanceLoaded;
+        playBtn.innerHTML = playing ? '<span>Lancer en cours...</span>' : '<span>Lancer le dé</span>';
     }
 }
 

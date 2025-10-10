@@ -34,10 +34,13 @@
     <main class="dice-main">
         <div class="dice-container">
             <!-- Left Panel - Controls -->
-            <div class="dice-controls">
+            <aside class="dice-controls">
                 <div class="control-section">
-                    <h2>🎲 Dice</h2>
-                    <p class="game-description">Prédisez si le résultat sera au-dessus ou en-dessous de votre choix!</p>
+                    <div class="control-header">
+                        <h2>🎲 Dice</h2>
+                        <span class="control-tag">Original</span>
+                    </div>
+                    <p class="game-description">Choisis ton risque, ajuste ton seuil et roule le dé comme sur Stake.</p>
                 </div>
 
                 <div class="control-section">
@@ -67,9 +70,11 @@
                     <div class="prediction-buttons">
                         <button class="prediction-btn active" id="rollOverBtn" data-prediction="over">
                             <span class="prediction-label">Roll Over</span>
+                            <span class="prediction-caption">Gagne si résultat &gt; cible</span>
                         </button>
                         <button class="prediction-btn" id="rollUnderBtn" data-prediction="under">
                             <span class="prediction-label">Roll Under</span>
+                            <span class="prediction-caption">Gagne si résultat &lt; cible</span>
                         </button>
                     </div>
                 </div>
@@ -93,76 +98,80 @@
 
                 <div class="control-section stats-section">
                     <h3>Statistiques</h3>
-                    <div class="stat-row">
-                        <span>Parties jouées:</span>
-                        <span id="gamesPlayed">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Victoires:</span>
-                        <span id="wins">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Défaites:</span>
-                        <span id="losses">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Taux de victoire:</span>
-                        <span id="winRate">0%</span>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Parties</span>
+                            <span class="stat-value" id="gamesPlayed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Victoires</span>
+                            <span class="stat-value" id="wins">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Défaites</span>
+                            <span class="stat-value" id="losses">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Winrate</span>
+                            <span class="stat-value" id="winRate">0%</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </aside>
 
-            <!-- Center - Game Board -->
-            <div class="dice-game">
-                <div class="dice-display">
-                    <div class="result-container">
-                        <div class="result-number" id="resultNumber">50.00</div>
-                        <div class="result-label">Dernier résultat</div>
+            <section class="dice-content">
+                <div class="dice-game">
+                    <div class="dice-game-header">
+                        <div class="result-chip">
+                            <span class="result-label">Dernier résultat</span>
+                            <span class="result-number" id="resultNumber">50.00</span>
+                        </div>
+                        <div class="dice-info-cards">
+                            <div class="info-card">
+                                <span class="info-label">Multiplicateur</span>
+                                <span class="info-value" id="infoMultiplier">1.98x</span>
+                            </div>
+                            <div class="info-card">
+                                <span class="info-label">Chances</span>
+                                <span class="info-value" id="infoWinChance">49.50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dice-visual">
+                        <canvas id="diceCanvas" width="800" height="260"></canvas>
+                        <div class="slider-track">
+                            <div class="slider-fill-under" id="sliderFillUnder"></div>
+                            <div class="slider-fill-over" id="sliderFillOver"></div>
+                            <div class="slider-marker" id="sliderMarker"></div>
+                            <div class="result-marker" id="resultMarker"></div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>0</span>
+                            <span>25</span>
+                            <span>50</span>
+                            <span>75</span>
+                            <span>100</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="dice-slider-visual">
-                    <canvas id="diceCanvas" width="800" height="300"></canvas>
-                    <div class="slider-track">
-                        <div class="slider-fill-under" id="sliderFillUnder"></div>
-                        <div class="slider-fill-over" id="sliderFillOver"></div>
-                        <div class="slider-marker" id="sliderMarker"></div>
-                        <div class="result-marker" id="resultMarker"></div>
+                <div class="dice-history">
+                    <div class="history-header">
+                        <h3>Historique des lancers</h3>
+                        <span class="history-subtitle">Suivi en temps réel</span>
                     </div>
-                    <div class="slider-labels">
-                        <span>0</span>
-                        <span>25</span>
-                        <span>50</span>
-                        <span>75</span>
-                        <span>100</span>
+                    <div class="history-columns">
+                        <span>Résultat</span>
+                        <span>Cible</span>
+                        <span>Mise</span>
+                        <span>Profit</span>
                     </div>
-                </div>
-
-                <div class="multiplier-info">
-                    <div class="info-item">
-                        <span class="info-label">Multiplicateur</span>
-                        <span class="info-value" id="infoMultiplier">1.98x</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Chances de gagner</span>
-                        <span class="info-value" id="infoWinChance">49.50%</span>
+                    <div class="history-list" id="historyList">
+                        <div class="no-history">Aucune partie jouée</div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Right Panel - History -->
-            <div class="dice-history">
-                <h3>Historique</h3>
-                <div class="history-header">
-                    <span>Résultat</span>
-                    <span>Cible</span>
-                    <span>Mise</span>
-                    <span>Profit</span>
-                </div>
-                <div class="history-list" id="historyList">
-                    <div class="no-history">Aucune partie jouée</div>
-                </div>
-            </div>
+            </section>
         </div>
     </main>
 
