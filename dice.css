@@ -1,0 +1,618 @@
+/* Dice Game Styles */
+.dice-main {
+    padding: 30px 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.dice-container {
+    display: grid;
+    grid-template-columns: 350px 1fr 350px;
+    gap: 30px;
+    min-height: calc(100vh - 120px);
+}
+
+/* Left Panel - Controls */
+.dice-controls {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 25px;
+    height: fit-content;
+    border: 1px solid var(--border-color);
+}
+
+.dice-controls h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: var(--accent-primary);
+}
+
+.game-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.control-section {
+    margin-bottom: 25px;
+}
+
+.control-section label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.win-chance {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.bet-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.bet-input-group input {
+    width: 100%;
+    padding: 12px 50px 12px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.bet-input-group input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.bet-input-group .currency {
+    position: absolute;
+    right: 16px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.quick-bet-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.quick-bet {
+    padding: 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-bet:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Profit Display */
+.profit-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.profit-display span {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+}
+
+.multiplier {
+    color: var(--text-secondary) !important;
+}
+
+/* Prediction Buttons */
+.prediction-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.prediction-btn {
+    padding: 14px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.prediction-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--accent-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.prediction-btn.active::before {
+    opacity: 0.15;
+}
+
+.prediction-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.prediction-label {
+    position: relative;
+    z-index: 1;
+}
+
+.prediction-btn:hover:not(.active) {
+    background: var(--border-color);
+}
+
+/* Target Input */
+.target-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#targetSlider {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+#targetSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--bg-secondary);
+    box-shadow: 0 2px 8px rgba(0, 208, 132, 0.5);
+}
+
+#targetSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--bg-secondary);
+    box-shadow: 0 2px 8px rgba(0, 208, 132, 0.5);
+}
+
+#targetInput {
+    width: 80px;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+#targetInput:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+/* Play Button */
+.btn-play-dice {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent-primary);
+    border: none;
+    border-radius: 8px;
+    color: var(--bg-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-play-dice:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 208, 132, 0.4);
+}
+
+.btn-play-dice:active {
+    transform: translateY(0);
+}
+
+.btn-play-dice:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Stats Section */
+.stats-section {
+    background: var(--bg-tertiary);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.stats-section h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-row span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Center - Game Display */
+.dice-game {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.dice-display {
+    text-align: center;
+}
+
+.result-container {
+    display: inline-block;
+    background: var(--bg-tertiary);
+    padding: 30px 60px;
+    border-radius: 16px;
+    border: 2px solid var(--border-color);
+}
+
+.result-number {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.result-number.win {
+    color: #00d084;
+    animation: winPulse 0.5s ease;
+}
+
+.result-number.loss {
+    color: #ff4444;
+    animation: lossPulse 0.5s ease;
+}
+
+@keyframes winPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes lossPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+}
+
+.result-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Dice Slider Visual */
+.dice-slider-visual {
+    position: relative;
+}
+
+#diceCanvas {
+    width: 100%;
+    height: 300px;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.slider-track {
+    position: relative;
+    height: 40px;
+    background: var(--bg-tertiary);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.slider-fill-under {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444, #ff6666);
+    transition: width 0.3s ease;
+}
+
+.slider-fill-over {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #00a066, #00d084);
+    transition: width 0.3s ease;
+}
+
+.slider-marker {
+    position: absolute;
+    top: -5px;
+    width: 4px;
+    height: 50px;
+    background: white;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.result-marker {
+    position: absolute;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: all 0.5s ease;
+    z-index: 4;
+    border: 3px solid var(--bg-secondary);
+    box-shadow: 0 0 20px rgba(0, 208, 132, 0.8);
+}
+
+.result-marker.show {
+    opacity: 1;
+    animation: markerDrop 0.8s ease;
+}
+
+@keyframes markerDrop {
+    0% {
+        top: -20%;
+        opacity: 0;
+    }
+    60% {
+        top: 55%;
+    }
+    100% {
+        top: 50%;
+        opacity: 1;
+    }
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0 10px;
+}
+
+/* Multiplier Info */
+.multiplier-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-item {
+    background: var(--bg-tertiary);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.info-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    display: block;
+    color: var(--accent-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Right Panel - History */
+.dice-history {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 25px;
+    height: fit-content;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+
+.dice-history h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.history-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.no-history {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px 20px;
+    font-size: 0.9rem;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.history-item:hover {
+    background: var(--border-color);
+}
+
+.history-item.win {
+    border-left: 3px solid #00d084;
+}
+
+.history-item.loss {
+    border-left: 3px solid #ff4444;
+}
+
+.history-result {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.history-result.win {
+    color: #00d084;
+}
+
+.history-result.loss {
+    color: #ff4444;
+}
+
+.history-target {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.history-bet,
+.history-profit {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.history-profit.win {
+    color: #00d084;
+    font-weight: 600;
+}
+
+.history-profit.loss {
+    color: #ff4444;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .dice-container {
+        grid-template-columns: 320px 1fr 320px;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .dice-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .dice-history {
+        max-height: 500px;
+    }
+}
+
+/* Custom Scrollbar */
+.dice-history::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dice-history::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+}
+
+.dice-history::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+.dice-history::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}

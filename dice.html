@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice - Casino</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dice.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🎰 CASINO</h1>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="plinko.html" class="nav-link">Plinko</a>
+                <a href="dice.html" class="nav-link active">Dice</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dice-main">
+        <div class="dice-container">
+            <!-- Left Panel - Controls -->
+            <div class="dice-controls">
+                <div class="control-section">
+                    <h2>🎲 Dice</h2>
+                    <p class="game-description">Prédisez si le résultat sera au-dessus ou en-dessous de votre choix!</p>
+                </div>
+
+                <div class="control-section">
+                    <label>Mise</label>
+                    <div class="bet-input-group">
+                        <input type="number" id="betAmount" value="1.00" min="0.1" step="0.1">
+                        <span class="currency">€</span>
+                    </div>
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet" data-action="half">½</button>
+                        <button class="quick-bet" data-action="double">2x</button>
+                        <button class="quick-bet" data-action="min">Min</button>
+                        <button class="quick-bet" data-action="max">Max</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Profit sur gain</label>
+                    <div class="profit-display">
+                        <span id="profitAmount">0.00 €</span>
+                        <span class="multiplier" id="multiplierDisplay">1.00x</span>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Prédiction</label>
+                    <div class="prediction-buttons">
+                        <button class="prediction-btn active" id="rollOverBtn" data-prediction="over">
+                            <span class="prediction-label">Roll Over</span>
+                        </button>
+                        <button class="prediction-btn" id="rollUnderBtn" data-prediction="under">
+                            <span class="prediction-label">Roll Under</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>
+                        <span>Nombre cible</span>
+                        <span id="winChanceDisplay" class="win-chance">49.50%</span>
+                    </label>
+                    <div class="target-input-container">
+                        <input type="range" id="targetSlider" min="2" max="98" value="50.5" step="0.01">
+                        <input type="number" id="targetInput" min="2" max="98" value="50.5" step="0.01">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <button class="btn-play-dice" id="playBtn">
+                        <span>Lancer le dé</span>
+                    </button>
+                </div>
+
+                <div class="control-section stats-section">
+                    <h3>Statistiques</h3>
+                    <div class="stat-row">
+                        <span>Parties jouées:</span>
+                        <span id="gamesPlayed">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Victoires:</span>
+                        <span id="wins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Défaites:</span>
+                        <span id="losses">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Taux de victoire:</span>
+                        <span id="winRate">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center - Game Board -->
+            <div class="dice-game">
+                <div class="dice-display">
+                    <div class="result-container">
+                        <div class="result-number" id="resultNumber">50.00</div>
+                        <div class="result-label">Dernier résultat</div>
+                    </div>
+                </div>
+
+                <div class="dice-slider-visual">
+                    <canvas id="diceCanvas" width="800" height="300"></canvas>
+                    <div class="slider-track">
+                        <div class="slider-fill-under" id="sliderFillUnder"></div>
+                        <div class="slider-fill-over" id="sliderFillOver"></div>
+                        <div class="slider-marker" id="sliderMarker"></div>
+                        <div class="result-marker" id="resultMarker"></div>
+                    </div>
+                    <div class="slider-labels">
+                        <span>0</span>
+                        <span>25</span>
+                        <span>50</span>
+                        <span>75</span>
+                        <span>100</span>
+                    </div>
+                </div>
+
+                <div class="multiplier-info">
+                    <div class="info-item">
+                        <span class="info-label">Multiplicateur</span>
+                        <span class="info-value" id="infoMultiplier">1.98x</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Chances de gagner</span>
+                        <span class="info-value" id="infoWinChance">49.50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - History -->
+            <div class="dice-history">
+                <h3>Historique</h3>
+                <div class="history-header">
+                    <span>Résultat</span>
+                    <span>Cible</span>
+                    <span>Mise</span>
+                    <span>Profit</span>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="no-history">Aucune partie jouée</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="dice.js"></script>
+</body>
+</html>

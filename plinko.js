@@ -1,15 +1,42 @@
 import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
+import { initializeUserBalance, subscribeToUserData, addFunds, applyGameResult } from './balance-manager.js';
+
+let currentUser = null;
+let unsubscribeBalance = null;
 
 // Check if user is logged in
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = 'login.html';
+    } else {
+        currentUser = user;
+        await initializeUserBalance(user);
+
+        // Subscribe to real-time balance updates
+        unsubscribeBalance = subscribeToUserData(user.uid, (data) => {
+            if (!data) {
+                balanceLoaded = false;
+                setPlayingState(false);
+                updateBalance();
+                return;
+            }
+
+            balance = data.balance;
+            balanceLoaded = true;
+
+            syncStatsFromData(data);
+            updateBalance();
+            setPlayingState(false);
+        });
     }
 });
 
 // Logout functionality
 document.getElementById('logoutBtn').addEventListener('click', async () => {
     try {
+        if (unsubscribeBalance) {
+            unsubscribeBalance();
+        }
         await signOut(auth);
         window.location.href = 'login.html';
     } catch (error) {
@@ -30,19 +57,61 @@ let balls = [];
 let currentRisk = 'medium';
 let currentRows = 16;
 let isPlaying = false;
-let balance = 1000;
+let balance = 0;
+let balanceLoaded = false;
+let activeBetAmount = 0;
 
 // Stats
 let gamesPlayed = 0;
 let totalWon = 0;
 let biggestWin = 0;
 
+function setPlayingState(playing) {
+    isPlaying = playing;
+    const playBtn = document.getElementById('playBtn');
+    if (playBtn) {
+        playBtn.disabled = playing || !balanceLoaded;
+    }
+}
+
+function syncStatsFromData(data) {
+    gamesPlayed = data.plinkoGamesPlayed ?? 0;
+    totalWon = data.plinkoTotalWon ?? 0;
+    biggestWin = data.plinkoBestWin ?? 0;
+    updateStats();
+}
+
+function renderMultiplierRow(containerId, values) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    values.forEach((mult) => {
+        const multiplierDiv = document.createElement('div');
+        multiplierDiv.className = 'multiplier-box';
+
+        if (mult >= 10) {
+            multiplierDiv.classList.add('high');
+        } else if (mult >= 2) {
+            multiplierDiv.classList.add('medium');
+        } else if (mult >= 1) {
+            multiplierDiv.classList.add('low');
+        } else {
+            multiplierDiv.classList.add('very-low');
+        }
+
+        multiplierDiv.textContent = `${mult}x`;
+        container.appendChild(multiplierDiv);
+    });
+}
+
 // Canvas dimensions
 const canvas = document.getElementById('plinkoCanvas');
 const canvasWidth = 600;
 const canvasHeight = 800;
 
-// Multipliers for different risk levels and rows
+// Multipliers for different risk levels and rows (based on Stake.com)
 const multipliers = {
     low: {
         8: [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
@@ -60,6 +129,50 @@ const multipliers = {
         16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000]
     }
 };
+
+// Probabilities based on binomial distribution (more realistic)
+function calculateBinomialProbability(n, k) {
+    if (k < 0 || k > n) return 0;
+    if (n === 0) return 1;
+
+    let coefficient = 1;
+    const effectiveK = Math.min(k, n - k);
+
+    for (let i = 1; i <= effectiveK; i++) {
+        coefficient = (coefficient * (n - effectiveK + i)) / i;
+    }
+
+    return coefficient * Math.pow(0.5, n);
+}
+
+// Get weighted random multiplier based on true probabilities
+function getWeightedMultiplierIndex(rows) {
+    const numBoxes = rows + 3;
+    const probabilities = [];
+    const steps = numBoxes - 1;
+
+    // Calculate binomial probabilities for each position
+    for (let i = 0; i < numBoxes; i++) {
+        probabilities.push(calculateBinomialProbability(steps, i));
+    }
+
+    // Normalize probabilities
+    const sum = probabilities.reduce((a, b) => a + b, 0);
+    const normalizedProbs = probabilities.map(p => p / sum);
+
+    // Weighted random selection
+    const random = Math.random();
+    let cumulative = 0;
+
+    for (let i = 0; i < normalizedProbs.length; i++) {
+        cumulative += normalizedProbs[i];
+        if (random <= cumulative) {
+            return i;
+        }
+    }
+
+    return Math.floor(numBoxes / 2); // fallback to middle
+}
 
 // Colors for multipliers
 const multiplierColors = {
@@ -199,17 +312,21 @@ function setupBoard() {
     World.add(world, [leftWall, rightWall]);
 }
 
-// Drop ball
+// Drop ball with improved physics and predetermined outcome
 function dropBall() {
     const ballRadius = 6;
     const startX = canvasWidth / 2 + (Math.random() - 0.5) * 10;
     const startY = 30;
+
+    // Pre-determine the outcome based on binomial probability
+    const targetIndex = getWeightedMultiplierIndex(currentRows);
 
     const ball = Bodies.circle(startX, startY, ballRadius, {
         restitution: 0.8,
         friction: 0.001,
         density: 0.002,
         label: 'ball',
+        targetIndex: targetIndex, // Store target for guidance
         render: {
             fillStyle: '#00d084'
         }
@@ -223,44 +340,107 @@ function dropBall() {
         x: (Math.random() - 0.5) * 2,
         y: 0
     });
+
+    // Apply subtle guidance forces to reach target
+    let guidanceInterval = setInterval(() => {
+        if (!ball.position || ball.position.y > canvasHeight - 150) {
+            clearInterval(guidanceInterval);
+            return;
+        }
+
+        const numBoxes = currentRows + 3;
+        const boxWidth = 40;
+        const boxGap = 5;
+        const totalWidth = numBoxes * boxWidth + (numBoxes - 1) * boxGap;
+        const startXBox = (canvasWidth - totalWidth) / 2;
+        const targetX = startXBox + targetIndex * (boxWidth + boxGap) + boxWidth / 2;
+
+        const distanceToTarget = targetX - ball.position.x;
+        const guidanceForce = distanceToTarget * 0.00008; // Subtle force
+
+        Body.applyForce(ball, ball.position, {
+            x: guidanceForce,
+            y: 0
+        });
+    }, 50);
 }
 
 // Handle ball landing in multiplier box
-function handleBallLanding(ball, box) {
-    if (!ball.hasLanded) {
-        ball.hasLanded = true;
-
-        const betAmount = parseFloat(document.getElementById('betAmount').value);
-        const multiplier = box.multiplier;
-        const winAmount = betAmount * multiplier;
-
-        balance += winAmount - betAmount;
-        updateBalance();
-
-        // Update stats
-        gamesPlayed++;
-        totalWon += winAmount;
-        if (winAmount > biggestWin) {
-            biggestWin = winAmount;
-        }
-        updateStats();
-
-        // Add to history
-        addToHistory(betAmount, multiplier, winAmount);
-
-        // Remove ball after delay
-        setTimeout(() => {
-            World.remove(world, ball);
-            balls = balls.filter(b => b !== ball);
-        }, 1000);
-
-        isPlaying = false;
+async function handleBallLanding(ball, box) {
+    if (ball.hasLanded || !currentUser) {
+        return;
     }
+
+    ball.hasLanded = true;
+
+    const betAmount = activeBetAmount;
+    if (!betAmount || betAmount <= 0) {
+        setPlayingState(false);
+        return;
+    }
+    const multiplier = box.multiplier;
+    const winAmount = parseFloat((betAmount * multiplier).toFixed(2));
+    let transactionSucceeded = false;
+
+    try {
+        const outcome = await applyGameResult(currentUser.uid, {
+            betAmount,
+            payout: winAmount,
+            game: 'plinko'
+        });
+        balance = outcome.balance;
+        updateBalance();
+        transactionSucceeded = true;
+    } catch (error) {
+        console.error('Error applying plinko result:', error);
+        if (error.message === 'INSUFFICIENT_FUNDS') {
+            alert('Solde insuffisant pour valider cette mise.');
+        } else {
+            alert('Erreur lors de la mise à jour du solde.');
+        }
+    }
+
+    if (transactionSucceeded) {
+        addToHistory(betAmount, multiplier, winAmount);
+    }
+
+    // Highlight winning box
+    box.render.fillStyle = '#FFD700';
+    setTimeout(() => {
+        let color;
+        if (multiplier >= 10) {
+            color = '#ff4444';
+        } else if (multiplier >= 2) {
+            color = '#ffa500';
+        } else if (multiplier >= 1) {
+            color = '#00d084';
+        } else {
+            color = '#4a5568';
+        }
+        box.render.fillStyle = color;
+    }, 1000);
+
+    // Remove ball after delay
+    setTimeout(() => {
+        World.remove(world, ball);
+        balls = balls.filter(b => b !== ball);
+    }, 1000);
+
+    activeBetAmount = 0;
+    setPlayingState(false);
 }
 
 // Update balance display
 function updateBalance() {
-    document.getElementById('userBalance').textContent = `${balance.toFixed(2)} €`;
+    const balanceElement = document.getElementById('userBalance');
+    if (!balanceElement) return;
+
+    if (!balanceLoaded) {
+        balanceElement.textContent = '---';
+        return;
+    }
+
+    balanceElement.textContent = `${balance.toFixed(2)} €`;
 }
 
 // Update stats
@@ -308,38 +488,24 @@ function addToHistory(bet, multiplier, win) {
 
 // Update multipliers display
 function updateMultipliers() {
-    const multipliersBottom = document.getElementById('multipliersBottom');
-    multipliersBottom.innerHTML = '';
-
     const currentMultipliers = multipliers[currentRisk][currentRows];
-
-    currentMultipliers.forEach((mult) => {
-        const multiplierDiv = document.createElement('div');
-        multiplierDiv.className = 'multiplier-box';
-
-        if (mult >= 10) {
-            multiplierDiv.classList.add('high');
-        } else if (mult >= 2) {
-            multiplierDiv.classList.add('medium');
-        } else if (mult >= 1) {
-            multiplierDiv.classList.add('low');
-        } else {
-            multiplierDiv.classList.add('very-low');
-        }
-
-        multiplierDiv.textContent = `${mult}x`;
-        multipliersBottom.appendChild(multiplierDiv);
-    });
+    renderMultiplierRow('multipliersTop', currentMultipliers);
+    renderMultiplierRow('multipliersBottom', currentMultipliers);
 }
 
 // Event Listeners
 document.getElementById('playBtn').addEventListener('click', () => {
-    if (isPlaying) return;
+    if (isPlaying || !currentUser) return;
 
     const betAmount = parseFloat(document.getElementById('betAmount').value);
 
-    if (betAmount <= 0) {
+    if (isNaN(betAmount) || betAmount <= 0) {
         alert('Mise invalide');
+        return;
+    }
+
+    if (!balanceLoaded) {
+        alert('Solde en cours de synchronisation, veuillez patienter.');
         return;
     }
 
@@ -348,7 +514,8 @@ document.getElementById('playBtn').addEventListener('click', () => {
         return;
     }
 
-    isPlaying = true;
+    activeBetAmount = parseFloat(betAmount.toFixed(2));
+    setPlayingState(true);
     dropBall();
 });
 
@@ -358,11 +525,16 @@ document.querySelectorAll('.quick-bet').forEach(btn => {
         const action = btn.dataset.action;
         const betInput = document.getElementById('betAmount');
         let currentBet = parseFloat(betInput.value);
+        if (isNaN(currentBet)) {
+            currentBet = 0;
+        }
 
         if (action === 'half') {
             betInput.value = (currentBet / 2).toFixed(2);
         } else if (action === 'double') {
-            betInput.value = (currentBet * 2).toFixed(2);
+            const doubled = currentBet * 2;
+            const target = balanceLoaded ? Math.min(doubled, balance) : doubled;
+            betInput.value = target.toFixed(2);
         }
     });
 });
@@ -390,14 +562,27 @@ document.querySelectorAll('.rows-btn').forEach(btn => {
 });
 
 // Deposit button
-document.getElementById('depositBtn').addEventListener('click', () => {
-    const amount = prompt('Montant à déposer:');
-    if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
-        balance += parseFloat(amount);
-        updateBalance();
+document.getElementById('depositBtn').addEventListener('click', async () => {
+    if (!currentUser) {
+        alert('Veuillez vous connecter');
+        return;
+    }
+
+    const amount = prompt('Montant à déposer (€):');
+    const depositAmount = parseFloat(amount);
+    if (amount && !isNaN(depositAmount) && depositAmount > 0) {
+        try {
+            await addFunds(currentUser.uid, depositAmount);
+            alert(`${depositAmount.toFixed(2)} € ajoutés à votre solde!`);
+        } catch (error) {
+            console.error('Error adding funds:', error);
+            alert('Erreur lors du dépôt');
+        }
     }
 });
 
 // Initialize
 initGame();
+updateStats();
 updateBalance();
+setPlayingState(false);

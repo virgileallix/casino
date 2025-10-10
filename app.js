@@ -1,17 +1,37 @@
 import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
+import { initializeUserBalance, subscribeToUserData, addFunds } from './balance-manager.js';
+
+let currentUser = null;
+let unsubscribeBalance = null;
 
 // Check if user is logged in
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = 'login.html';
     } else {
+        currentUser = user;
         console.log('User logged in:', user.email);
+
+        // Initialize user balance if needed
+        await initializeUserBalance(user);
+
+        // Subscribe to real-time balance updates
+        unsubscribeBalance = subscribeToUserData(user.uid, (userData) => {
+            if (!userData) {
+                updateBalanceDisplay(null);
+                return;
+            }
+            updateBalanceDisplay(userData.balance);
+        });
     }
 });
 
 // Logout functionality
 document.getElementById('logoutBtn').addEventListener('click', async () => {
     try {
+        if (unsubscribeBalance) {
+            unsubscribeBalance();
+        }
         await signOut(auth);
         window.location.href = 'login.html';
     } catch (error) {
@@ -19,10 +39,24 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     }
 });
 
+// Update balance display
+function updateBalanceDisplay(balance) {
+    const balanceElement = document.querySelector('.balance-amount');
+    if (!balanceElement) return;
+
+    if (balance === null || balance === undefined || isNaN(balance)) {
+        balanceElement.textContent = '---';
+        return;
+    }
+
+    balanceElement.textContent = `${balance.toFixed(2)} €`;
+}
+
 // Sample games data
 const games = [
     { id: 0, name: 'Plinko', provider: 'Casino', image: '🎯', type: 'original', link: 'plinko.html' },
-    { id: 1, name: 'Sweet Bonanza', provider: 'Pragmatic Play', image: '🍬', type: 'slot' },
+    { id: 1, name: 'Dice', provider: 'Casino', image: '🎲', type: 'original', link: 'dice.html' },
+    { id: 2, name: 'Sweet Bonanza', provider: 'Pragmatic Play', image: '🍬', type: 'slot' },
     { id: 2, name: 'Gates of Olympus', provider: 'Pragmatic Play', image: '⚡', type: 'slot' },
     { id: 3, name: 'Book of Dead', provider: 'Play\'n GO', image: '📖', type: 'slot' },
     { id: 4, name: 'Crazy Time', provider: 'Evolution', image: '🎡', type: 'live' },
@@ -70,8 +104,22 @@ function renderGames() {
 }
 
 // Deposit button
-document.getElementById('depositBtn').addEventListener('click', () => {
-    alert('Fonctionnalité de dépôt à venir...');
+document.getElementById('depositBtn').addEventListener('click', async () => {
+    if (!currentUser) {
+        alert('Veuillez vous connecter');
+        return;
+    }
+
+    const amount = prompt('Montant à déposer (€):');
+    if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+        try {
+            await addFunds(currentUser.uid, parseFloat(amount));
+            alert(`${parseFloat(amount).toFixed(2)} € ajoutés à votre solde!`);
+        } catch (error) {
+            console.error('Error adding funds:', error);
+            alert('Erreur lors du dépôt');
+        }
+    }
 });
 
 // Category buttons
@@ -84,4 +132,5 @@ categoryButtons.forEach(btn => {
 });
 
 // Initialize
+updateBalanceDisplay(null);
 renderGames();

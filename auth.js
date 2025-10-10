@@ -1,4 +1,5 @@
-import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from './firebase-config.js';
+import { initializeUserBalance } from './balance-manager.js';
 
 // Check if user is already logged in
 onAuthStateChanged(auth, (user) => {
@@ -37,7 +38,8 @@ loginForm.addEventListener('submit', async (e) => {
     const errorDiv = document.getElementById('loginError');
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        await initializeUserBalance(userCredential.user);
         window.location.href = 'index.html';
     } catch (error) {
         errorDiv.textContent = getErrorMessage(error.code);
@@ -66,12 +68,39 @@ registerForm.addEventListener('submit', async (e) => {
     }
 
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await initializeUserBalance(userCredential.user);
         window.location.href = 'index.html';
     } catch (error) {
         errorDiv.textContent = getErrorMessage(error.code);
         errorDiv.style.display = 'block';
     }
+});
+
+// Google Sign In (Login & Register)
+async function handleGoogleSignIn(errorDivId) {
+    const provider = new GoogleAuthProvider();
+    const errorDiv = document.getElementById(errorDivId);
+
+    try {
+        const result = await signInWithPopup(auth, provider);
+        await initializeUserBalance(result.user);
+        window.location.href = 'index.html';
+    } catch (error) {
+        errorDiv.textContent = getErrorMessage(error.code);
+        errorDiv.style.display = 'block';
+        console.error('Error signing in with Google:', error);
+    }
+}
+
+// Google Login Button
+document.getElementById('googleLoginBtn').addEventListener('click', () => {
+    handleGoogleSignIn('loginError');
+});
+
+// Google Register Button
+document.getElementById('googleRegisterBtn').addEventListener('click', () => {
+    handleGoogleSignIn('registerError');
 });
 
 function clearErrors() {
