@@ -194,16 +194,12 @@
             <h3>💬 Chat Global</h3>
             <button class="chat-close" id="chatCloseBtn">&times;</button>
         </div>
-        <div class="chat-body">
-            <div id="globalChatPanel">
-                <ul class="chat-messages" data-chat-messages></ul>
-                <div class="chat-empty" data-chat-empty hidden>
-                    <div class="chat-empty-icon">💬</div>
-                    <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
-                </div>
+        <div class="chat-body" id="globalChatPanel">
+            <ul class="chat-messages" data-chat-messages></ul>
+            <div class="chat-empty" data-chat-empty hidden>
+                <div class="chat-empty-icon">💬</div>
+                <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
             </div>
-        </div>
-        <div class="chat-footer">
             <form class="chat-form" data-chat-form>
                 <input
                     type="text"

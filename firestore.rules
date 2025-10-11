@@ -110,14 +110,30 @@ service cloud.firestore {
               request.auth.token.email == request.resource.data.email)));
   }
 
+  function hasValidAdminField() {
+    return !request.resource.data.keys().hasAny(['admin']) ||
+           (request.resource.data.admin is int &&
+            (request.resource.data.admin == 0 || request.resource.data.admin == 1));
+  }
+
+  function canModifyAdminField() {
+    return !request.resource.data.keys().hasAny(['admin']) ||
+           (resource.data.admin == request.resource.data.admin) ||
+           isAdmin();
+  }
+
   function isValidUserCreate() {
     return hasAllowedKeys() &&
            hasValidNumberFields() &&
-           hasValidCreateMetadata();
+           hasValidCreateMetadata() &&
+           hasValidAdminField() &&
+           (!request.resource.data.keys().hasAny(['admin']) || request.resource.data.admin == 0);
   }
 
   function isValidUserUpdate() {
     return hasAllowedKeys() &&
-           hasValidNumberFields();
+           hasValidNumberFields() &&
+           hasValidAdminField() &&
+           canModifyAdminField();
   }
 }
