@@ -26,8 +26,8 @@ const stats = {
 };
 
 const difficultyConfig = {
-    easy: { tiles: 3, correctTiles: 2, houseEdge: 0.04 },
-    medium: { tiles: 3, correctTiles: 1, houseEdge: 0.03 },
+    easy: { tiles: 4, correctTiles: 3, houseEdge: 0.04 },
+    medium: { tiles: 4, correctTiles: 2, houseEdge: 0.03 },
     hard: { tiles: 4, correctTiles: 1, houseEdge: 0.02 }
 };
 

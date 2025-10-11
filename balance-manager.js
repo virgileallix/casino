@@ -30,7 +30,10 @@ const DEFAULT_USER_FIELDS = {
     totalWager: 0,
     rakebackAvailable: 0,
     totalRakebackEarned: 0,
-    lastRakebackClaim: null
+    lastRakebackClaim: null,
+    username: null,
+    // Admin System
+    admin: 0
 };
 
 function roundCurrency(value) {
@@ -54,6 +57,9 @@ function mergeWithDefaults(data = {}) {
     merged.rakebackAvailable = roundCurrency(merged.rakebackAvailable);
     merged.totalRakebackEarned = roundCurrency(merged.totalRakebackEarned);
     return merged;
+}
+export function normalizeUserData(data = {}) {
+    return mergeWithDefaults(data);
 }
 
 // VIP Tiers based on wager
@@ -269,4 +275,111 @@ export async function getUserBalance(userId) {
     }
     const data = mergeWithDefaults(snapshot.data());
     return data.balance;
+}
+
+export async function getUserProfile(userId) {
+    const userRef = getUserRef(userId);
+    const snapshot = await getDoc(userRef);
+    if (!snapshot.exists()) {
+        return null;
+    }
+    return mergeWithDefaults(snapshot.data());
+}
+
+// Admin functions
+export async function isAdmin(userId) {
+    const userRef = getUserRef(userId);
+    const snapshot = await getDoc(userRef);
+    if (!snapshot.exists()) {
+        return false;
+    }
+    const data = snapshot.data();
+    return data.admin === 1;
+}
+
+export async function getAllUsers() {
+    const { collection, getDocs } = await import('./firebase-config.js');
+    const usersCollection = collection(db, 'users');
+    const snapshot = await getDocs(usersCollection);
+
+    const users = [];
+    snapshot.forEach(doc => {
+        users.push({
+            id: doc.id,
+            ...mergeWithDefaults(doc.data())
+        });
+    });
+
+    return users;
+}
+
+export async function updateUserBalance(userId, newBalance) {
+    const userRef = getUserRef(userId);
+    await updateDoc(userRef, {
+        balance: roundCurrency(newBalance)
+    });
+}
+
+export async function setUserAdmin(userId, isAdmin) {
+    const userRef = getUserRef(userId);
+    await updateDoc(userRef, {
+        admin: isAdmin ? 1 : 0
+    });
+}
+
+export async function deleteUser(userId) {
+    const { deleteDoc } = await import('./firebase-config.js');
+    const userRef = getUserRef(userId);
+    await deleteDoc(userRef);
+}
+
+export async function resetUserStats(userId) {
+    const userRef = getUserRef(userId);
+    await updateDoc(userRef, {
+        totalWagered: 0,
+        totalWon: 0,
+        gamesPlayed: 0,
+        diceGamesPlayed: 0,
+        diceWins: 0,
+        diceLosses: 0,
+        diceBestWin: 0,
+        plinkoGamesPlayed: 0,
+        plinkoTotalWon: 0,
+        plinkoBestWin: 0,
+        blackjackHandsPlayed: 0,
+        blackjackWins: 0,
+        blackjackBlackjacks: 0,
+        blackjackTotalProfit: 0,
+        minesGamesPlayed: 0,
+        minesCashouts: 0,
+        minesBestMultiplier: 0,
+        minesTotalProfit: 0,
+        towerGamesPlayed: 0,
+        towerCashouts: 0,
+        towerBestMultiplier: 0,
+        towerTotalProfit: 0,
+        totalWager: 0,
+        rakebackAvailable: 0,
+        totalRakebackEarned: 0
+    });
+}
+
+export async function updateUsername(userId, username) {
+    if (!username || typeof username !== 'string') {
+        throw new Error('Nom d’utilisateur invalide');
+    }
+    const sanitized = username.trim();
+    if (sanitized.length < 3 || sanitized.length > 16) {
+        throw new Error('Le pseudo doit contenir entre 3 et 16 caractères.');
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(sanitized)) {
+        throw new Error('Le pseudo ne peut contenir que des lettres, chiffres ou underscores.');
+    }
+
+    const userRef = getUserRef(userId);
+    await updateDoc(userRef, {
+        username: sanitized
+    });
+
+    return sanitized;
 }

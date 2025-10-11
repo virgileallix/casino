@@ -4,9 +4,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
       allow create: if isAuthenticatedOwner(userId) && isValidUserCreate();
-      allow read: if isAuthenticatedOwner(userId);
-      allow update: if isAuthenticatedOwner(userId) && isValidUserUpdate();
-      allow delete: if false;
+      allow read: if request.auth != null;
+      allow update: if (isAuthenticatedOwner(userId) && isValidUserUpdate()) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /{document=**} {
@@ -16,6 +16,12 @@ service cloud.firestore {
 
   function isAuthenticatedOwner(userId) {
     return request.auth != null && request.auth.uid == userId;
+  }
+
+  function isAdmin() {
+    return request.auth != null &&
+           exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == 1;
   }
 
   function allowedUserFields() {
@@ -40,39 +46,30 @@ service cloud.firestore {
       'minesGamesPlayed',
       'minesCashouts',
       'minesBestMultiplier',
-      'minesTotalProfit'
+      'minesTotalProfit',
+      'towerGamesPlayed',
+      'towerCashouts',
+      'towerBestMultiplier',
+      'towerTotalProfit',
+      'totalWager',
+      'rakebackAvailable',
+      'totalRakebackEarned',
+      'lastRakebackClaim',
+      'admin'
     ];
   }
 
   function requiredUserFields() {
     return [
-      'email',
-      'createdAt',
       'balance',
       'totalWagered',
       'totalWon',
-      'gamesPlayed',
-      'diceGamesPlayed',
-      'diceWins',
-      'diceLosses',
-      'diceBestWin',
-      'plinkoGamesPlayed',
-      'plinkoTotalWon',
-      'plinkoBestWin',
-      'blackjackHandsPlayed',
-      'blackjackWins',
-      'blackjackBlackjacks',
-      'blackjackTotalProfit',
-      'minesGamesPlayed',
-      'minesCashouts',
-      'minesBestMultiplier',
-      'minesTotalProfit'
+      'gamesPlayed'
     ];
   }
 
   function hasAllowedKeys() {
-    return request.resource.data.keys().hasOnly(allowedUserFields()) &&
-           request.resource.data.keys().hasAll(requiredUserFields());
+    return request.resource.data.keys().hasOnly(allowedUserFields());
   }
 
   function isNonNegativeNumber(field) {
@@ -93,30 +90,14 @@ service cloud.firestore {
     return isNonNegativeNumber('balance') &&
            isNonNegativeNumber('totalWagered') &&
            isNonNegativeNumber('totalWon') &&
-           isNonNegativeNumber('diceBestWin') &&
-           isNonNegativeNumber('plinkoTotalWon') &&
-           isNonNegativeNumber('plinkoBestWin') &&
-           isNonNegativeInt('gamesPlayed') &&
-           isNonNegativeInt('diceGamesPlayed') &&
-           isNonNegativeInt('diceWins') &&
-           isNonNegativeInt('diceLosses') &&
-           isNonNegativeInt('plinkoGamesPlayed') &&
-           isNonNegativeInt('blackjackHandsPlayed') &&
-           isNonNegativeInt('blackjackWins') &&
-           isNonNegativeInt('blackjackBlackjacks') &&
-           isNumber('blackjackTotalProfit') &&
-           isNonNegativeInt('minesGamesPlayed') &&
-           isNonNegativeInt('minesCashouts') &&
-           isNonNegativeNumber('minesBestMultiplier') &&
-           isNumber('minesTotalProfit');
+           isNonNegativeInt('gamesPlayed');
   }
 
   function hasValidCreateMetadata() {
     return (request.resource.data.email == null ||
             (request.resource.data.email is string &&
              (request.auth.token.email == null ||
-              request.auth.token.email == request.resource.data.email))) &&
-           request.resource.data.createdAt is string;
+              request.auth.token.email == request.resource.data.email)));
   }
 
   function isValidUserCreate() {
@@ -127,8 +108,6 @@ service cloud.firestore {
 
   function isValidUserUpdate() {
     return hasAllowedKeys() &&
-           hasValidNumberFields() &&
-           request.resource.data.email == resource.data.email &&
-           request.resource.data.createdAt == resource.data.createdAt;
+           hasValidNumberFields();
   }
 }

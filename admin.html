@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Casino</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Admin Panel</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="admin.html" class="nav-link active">Admin</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Admin:</span>
+                    <span class="balance-amount" id="adminEmail">---</span>
+                </div>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="admin-container">
+            <!-- Stats Overview -->
+            <section class="stats-overview">
+                <h2 class="section-title">📊 Vue d'ensemble</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Utilisateurs totaux</span>
+                            <span class="stat-value" id="totalUsers">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Solde total</span>
+                            <span class="stat-value" id="totalBalance">0.00 €</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Parties jouées</span>
+                            <span class="stat-value" id="totalGames">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Wager total</span>
+                            <span class="stat-value" id="totalWager">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Management -->
+            <section class="users-section">
+                <div class="section-header">
+                    <h2 class="section-title">👥 Gestion des utilisateurs</h2>
+                    <div class="section-actions">
+                        <input type="text" id="searchUser" placeholder="Rechercher un utilisateur..." class="search-input">
+                        <button class="btn-refresh" id="refreshBtn">🔄 Actualiser</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Solde</th>
+                                <th>Wager</th>
+                                <th>Parties</th>
+                                <th>VIP</th>
+                                <th>Admin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr class="loading-row">
+                                <td colspan="8">Chargement...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Modifier l'utilisateur</h3>
+                <button class="modal-close" id="closeEditModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="editUserEmail" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Solde (€)</label>
+                    <input type="number" id="editUserBalance" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Admin</label>
+                    <select id="editUserAdmin">
+                        <option value="0">Non</option>
+                        <option value="1">Oui</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelEditBtn">Annuler</button>
+                <button class="btn-primary" id="saveEditBtn">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmer la suppression</h3>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+                <p class="warning-text">Cette action est irréversible !</p>
+                <p><strong id="deleteUserEmail"></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelDeleteBtn">Annuler</button>
+                <button class="btn-danger" id="confirmDeleteBtn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Stats Modal -->
+    <div class="modal" id="resetStatsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔄 Réinitialiser les statistiques</h3>
+                <button class="modal-close" id="closeResetModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Voulez-vous réinitialiser les statistiques de cet utilisateur ?</p>
+                <p class="info-text">Le solde ne sera pas affecté.</p>
+                <p><strong id="resetUserEmail"></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelResetBtn">Annuler</button>
+                <button class="btn-primary" id="confirmResetBtn">Réinitialiser</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
