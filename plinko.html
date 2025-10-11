@@ -33,6 +33,10 @@
                     <span class="balance-amount" id="userBalance">1,000.00 €</span>
                 </div>
                 <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-chat" id="chatToggleBtn">
+                    <span>💬</span>
+                    <span>Chat</span>
+                </button>
                 <button class="btn-logout" id="logoutBtn">Déconnexion</button>
             </div>
         </div>
@@ -148,5 +152,40 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script type="module" src="plinko.js"></script>
+
+    <!-- Global Chat Container -->
+    <div id="globalChatContainer">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button class="chat-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-body">
+            <div id="globalChatPanel">
+                <ul class="chat-messages" data-chat-messages></ul>
+                <div class="chat-empty" data-chat-empty hidden>
+                    <div class="chat-empty-icon">💬</div>
+                    <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-footer">
+            <form class="chat-form" data-chat-form>
+                <input
+                    type="text"
+                    class="chat-input"
+                    data-chat-input
+                    placeholder="Écrivez votre message..."
+                    maxlength="250"
+                    autocomplete="off"
+                />
+                <button type="submit" class="chat-send" data-chat-send>Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeGlobalChat } from './global-chat.js';
+        initializeGlobalChat();
+    </script>
 </body>
 </html>
