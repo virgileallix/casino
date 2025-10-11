@@ -115,11 +115,23 @@ function generateBoard(mines) {
 
 function calculateMultiplier(safeRevealed, mineCount) {
     if (safeRevealed === 0) return 1;
+
+    const houseEdge = 0.03; // 3% house edge
+    const safeTiles = TOTAL_TILES - mineCount;
+
     let multiplier = 1;
     for (let i = 0; i < safeRevealed; i++) {
-        multiplier *= (TOTAL_TILES - mineCount - i) / (TOTAL_TILES - i);
+        const tilesLeft = TOTAL_TILES - i;
+        const safeTilesLeft = safeTiles - i;
+
+        // Probability of hitting a safe tile = safeTilesLeft / tilesLeft
+        const probability = safeTilesLeft / tilesLeft;
+
+        // Multiplier for this pick = (1 - houseEdge) / probability
+        multiplier *= (1 - houseEdge) / probability;
     }
-    return Math.max(1, multiplier);
+
+    return Math.max(1.01, multiplier);
 }
 
 function updateMultiplierUI() {

@@ -21,7 +21,16 @@ const DEFAULT_USER_FIELDS = {
     minesGamesPlayed: 0,
     minesCashouts: 0,
     minesBestMultiplier: 0,
-    minesTotalProfit: 0
+    minesTotalProfit: 0,
+    towerGamesPlayed: 0,
+    towerCashouts: 0,
+    towerBestMultiplier: 0,
+    towerTotalProfit: 0,
+    // VIP System
+    totalWager: 0,
+    rakebackAvailable: 0,
+    totalRakebackEarned: 0,
+    lastRakebackClaim: null
 };
 
 function roundCurrency(value) {
@@ -39,7 +48,42 @@ function mergeWithDefaults(data = {}) {
     merged.blackjackTotalProfit = roundCurrency(merged.blackjackTotalProfit);
     merged.minesBestMultiplier = roundCurrency(merged.minesBestMultiplier);
     merged.minesTotalProfit = roundCurrency(merged.minesTotalProfit);
+    merged.towerBestMultiplier = roundCurrency(merged.towerBestMultiplier);
+    merged.towerTotalProfit = roundCurrency(merged.towerTotalProfit);
+    merged.totalWager = roundCurrency(merged.totalWager);
+    merged.rakebackAvailable = roundCurrency(merged.rakebackAvailable);
+    merged.totalRakebackEarned = roundCurrency(merged.totalRakebackEarned);
     return merged;
+}
+
+// VIP Tiers based on wager
+const VIP_TIERS = [
+    { name: 'bronze', wagerRequired: 0, rakeback: 0.01 },
+    { name: 'silver', wagerRequired: 1000, rakeback: 0.02 },
+    { name: 'gold', wagerRequired: 5000, rakeback: 0.03 },
+    { name: 'platinum', wagerRequired: 25000, rakeback: 0.05 },
+    { name: 'diamond', wagerRequired: 100000, rakeback: 0.08 }
+];
+
+function getCurrentVIPTier(totalWager) {
+    for (let i = VIP_TIERS.length - 1; i >= 0; i--) {
+        if (totalWager >= VIP_TIERS[i].wagerRequired) {
+            return VIP_TIERS[i];
+        }
+    }
+    return VIP_TIERS[0];
+}
+
+function calculateRakeback(betAmount, payout, totalWager) {
+    const tier = getCurrentVIPTier(totalWager);
+    const loss = betAmount - payout;
+
+    // Only give rakeback on losses
+    if (loss > 0) {
+        return roundCurrency(loss * tier.rakeback);
+    }
+
+    return 0;
 }
 
 function getUserRef(userId) {
@@ -147,11 +191,18 @@ export async function applyGameResult(userId, { betAmount, payout, game, metadat
         const profit = roundCurrency(payout - betAmount);
         const balance = roundCurrency(current.balance - betAmount + payout);
 
+        // Calculate rakeback
+        const rakeback = calculateRakeback(betAmount, payout, current.totalWager);
+
         const updates = {
             balance,
             totalWagered: roundCurrency(current.totalWagered + betAmount),
             totalWon: roundCurrency(current.totalWon + payout),
-            gamesPlayed: current.gamesPlayed + 1
+            gamesPlayed: current.gamesPlayed + 1,
+            // VIP System
+            totalWager: roundCurrency(current.totalWager + betAmount),
+            rakebackAvailable: roundCurrency(current.rakebackAvailable + rakeback),
+            totalRakebackEarned: roundCurrency(current.totalRakebackEarned + rakeback)
         };
 
         if (game === 'dice') {
@@ -189,6 +240,15 @@ export async function applyGameResult(userId, { betAmount, payout, game, metadat
                 updates.minesBestMultiplier = Math.max(current.minesBestMultiplier || 0, metadata.multiplier || 0);
             }
             updates.minesTotalProfit = roundCurrency((current.minesTotalProfit || 0) + profit);
+        }
+
+        if (game === 'tower') {
+            updates.towerGamesPlayed = current.towerGamesPlayed + 1;
+            if (metadata.cashout) {
+                updates.towerCashouts = current.towerCashouts + 1;
+                updates.towerBestMultiplier = Math.max(current.towerBestMultiplier || 0, metadata.multiplier || 0);
+            }
+            updates.towerTotalProfit = roundCurrency((current.towerTotalProfit || 0) + profit);
         }
 
         transaction.update(userRef, updates);

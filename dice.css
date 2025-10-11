@@ -381,17 +381,56 @@
 
 .result-number.rolling {
     color: rgba(177, 186, 211, 0.6);
-    animation: resultPulse 0.9s ease-in-out infinite;
+    animation: resultPulse 0.9s ease-in-out infinite, resultShake 0.15s ease-in-out infinite;
+}
+
+@keyframes resultShake {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    25% {
+        transform: translateX(-2px) rotate(-1deg);
+    }
+    75% {
+        transform: translateX(2px) rotate(1deg);
+    }
 }
 
 .result-number.win {
     color: var(--accent-primary);
     text-shadow: 0 0 18px rgba(0, 208, 132, 0.35);
+    animation: resultWinPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .result-number.loss {
     color: #ff6666;
     text-shadow: 0 0 18px rgba(255, 68, 68, 0.3);
+    animation: resultLossPop 0.5s ease-out;
+}
+
+@keyframes resultWinPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes resultLossPop {
+    0% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .dice-info-cards {
@@ -602,9 +641,24 @@
 }
 
 @keyframes sliderSweep {
-    0% { opacity: 0; transform: translateX(-30%); }
-    10% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(130%); }
+    0% {
+        opacity: 0;
+        transform: translateX(-30%) scaleX(0.8);
+        filter: blur(2px);
+    }
+    15% {
+        opacity: 1;
+        filter: blur(0);
+    }
+    85% {
+        opacity: 1;
+        filter: blur(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(130%) scaleX(1.2);
+        filter: blur(2px);
+    }
 }
 
 @keyframes resultPulse {

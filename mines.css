@@ -66,8 +66,8 @@
 
 .mines-selector {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
 }
 
 .mines-btn {
@@ -99,17 +99,62 @@
     align-items: center;
     gap: 12px;
     margin-top: 14px;
+    background: rgba(16, 21, 31, 0.9);
+    border: 1px solid rgba(79, 89, 110, 0.4);
+    border-radius: 12px;
+    padding: 12px 14px;
 }
 
 .selector-slider input[type="range"] {
     flex: 1;
+    height: 8px;
+    background: linear-gradient(90deg, rgba(0, 208, 132, 0.2) 0%, rgba(255, 68, 68, 0.3) 100%);
+    border-radius: 999px;
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.selector-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #00d084 0%, #00e0a1 100%);
+    border-radius: 50%;
+    border: 3px solid rgba(15, 20, 33, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 208, 132, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selector-slider input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 18px rgba(0, 208, 132, 0.6);
+}
+
+.selector-slider input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #00d084 0%, #00e0a1 100%);
+    border-radius: 50%;
+    border: 3px solid rgba(15, 20, 33, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 208, 132, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selector-slider input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 18px rgba(0, 208, 132, 0.6);
 }
 
 .selector-slider span {
-    color: rgba(177, 186, 211, 0.7);
-    font-weight: 600;
+    color: var(--accent-primary);
+    font-weight: 700;
     min-width: 80px;
     text-align: right;
+    font-size: 1.05rem;
+    text-shadow: 0 0 10px rgba(0, 208, 132, 0.3);
 }
 
 .action-buttons {
@@ -324,7 +369,18 @@
     border-radius: 14px;
     cursor: pointer;
     overflow: hidden;
-    transition: border 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tile:hover:not(.revealed) {
+    transform: translateY(-4px) scale(1.05);
+    border-color: rgba(0, 208, 132, 0.5);
+    box-shadow: 0 8px 20px rgba(0, 208, 132, 0.2);
+    background: rgba(0, 208, 132, 0.05);
+}
+
+.tile:active:not(.revealed) {
+    transform: translateY(-2px) scale(0.98);
 }
 
 .tile.revealed {
@@ -335,12 +391,54 @@
 .tile.safe {
     border-color: rgba(0, 208, 132, 0.5);
     box-shadow: 0 12px 24px rgba(0, 208, 132, 0.25);
+    animation: tileRevealSafe 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .tile.mine {
     border-color: rgba(255, 68, 68, 0.6);
     box-shadow: 0 12px 28px rgba(255, 68, 68, 0.35);
     background: radial-gradient(circle, rgba(255, 68, 68, 0.4), rgba(16, 21, 31, 0.95));
+    animation: tileRevealMine 0.5s ease-out, tileShakeError 0.5s ease-out;
+}
+
+@keyframes tileRevealSafe {
+    0% {
+        transform: translateY(-2px) scale(0.8) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-6px) scale(1.15) rotate(5deg);
+    }
+    100% {
+        transform: translateY(-2px) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes tileRevealMine {
+    0% {
+        transform: translateY(-2px) scale(0.9);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-2px) scale(1.1);
+    }
+    100% {
+        transform: translateY(-2px) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes tileShakeError {
+    0%, 100% {
+        transform: translateY(-2px) translateX(0);
+    }
+    20%, 60% {
+        transform: translateY(-2px) translateX(-4px);
+    }
+    40%, 80% {
+        transform: translateY(-2px) translateX(4px);
+    }
 }
 
 .tile-content {

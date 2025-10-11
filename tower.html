@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mines - Casino</title>
+    <title>Tower - Casino</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="mines.css">
+    <link rel="stylesheet" href="tower.css">
 </head>
 <body>
     <!-- Header -->
@@ -22,9 +22,9 @@
                 <a href="index.html" class="nav-link">Casino</a>
                 <a href="dice.html" class="nav-link">Dice</a>
                 <a href="plinko.html" class="nav-link">Plinko</a>
-                <a href="mines.html" class="nav-link active">Mines</a>
+                <a href="mines.html" class="nav-link">Mines</a>
                 <a href="blackjack.html" class="nav-link">Blackjack</a>
-                <a href="tower.html" class="nav-link">Tower</a>
+                <a href="tower.html" class="nav-link active">Tower</a>
                 <a href="vip.html" class="nav-link">VIP</a>
             </nav>
             <div class="user-section">
@@ -39,17 +39,17 @@
     </header>
 
     <!-- Main Content -->
-    <main class="mines-main">
-        <div class="mines-container">
-            <!-- Controls -->
-            <aside class="mines-controls">
+    <main class="tower-main">
+        <div class="tower-container">
+            <!-- Left Panel - Controls -->
+            <aside class="tower-controls">
                 <div class="control-section">
                     <div class="control-header">
-                        <h2>💣 Mines</h2>
-                        <span class="control-tag">Stake Style</span>
+                        <h2>🗼 Tower</h2>
+                        <span class="control-tag">Original</span>
                     </div>
                     <p class="game-description">
-                        Choisis ton nombre de mines, découvre les gemmes et encaisse avant l'explosion !
+                        Grimpe la tour en choisissant les bonnes tuiles. Plus tu montes, plus tu gagnes !
                     </p>
                 </div>
 
@@ -68,18 +68,20 @@
                 </div>
 
                 <div class="control-section">
-                    <label>Nombre de mines</label>
-                    <div class="mines-selector">
-                        <button class="mines-btn" data-mines="1">1</button>
-                        <button class="mines-btn" data-mines="3">3</button>
-                        <button class="mines-btn active" data-mines="5">5</button>
-                        <button class="mines-btn" data-mines="10">10</button>
-                        <button class="mines-btn" data-mines="15">15</button>
-                        <button class="mines-btn" data-mines="24">24</button>
-                    </div>
-                    <div class="selector-slider">
-                        <input type="range" id="minesRange" min="1" max="24" value="5" step="1">
-                        <span id="minesRangeValue">5 mines</span>
+                    <label>Difficulté</label>
+                    <div class="difficulty-selector">
+                        <button class="difficulty-btn" data-difficulty="easy">
+                            <span class="difficulty-label">Facile</span>
+                            <span class="difficulty-info">3 choix</span>
+                        </button>
+                        <button class="difficulty-btn active" data-difficulty="medium">
+                            <span class="difficulty-label">Moyen</span>
+                            <span class="difficulty-info">2 choix</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="hard">
+                            <span class="difficulty-label">Difficile</span>
+                            <span class="difficulty-info">1 choix</span>
+                        </button>
                     </div>
                 </div>
 
@@ -88,24 +90,35 @@
                     <button class="btn-secondary-action" id="cashoutBtn" disabled><span>Cashout</span></button>
                 </div>
 
+                <div class="control-section multiplier-display">
+                    <div class="multiplier-card">
+                        <span class="multiplier-label">Multiplicateur actuel</span>
+                        <span class="multiplier-value" id="currentMultiplier">1.00x</span>
+                    </div>
+                    <div class="multiplier-card">
+                        <span class="multiplier-label">Gain potentiel</span>
+                        <span class="multiplier-value" id="potentialPayout">0.00 €</span>
+                    </div>
+                </div>
+
                 <div class="control-section stats-section">
                     <h3>Statistiques</h3>
                     <div class="stat-grid">
                         <div class="stat-item">
                             <span class="stat-label">Parties</span>
-                            <span class="stat-value" id="minesGamesPlayed">0</span>
+                            <span class="stat-value" id="towerGamesPlayed">0</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Cashouts</span>
-                            <span class="stat-value" id="minesCashouts">0</span>
+                            <span class="stat-value" id="towerCashouts">0</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Meilleur multi</span>
-                            <span class="stat-value" id="minesBestMultiplier">0.00x</span>
+                            <span class="stat-value" id="towerBestMultiplier">0.00x</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Profit total</span>
-                            <span class="stat-value" id="minesTotalProfit">0.00 €</span>
+                            <span class="stat-value" id="towerTotalProfit">0.00 €</span>
                         </div>
                     </div>
                 </div>
@@ -113,45 +126,37 @@
                 <div class="control-section rules-section">
                     <h3>Règles</h3>
                     <ul>
-                        <li>25 cases, entre 1 et 24 mines.</li>
-                        <li>Chaque gemme augmente le multiplicateur.</li>
-                        <li>Clique sur Cashout pour encaisser.</li>
-                        <li>Si tu touches une mine tu perds ta mise.</li>
+                        <li>8 niveaux à gravir pour gagner</li>
+                        <li>Choisis la bonne tuile à chaque niveau</li>
+                        <li>Chaque niveau augmente le multiplicateur</li>
+                        <li>Cashout à tout moment pour encaisser</li>
+                        <li>Une mauvaise tuile = fin de partie</li>
                     </ul>
                 </div>
             </aside>
 
             <!-- Game Board -->
-            <section class="mines-board-area">
+            <section class="tower-board-area">
                 <div class="board-header">
                     <div class="status-pill" id="gameStatus">Choisis ta mise et clique sur Commencer.</div>
-                    <div class="multiplier-pill">
-                        <span class="pill-label">Multiplicateur</span>
-                        <span class="pill-value" id="currentMultiplier">1.00x</span>
-                    </div>
-                    <div class="multiplier-pill">
-                        <span class="pill-label">Potentiel</span>
-                        <span class="pill-value" id="potentialPayout">0.00 €</span>
+                    <div class="level-indicator">
+                        <span class="level-label">Niveau</span>
+                        <span class="level-value" id="currentLevel">0/8</span>
                     </div>
                 </div>
 
-                <div class="mines-grid" id="minesGrid">
-                    <!-- Tiles generated dynamically -->
+                <div class="tower-grid" id="towerGrid">
+                    <!-- Levels generated dynamically -->
                 </div>
 
-                <div class="history-panel">
-                    <div class="history-header">
-                        <h3>Historique</h3>
-                        <span class="history-subtitle">Derniers cashouts / explosions</span>
-                    </div>
-                    <div class="history-list" id="historyList">
-                        <div class="no-history">Aucun tour joué</div>
-                    </div>
+                <div class="multiplier-ladder" id="multiplierLadder">
+                    <div class="ladder-header">Échelle des gains</div>
+                    <!-- Multipliers generated dynamically -->
                 </div>
             </section>
         </div>
     </main>
 
-    <script type="module" src="mines.js"></script>
+    <script type="module" src="tower.js"></script>
 </body>
 </html>

@@ -305,7 +305,7 @@ async function animateResult(result, won) {
     const resultMarker = document.getElementById('resultMarker');
 
     if (!resultNumber || !resultMarker) {
-        drawCanvas(result, won);
+        animateCursorToResult(result, won);
         return;
     }
 
@@ -339,7 +339,8 @@ async function animateResult(result, won) {
     resultMarker.classList.toggle('win', won);
     resultMarker.classList.toggle('loss', !won);
 
-    drawCanvas(result, won);
+    // Trigger animated cursor on canvas
+    animateCursorToResult(result, won, 800);
 }
 
 function animateNumberTransition(element, from, to, duration) {
@@ -444,7 +445,16 @@ function updateVisuals() {
         fillUnder.style.opacity = '1';
         fillOver.style.opacity = '0.3';
     }
+
+    // Update canvas with new target (only if no active result animation)
+    if (!cursorAnimationFrame) {
+        drawCanvas();
+    }
 }
+
+// Store animated cursor position
+let animatedCursorX = null;
+let cursorAnimationFrame = null;
 
 // Draw canvas visualization
 function drawCanvas(result = null, won = null) {
@@ -492,34 +502,118 @@ function drawCanvas(result = null, won = null) {
     ctx.textAlign = 'center';
     ctx.fillText(`Target: ${targetNumber.toFixed(2)}`, targetX, 30);
 
-    // Draw result if available
-    if (result !== null) {
-        const resultX = (result / 100) * width;
+    // Draw animated cursor if result is available
+    if (result !== null && animatedCursorX !== null) {
+        const cursorX = animatedCursorX;
 
-        // Draw result line
-        ctx.strokeStyle = won ? '#00d084' : '#ff4444';
-        ctx.lineWidth = 4;
+        // Draw cursor shadow/glow
+        ctx.save();
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Draw cursor line with gradient
+        const cursorGradient = ctx.createLinearGradient(cursorX, 0, cursorX, height);
+        cursorGradient.addColorStop(0, won ? 'rgba(0, 208, 132, 0.2)' : 'rgba(255, 68, 68, 0.2)');
+        cursorGradient.addColorStop(0.5, won ? 'rgba(0, 208, 132, 1)' : 'rgba(255, 68, 68, 1)');
+        cursorGradient.addColorStop(1, won ? 'rgba(0, 208, 132, 0.2)' : 'rgba(255, 68, 68, 0.2)');
+
+        ctx.strokeStyle = cursorGradient;
+        ctx.lineWidth = 6;
         ctx.beginPath();
-        ctx.moveTo(resultX, 0);
-        ctx.lineTo(resultX, height);
+        ctx.moveTo(cursorX, 0);
+        ctx.lineTo(cursorX, height);
         ctx.stroke();
+        ctx.restore();
 
-        // Draw result circle
+        // Draw cursor marker at top
+        ctx.save();
         ctx.fillStyle = won ? '#00d084' : '#ff4444';
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
+        ctx.shadowBlur = 15;
+
+        // Triangle pointer at top
         ctx.beginPath();
-        ctx.arc(resultX, height / 2, 20, 0, Math.PI * 2);
+        ctx.moveTo(cursorX, 0);
+        ctx.lineTo(cursorX - 15, 25);
+        ctx.lineTo(cursorX + 15, 25);
+        ctx.closePath();
         ctx.fill();
+        ctx.restore();
 
-        // Draw result label
+        // Draw cursor marker at bottom
+        ctx.save();
+        ctx.fillStyle = won ? '#00d084' : '#ff4444';
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
+        ctx.shadowBlur = 15;
+
+        // Triangle pointer at bottom
+        ctx.beginPath();
+        ctx.moveTo(cursorX, height);
+        ctx.lineTo(cursorX - 15, height - 25);
+        ctx.lineTo(cursorX + 15, height - 25);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Draw result circle in center
+        ctx.save();
+        ctx.fillStyle = won ? '#00d084' : '#ff4444';
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 1)' : 'rgba(255, 68, 68, 1)';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(cursorX, height / 2, 28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Draw result value in circle
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 18px Arial';
+        ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(result.toFixed(2), resultX, height / 2 + 6);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(result.toFixed(2), cursorX, height / 2);
 
-        // Draw win/loss text
-        ctx.font = 'bold 24px Arial';
-        ctx.fillText(won ? 'WIN!' : 'LOSS', resultX, height - 30);
+        // Draw win/loss text above circle
+        ctx.font = 'bold 28px Arial';
+        ctx.fillStyle = won ? '#00d084' : '#ff4444';
+        ctx.fillText(won ? 'WIN!' : 'LOSS', cursorX, height / 2 - 50);
     }
+}
+
+// Animate cursor movement to result position
+function animateCursorToResult(result, won, duration = 800) {
+    const canvas = document.getElementById('diceCanvas');
+    const width = canvas.width;
+    const targetX = (result / 100) * width;
+
+    // Start from random position or current position
+    const startX = animatedCursorX !== null ? animatedCursorX : width * 0.5;
+    const startTime = performance.now();
+
+    if (cursorAnimationFrame) {
+        cancelAnimationFrame(cursorAnimationFrame);
+    }
+
+    function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Easing function (ease-out cubic)
+        const eased = 1 - Math.pow(1 - progress, 3);
+
+        animatedCursorX = startX + (targetX - startX) * eased;
+
+        drawCanvas(result, won);
+
+        if (progress < 1) {
+            cursorAnimationFrame = requestAnimationFrame(animate);
+        } else {
+            cursorAnimationFrame = null;
+        }
+    }
+
+    cursorAnimationFrame = requestAnimationFrame(animate);
 }
 
 // Update stats

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP - Casino</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="vip.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="dice.html" class="nav-link">Dice</a>
+                <a href="plinko.html" class="nav-link">Plinko</a>
+                <a href="mines.html" class="nav-link">Mines</a>
+                <a href="blackjack.html" class="nav-link">Blackjack</a>
+                <a href="tower.html" class="nav-link">Tower</a>
+                <a href="vip.html" class="nav-link active">VIP</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="vip-main">
+        <div class="vip-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Programme VIP</h1>
+                <p class="hero-subtitle">Plus vous jouez, plus vous gagnez de récompenses exclusives</p>
+            </div>
+        </div>
+
+        <div class="vip-container">
+            <!-- Current VIP Status -->
+            <section class="vip-status-card">
+                <div class="status-header">
+                    <div class="status-info">
+                        <h2>Votre statut VIP</h2>
+                        <div class="current-tier" id="currentTierDisplay">
+                            <span class="tier-badge" id="tierBadge">🥉 Bronze</span>
+                            <span class="tier-name" id="tierName">Bronze</span>
+                        </div>
+                    </div>
+                    <div class="wager-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">Wager total</span>
+                            <span class="stat-value" id="totalWager">0.00 €</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Prochain tier</span>
+                            <span class="stat-value" id="nextTierWager">1,000.00 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-info">
+                        <span class="progress-label">Progression vers <span id="nextTierName">Argent</span></span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-amount">
+                        <span id="remainingWager">1,000.00 €</span> restants
+                    </div>
+                </div>
+
+                <div class="current-benefits">
+                    <h3>Vos avantages actuels</h3>
+                    <div class="benefits-grid" id="currentBenefits">
+                        <!-- Benefits populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIP Tiers -->
+            <section class="vip-tiers">
+                <h2 class="section-title">Niveaux VIP</h2>
+                <div class="tiers-grid">
+                    <!-- Bronze -->
+                    <div class="tier-card tier-bronze" data-tier="bronze">
+                        <div class="tier-header">
+                            <div class="tier-icon">🥉</div>
+                            <div class="tier-info">
+                                <h3 class="tier-title">Bronze</h3>
+                                <p class="tier-requirement">0 € de wager</p>
+                            </div>
+                        </div>
+                        <div class="tier-benefits">
+                            <div class="benefit-item">
+                                <span class="benefit-icon">💰</span>
+                                <span class="benefit-text">Rakeback: 1%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎁</span>
+                                <span class="benefit-text">Bonus de bienvenue</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎮</span>
+                                <span class="benefit-text">Accès à tous les jeux</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Silver -->
+                    <div class="tier-card tier-silver" data-tier="silver">
+                        <div class="tier-header">
+                            <div class="tier-icon">🥈</div>
+                            <div class="tier-info">
+                                <h3 class="tier-title">Argent</h3>
+                                <p class="tier-requirement">1,000 € de wager</p>
+                            </div>
+                        </div>
+                        <div class="tier-benefits">
+                            <div class="benefit-item">
+                                <span class="benefit-icon">💰</span>
+                                <span class="benefit-text">Rakeback: 2%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎁</span>
+                                <span class="benefit-text">Bonus hebdomadaire: 10 €</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">⚡</span>
+                                <span class="benefit-text">Retraits prioritaires</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎯</span>
+                                <span class="benefit-text">Bonus de reload: 5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gold -->
+                    <div class="tier-card tier-gold" data-tier="gold">
+                        <div class="tier-header">
+                            <div class="tier-icon">🥇</div>
+                            <div class="tier-info">
+                                <h3 class="tier-title">Or</h3>
+                                <p class="tier-requirement">5,000 € de wager</p>
+                            </div>
+                        </div>
+                        <div class="tier-benefits">
+                            <div class="benefit-item">
+                                <span class="benefit-icon">💰</span>
+                                <span class="benefit-text">Rakeback: 3%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎁</span>
+                                <span class="benefit-text">Bonus hebdomadaire: 25 €</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">⚡</span>
+                                <span class="benefit-text">Retraits instantanés</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎯</span>
+                                <span class="benefit-text">Bonus de reload: 10%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎂</span>
+                                <span class="benefit-text">Bonus d'anniversaire: 50 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platinum -->
+                    <div class="tier-card tier-platinum" data-tier="platinum">
+                        <div class="tier-header">
+                            <div class="tier-icon">💎</div>
+                            <div class="tier-info">
+                                <h3 class="tier-title">Platine</h3>
+                                <p class="tier-requirement">25,000 € de wager</p>
+                            </div>
+                        </div>
+                        <div class="tier-benefits">
+                            <div class="benefit-item">
+                                <span class="benefit-icon">💰</span>
+                                <span class="benefit-text">Rakeback: 5%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎁</span>
+                                <span class="benefit-text">Bonus hebdomadaire: 100 €</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">⚡</span>
+                                <span class="benefit-text">Limites de retrait illimitées</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎯</span>
+                                <span class="benefit-text">Bonus de reload: 15%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎂</span>
+                                <span class="benefit-text">Bonus d'anniversaire: 250 €</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎖️</span>
+                                <span class="benefit-text">Manager VIP dédié</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diamond -->
+                    <div class="tier-card tier-diamond" data-tier="diamond">
+                        <div class="tier-header">
+                            <div class="tier-icon">💠</div>
+                            <div class="tier-info">
+                                <h3 class="tier-title">Diamant</h3>
+                                <p class="tier-requirement">100,000 € de wager</p>
+                            </div>
+                        </div>
+                        <div class="tier-benefits">
+                            <div class="benefit-item">
+                                <span class="benefit-icon">💰</span>
+                                <span class="benefit-text">Rakeback: 8%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎁</span>
+                                <span class="benefit-text">Bonus hebdomadaire: 500 €</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">⚡</span>
+                                <span class="benefit-text">Tout illimité</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎯</span>
+                                <span class="benefit-text">Bonus de reload: 25%</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎂</span>
+                                <span class="benefit-text">Bonus d'anniversaire: 1,000 €</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎖️</span>
+                                <span class="benefit-text">Manager VIP personnel</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🏆</span>
+                                <span class="benefit-text">Événements VIP exclusifs</span>
+                            </div>
+                            <div class="benefit-item">
+                                <span class="benefit-icon">🎰</span>
+                                <span class="benefit-text">Jeux exclusifs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rakeback Info -->
+            <section class="rakeback-section">
+                <h2 class="section-title">Rakeback</h2>
+                <div class="rakeback-card">
+                    <div class="rakeback-info">
+                        <p class="rakeback-description">
+                            Le rakeback vous permet de récupérer un pourcentage de vos mises perdues. Plus votre niveau VIP est élevé, plus votre pourcentage de rakeback est important.
+                        </p>
+                        <div class="rakeback-stats">
+                            <div class="rakeback-stat">
+                                <span class="rakeback-label">Votre taux actuel</span>
+                                <span class="rakeback-value" id="currentRakeback">1%</span>
+                            </div>
+                            <div class="rakeback-stat">
+                                <span class="rakeback-label">Rakeback total gagné</span>
+                                <span class="rakeback-value" id="totalRakeback">0.00 €</span>
+                            </div>
+                        </div>
+                        <button class="btn-claim-rakeback" id="claimRakebackBtn" disabled>
+                            <span>Réclamer le rakeback</span>
+                            <span class="claim-amount" id="rakebackAvailable">0.00 €</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="vip.js"></script>
+</body>
+</html>
