@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Admin - Casino</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .admin-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+        }
+
+        .admin-header {
+            margin-bottom: 32px;
+        }
+
+        .admin-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary, #ffffff);
+            margin-bottom: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface-color, #1a1d29);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary, #a0a0a0);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary, #ffffff);
+        }
+
+        .users-table {
+            background: var(--surface-color, #1a1d29);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary, #ffffff);
+        }
+
+        .btn-migrate-all {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-migrate-all:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-migrate-all:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .user-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-email {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary, #ffffff);
+            margin-bottom: 4px;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        .user-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+
+        .user-badge.needs-migration {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .user-badge.migrated {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary, #a0a0a0);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Migration des comptes - Administration</h1>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total utilisateurs</div>
+                <div class="stat-value" id="totalUsers">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Migration requise</div>
+                <div class="stat-value" id="needsMigration">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Déjà migrés</div>
+                <div class="stat-value" id="alreadyMigrated">0</div>
+            </div>
+        </div>
+
+        <div class="users-table">
+            <div class="table-header">
+                <h2>Liste des utilisateurs</h2>
+                <button class="btn-migrate-all" id="migrateAllBtn" disabled>
+                    Migrer tous les comptes
+                </button>
+            </div>
+            <div class="user-list" id="userList">
+                <div class="loading-spinner">Chargement des utilisateurs...</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+            <a href="index.html" style="color: var(--text-secondary, #a0a0a0); text-decoration: none;">
+                Retour à l'accueil
+            </a>
+        </div>
+    </div>
+
+    <script type="module" src="admin-migrate.js"></script>
+</body>
+</html>

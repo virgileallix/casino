@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration de compte - Casino</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .migration-container {
+            max-width: 600px;
+            margin: 80px auto;
+            padding: 40px;
+            background: var(--surface-color, #1a1d29);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .migration-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .migration-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary, #ffffff);
+            margin-bottom: 12px;
+        }
+
+        .migration-header p {
+            font-size: 15px;
+            color: var(--text-secondary, #a0a0a0);
+            line-height: 1.5;
+        }
+
+        .migration-status {
+            background: var(--background-color, #0f111a);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-size: 14px;
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        .status-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary, #ffffff);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .status-badge.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+
+        .status-badge.error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
+        .migration-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-migrate {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-migrate.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+        }
+
+        .btn-migrate.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-migrate.secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary, #ffffff);
+        }
+
+        .btn-migrate.secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-migrate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .migration-log {
+            background: var(--background-color, #0f111a);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            display: none;
+        }
+
+        .migration-log.visible {
+            display: block;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            color: var(--text-secondary, #a0a0a0);
+        }
+
+        .log-entry.success {
+            color: #4caf50;
+        }
+
+        .log-entry.error {
+            color: #f44336;
+        }
+
+        .log-entry.info {
+            color: #2196f3;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="migration-container">
+        <div class="migration-header">
+            <h1>Migration de compte</h1>
+            <p>Nous avons mis à jour notre système. Veuillez migrer votre compte pour continuer à utiliser tous les services.</p>
+        </div>
+
+        <div class="migration-status">
+            <div class="status-item">
+                <span class="status-label">Utilisateur</span>
+                <span class="status-value" id="userEmail">---</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Statut du compte</span>
+                <span class="status-badge pending" id="accountStatus">En attente</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Migration requise</span>
+                <span class="status-value" id="migrationRequired">Vérification...</span>
+            </div>
+        </div>
+
+        <div class="migration-actions">
+            <button class="btn-migrate secondary" id="skipBtn">
+                Passer
+            </button>
+            <button class="btn-migrate primary" id="migrateBtn" disabled>
+                <span class="loading" style="display: none;">
+                    <span class="spinner"></span>
+                    Migration...
+                </span>
+                <span class="btn-text">Migrer le compte</span>
+            </button>
+        </div>
+
+        <div class="migration-log" id="migrationLog">
+            <div class="log-entry info">[INFO] Prêt pour la migration...</div>
+        </div>
+    </div>
+
+    <script type="module" src="migrate.js"></script>
+</body>
+</html>

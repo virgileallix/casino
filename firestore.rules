@@ -97,11 +97,45 @@ service cloud.firestore {
     return request.resource.data[field] is number;
   }
 
+  function isValidOptionalNumber(field) {
+    return !request.resource.data.keys().hasAny([field]) ||
+           request.resource.data[field] == null ||
+           (request.resource.data[field] is number && request.resource.data[field] >= 0);
+  }
+
+  function isValidOptionalInt(field) {
+    return !request.resource.data.keys().hasAny([field]) ||
+           request.resource.data[field] == null ||
+           (request.resource.data[field] is int && request.resource.data[field] >= 0);
+  }
+
   function hasValidNumberFields() {
     return isNonNegativeNumber('balance') &&
            isNonNegativeNumber('totalWagered') &&
            isNonNegativeNumber('totalWon') &&
-           isNonNegativeInt('gamesPlayed');
+           isNonNegativeInt('gamesPlayed') &&
+           isValidOptionalInt('diceGamesPlayed') &&
+           isValidOptionalInt('diceWins') &&
+           isValidOptionalInt('diceLosses') &&
+           isValidOptionalNumber('diceBestWin') &&
+           isValidOptionalInt('plinkoGamesPlayed') &&
+           isValidOptionalNumber('plinkoTotalWon') &&
+           isValidOptionalNumber('plinkoBestWin') &&
+           isValidOptionalInt('blackjackHandsPlayed') &&
+           isValidOptionalInt('blackjackWins') &&
+           isValidOptionalInt('blackjackBlackjacks') &&
+           isValidOptionalNumber('blackjackTotalProfit') &&
+           isValidOptionalInt('minesGamesPlayed') &&
+           isValidOptionalInt('minesCashouts') &&
+           isValidOptionalNumber('minesBestMultiplier') &&
+           isValidOptionalNumber('minesTotalProfit') &&
+           isValidOptionalInt('towerGamesPlayed') &&
+           isValidOptionalInt('towerCashouts') &&
+           isValidOptionalNumber('towerBestMultiplier') &&
+           isValidOptionalNumber('towerTotalProfit') &&
+           isValidOptionalNumber('totalWager') &&
+           isValidOptionalNumber('rakebackAvailable') &&
+           isValidOptionalNumber('totalRakebackEarned');
   }
 
   function hasValidCreateMetadata() {
@@ -117,6 +151,25 @@ service cloud.firestore {
             (request.resource.data.admin == 0 || request.resource.data.admin == 1));
   }
 
+  function hasValidUsernameField() {
+    return !request.resource.data.keys().hasAny(['username']) ||
+           request.resource.data.username == null ||
+           (request.resource.data.username is string &&
+            request.resource.data.username.size() >= 3 &&
+            request.resource.data.username.size() <= 16);
+  }
+
+  function hasValidRakebackClaimField() {
+    return !request.resource.data.keys().hasAny(['lastRakebackClaim']) ||
+           request.resource.data.lastRakebackClaim == null ||
+           request.resource.data.lastRakebackClaim is string;
+  }
+
+  function hasValidCreatedAtField() {
+    return !request.resource.data.keys().hasAny(['createdAt']) ||
+           (request.resource.data.createdAt is string);
+  }
+
   function canModifyAdminField() {
     return !request.resource.data.keys().hasAny(['admin']) ||
            (resource.data.admin == request.resource.data.admin) ||
@@ -128,6 +181,9 @@ service cloud.firestore {
            hasValidNumberFields() &&
            hasValidCreateMetadata() &&
            hasValidAdminField() &&
+           hasValidUsernameField() &&
+           hasValidRakebackClaimField() &&
+           hasValidCreatedAtField() &&
            (!request.resource.data.keys().hasAny(['admin']) || request.resource.data.admin == 0);
   }
 
@@ -135,6 +191,8 @@ service cloud.firestore {
     return hasAllowedKeys() &&
            hasValidNumberFields() &&
            hasValidAdminField() &&
+           hasValidUsernameField() &&
+           hasValidRakebackClaimField() &&
            canModifyAdminField();
   }
 }
