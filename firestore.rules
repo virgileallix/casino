@@ -5,8 +5,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow create: if isAuthenticatedOwner(userId) && isValidUserCreate();
       allow read: if request.auth != null;
-      allow update: if (isAuthenticatedOwner(userId) && isValidUserUpdate()) || isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isAuthenticatedOwner(userId) && isValidUserUpdate();
+      allow delete: if false;
     }
 
     match /chatMessages/{messageId} {
@@ -84,7 +84,7 @@ service cloud.firestore {
   }
 
   function isNonNegativeNumber(field) {
-    return request.resource.data[field] is number &&
+    return (request.resource.data[field] is number || request.resource.data[field] is int) &&
            request.resource.data[field] >= 0;
   }
 
@@ -100,7 +100,8 @@ service cloud.firestore {
   function isValidOptionalNumber(field) {
     return !request.resource.data.keys().hasAny([field]) ||
            request.resource.data[field] == null ||
-           (request.resource.data[field] is number && request.resource.data[field] >= 0);
+           (request.resource.data[field] is number && request.resource.data[field] >= 0) ||
+           (request.resource.data[field] is int && request.resource.data[field] >= 0);
   }
 
   function isValidOptionalInt(field) {
@@ -110,10 +111,10 @@ service cloud.firestore {
   }
 
   function hasValidNumberFields() {
-    return isNonNegativeNumber('balance') &&
-           isNonNegativeNumber('totalWagered') &&
-           isNonNegativeNumber('totalWon') &&
-           isNonNegativeInt('gamesPlayed') &&
+    return (!request.resource.data.keys().hasAny(['balance']) || isNonNegativeNumber('balance')) &&
+           (!request.resource.data.keys().hasAny(['totalWagered']) || isNonNegativeNumber('totalWagered')) &&
+           (!request.resource.data.keys().hasAny(['totalWon']) || isNonNegativeNumber('totalWon')) &&
+           (!request.resource.data.keys().hasAny(['gamesPlayed']) || isNonNegativeInt('gamesPlayed')) &&
            isValidOptionalInt('diceGamesPlayed') &&
            isValidOptionalInt('diceWins') &&
            isValidOptionalInt('diceLosses') &&
@@ -155,7 +156,7 @@ service cloud.firestore {
     return !request.resource.data.keys().hasAny(['username']) ||
            request.resource.data.username == null ||
            (request.resource.data.username is string &&
-            request.resource.data.username.size() >= 3 &&
+            request.resource.data.username.size() >= 0 &&
             request.resource.data.username.size() <= 16);
   }
 
@@ -172,7 +173,8 @@ service cloud.firestore {
 
   function canModifyAdminField() {
     return !request.resource.data.keys().hasAny(['admin']) ||
-           (resource.data.admin == request.resource.data.admin) ||
+           (request.resource.data.admin == 0 && !resource.data.keys().hasAny(['admin'])) ||
+           (resource.data.keys().hasAny(['admin']) && resource.data.admin == request.resource.data.admin) ||
            isAdmin();
   }
 
@@ -193,6 +195,7 @@ service cloud.firestore {
            hasValidAdminField() &&
            hasValidUsernameField() &&
            hasValidRakebackClaimField() &&
+           hasValidCreatedAtField() &&
            canModifyAdminField();
   }
 }

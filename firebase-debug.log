@@ -1,0 +1,51 @@
+[debug] [2025-10-12T13:09:34.279Z] ----------------------------------------------------------------------
+[debug] [2025-10-12T13:09:34.280Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules
+[debug] [2025-10-12T13:09:34.281Z] CLI Version:   14.19.1
+[debug] [2025-10-12T13:09:34.281Z] Platform:      linux
+[debug] [2025-10-12T13:09:34.281Z] Node Version:  v22.17.0
+[debug] [2025-10-12T13:09:34.281Z] Time:          Sun Oct 12 2025 13:09:34 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-12T13:09:34.281Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-12T13:09:34.281Z] ----------------------------------------------------------------------
+[debug] 
+[error] 
+[error] Error: Not in a Firebase app directory (could not locate firebase.json)
+[debug] [2025-10-12T13:09:49.285Z] ----------------------------------------------------------------------
+[debug] [2025-10-12T13:09:49.286Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules
+[debug] [2025-10-12T13:09:49.287Z] CLI Version:   14.19.1
+[debug] [2025-10-12T13:09:49.287Z] Platform:      linux
+[debug] [2025-10-12T13:09:49.287Z] Node Version:  v22.17.0
+[debug] [2025-10-12T13:09:49.287Z] Time:          Sun Oct 12 2025 13:09:49 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-12T13:09:49.287Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-12T13:09:49.287Z] ----------------------------------------------------------------------
+[debug] 
+[error] 
+[error] Error: No currently active project.
+To run this command, you need to specify a project. You have two options:
+- Run this command with --project <alias_or_project_id>.
+- Set an active project by running firebase use --add, then rerun this command.
+To list all the Firebase projects to which you have access, run firebase projects:list.
+To learn about active projects for the CLI, visit https://firebase.google.com/docs/cli#project_aliases
+
+
+[debug] [2025-10-12T13:09:58.271Z] ----------------------------------------------------------------------
+[debug] [2025-10-12T13:09:58.273Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules --project casino-eaa24
+[debug] [2025-10-12T13:09:58.273Z] CLI Version:   14.19.1
+[debug] [2025-10-12T13:09:58.273Z] Platform:      linux
+[debug] [2025-10-12T13:09:58.273Z] Node Version:  v22.17.0
+[debug] [2025-10-12T13:09:58.274Z] Time:          Sun Oct 12 2025 13:09:58 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-12T13:09:58.274Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-12T13:09:58.274Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-12T13:09:58.566Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-12T13:09:58.596Z] Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+    at GoogleAuth.getApplicationDefaultAsync (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:287:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async GoogleAuth._GoogleAuth_determineClient (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:834:32)
+    at async GoogleAuth.getClient (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:698:20)
+    at async GoogleAuth.getAccessToken (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:722:24)
+    at async autoAuth (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/requireAuth.js:28:19)
+    at async requireAuth (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/requireAuth.js:91:20)
+    at async requirePermissions (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/requirePermissions.js:17:5)
+    at async /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/command.js:262:17
+[error] 
+[error] Error: Failed to authenticate, have you run firebase login?
