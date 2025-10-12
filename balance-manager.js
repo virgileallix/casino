@@ -103,11 +103,17 @@ export async function initializeUserBalance(user) {
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
-        await setDoc(userRef, {
-            email: user.email ?? null,
+        const userData = {
             createdAt: new Date().toISOString(),
             ...DEFAULT_USER_FIELDS
-        });
+        };
+
+        // Only add email if it exists in the auth token
+        if (user.email) {
+            userData.email = user.email;
+        }
+
+        await setDoc(userRef, userData);
         return;
     }
 

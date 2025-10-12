@@ -65,6 +65,7 @@ service cloud.firestore {
       'rakebackAvailable',
       'totalRakebackEarned',
       'lastRakebackClaim',
+      'username',
       'admin'
     ];
   }
