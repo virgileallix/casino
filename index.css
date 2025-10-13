@@ -78,6 +78,10 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    display: inline-block;
+    font-size: 4rem;
+    font-weight: 900;
+    text-shadow: 0 0 40px rgba(0, 208, 132, 0.5);
 }
 
 .hero-subtitle {
