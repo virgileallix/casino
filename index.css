@@ -81,7 +81,8 @@
     display: inline-block;
     font-size: 4rem;
     font-weight: 900;
-    text-shadow: 0 0 40px rgba(0, 208, 132, 0.5);
+    filter: drop-shadow(0 0 20px rgba(0, 208, 132, 0.6));
+    position: relative;
 }
 
 .hero-subtitle {
@@ -191,6 +192,12 @@
     bottom: 30%;
     left: 5%;
     animation-delay: 4s;
+}
+
+.floating-card.card-6 {
+    top: 70%;
+    right: 35%;
+    animation-delay: 5s;
 }
 
 @keyframes float {

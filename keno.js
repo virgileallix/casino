@@ -100,6 +100,7 @@ function toggleNumber(num) {
     }
 
     updateSelectedCount();
+    generatePayoutTable();
     updatePayoutDisplay();
     updatePlayButton();
 }
@@ -138,20 +139,21 @@ function updatePayoutDisplay() {
 function generatePayoutTable() {
     const table = document.getElementById('payoutTable');
     const payoutData = PAYOUT_TABLES[currentRisk];
+    const numSelected = selectedNumbers.size;
 
     let html = '<thead><tr><th>Sélection</th><th>Trouvés</th><th>Multiplicateur</th></tr></thead><tbody>';
 
-    for (let selected = 1; selected <= 10; selected++) {
-        const payouts = payoutData[selected];
+    if (numSelected === 0) {
+        html += '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary);">Sélectionnez des numéros pour voir les gains possibles</td></tr>';
+    } else {
+        const payouts = payoutData[numSelected];
         for (let hits = 0; hits < payouts.length; hits++) {
             const multiplier = payouts[hits];
-            if (multiplier > 0) {
-                html += `<tr data-selected="${selected}" data-hits="${hits}">
-                    <td>${selected}</td>
-                    <td>${hits}</td>
-                    <td class="multiplier">${multiplier.toFixed(2)}x</td>
-                </tr>`;
-            }
+            html += `<tr data-selected="${numSelected}" data-hits="${hits}">
+                <td>${numSelected}</td>
+                <td>${hits}</td>
+                <td class="multiplier ${multiplier > 0 ? 'positive' : ''}">${multiplier.toFixed(2)}x</td>
+            </tr>`;
         }
     }
 
@@ -301,6 +303,7 @@ function clearSelection() {
         el.classList.remove('selected', 'hit', 'drawn');
     });
     updateSelectedCount();
+    generatePayoutTable();
     updatePayoutDisplay();
     updatePlayButton();
     document.getElementById('resultInfo').innerHTML = '';
@@ -326,6 +329,7 @@ function quickPick() {
     }
 
     updateSelectedCount();
+    generatePayoutTable();
     updatePayoutDisplay();
     updatePlayButton();
 }
