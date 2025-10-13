@@ -813,6 +813,31 @@ body {
     color: var(--bg-primary);
 }
 
+.btn-admin {
+    padding: 8px 16px;
+    background: rgba(138, 43, 226, 0.1);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 8px;
+    color: #b794f6;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.btn-admin:hover {
+    background: rgba(138, 43, 226, 0.2);
+    border-color: rgba(138, 43, 226, 0.5);
+    color: #d4b4ff;
+}
+
+.admin-icon {
+    font-size: 1rem;
+}
+
 #globalChatContainer {
     position: fixed;
     bottom: 20px;

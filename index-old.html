@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino - Accueil</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link active">Casino</a>
+                <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="dice.html" class="nav-link">Dice</a>
+                <a href="plinko.html" class="nav-link">Plinko</a>
+                <a href="mines.html" class="nav-link">Mines</a>
+                <a href="blackjack.html" class="nav-link">Blackjack</a>
+                <a href="tower.html" class="nav-link">Tower</a>
+                <a href="vip.html" class="nav-link">VIP</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-chat" id="chatToggleBtn">
+                    <span>💬</span>
+                    <span>Chat</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Banner -->
+        <section class="banner">
+            <div class="banner-content">
+                <h2>Bienvenue sur Casino</h2>
+                <p>Profitez de nos jeux de casino en ligne</p>
+                <button class="btn-primary">Bonus de bienvenue - 100%</button>
+            </div>
+        </section>
+
+        <!-- Stats Panel -->
+        <section class="stats-section">
+            <div class="stats-header">
+                <h2 class="section-title">Vos statistiques</h2>
+                <p class="stats-subtitle">Suivez vos performances globales et par jeu</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Global</h3>
+                        <span class="stats-chip">📊</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Total misé</span>
+                        <span id="statTotalWagered">0.00 €</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Total gagné</span>
+                        <span id="statTotalWon">0.00 €</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Résultat net</span>
+                        <span id="statNetProfit" class="stat-net">0.00 €</span>
+                    </div>
+                    <div class="stats-footnote" id="statGamesPlayed">0 parties jouées</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Dice</h3>
+                        <span class="stats-chip">🎲</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Parties</span>
+                        <span id="statDiceGames">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Victoires</span>
+                        <span id="statDiceWins">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Taux de victoire</span>
+                        <span id="statDiceWinRate">0%</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Meilleur profit</span>
+                        <span id="statDiceBestWin">0.00 €</span>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Plinko</h3>
+                        <span class="stats-chip">🎯</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Parties</span>
+                        <span id="statPlinkoGames">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Total gagné</span>
+                        <span id="statPlinkoTotalWon">0.00 €</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Plus gros gain</span>
+                        <span id="statPlinkoBestWin">0.00 €</span>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Blackjack</h3>
+                        <span class="stats-chip">🃏</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Mains</span>
+                        <span id="statBlackjackHands">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Victoires</span>
+                        <span id="statBlackjackWins">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Blackjacks</span>
+                        <span id="statBlackjackBlackjacks">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Profit</span>
+                        <span id="statBlackjackProfit">0.00 €</span>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h3>Mines</h3>
+                        <span class="stats-chip">💣</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Parties</span>
+                        <span id="statMinesGames">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Cashouts</span>
+                        <span id="statMinesCashouts">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Best multi</span>
+                        <span id="statMinesBestMultiplier">0.00x</span>
+                    </div>
+                    <div class="stats-row">
+                        <span>Profit</span>
+                        <span id="statMinesProfit">0.00 €</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Categories -->
+        <section class="game-categories" id="categoriesContainer">
+            <!-- Category buttons generated dynamically -->
+        </section>
+
+        <!-- Games Grid -->
+        <section class="games-section">
+            <h2 class="section-title" id="gamesSectionTitle">Jeux populaires</h2>
+            <div class="games-grid" id="gamesGrid">
+                <!-- Game cards will be generated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>À propos</h3>
+                <a href="#">À propos de nous</a>
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Politique de confidentialité</a>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <a href="#">Centre d'aide</a>
+                <a href="#">Contact</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h3>Responsable</h3>
+                <a href="#">Jeu responsable</a>
+                <a href="#">18+</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Casino. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Global Chat Container -->
+    <div id="globalChatContainer">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button class="chat-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-body" id="globalChatPanel">
+            <ul class="chat-messages" data-chat-messages></ul>
+            <div class="chat-empty" data-chat-empty hidden>
+                <div class="chat-empty-icon">💬</div>
+                <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
+            </div>
+            <form class="chat-form" data-chat-form>
+                <input
+                    type="text"
+                    class="chat-input"
+                    data-chat-input
+                    placeholder="Écrivez votre message..."
+                    maxlength="250"
+                    autocomplete="off"
+                />
+                <button type="submit" class="chat-send" data-chat-send>Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script type="module">
+        import { initializeGlobalChat } from './global-chat.js';
+        import { initializeAdminNav } from './admin-nav.js';
+        import { initializeURLCleaner } from './url-cleaner.js';
+        initializeGlobalChat();
+        initializeAdminNav();
+        initializeURLCleaner();
+    </script>
+</body>
+</html>

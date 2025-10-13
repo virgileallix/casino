@@ -1,5 +1,5 @@
 import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
-import { initializeUserBalance, subscribeToUserData, addFunds } from './balance-manager.js';
+import { initializeUserBalance, subscribeToUserData, addFunds, claimRakeback as claimRakebackTransaction } from './balance-manager.js';
 
 let currentUser = null;
 let unsubscribeUser = null;
@@ -95,6 +95,7 @@ const VIP_TIERS = {
 const elements = {
     userBalance: document.getElementById('userBalance'),
     depositBtn: document.getElementById('depositBtn'),
+    adminBtn: document.getElementById('adminBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
     currentTierDisplay: document.getElementById('currentTierDisplay'),
     tierBadge: document.getElementById('tierBadge'),
@@ -224,18 +225,23 @@ async function claimRakeback() {
         return;
     }
 
+    // Disable button during claim
+    elements.claimRakebackBtn.disabled = true;
+    elements.claimRakebackBtn.innerHTML = '<span>Réclamation en cours...</span>';
+
     try {
-        // In a real app, this would be a Firebase function
-        // For now, we'll just add the funds and reset rakeback
-        await addFunds(currentUser.uid, rakebackAvailable);
-
-        // Reset rakeback available (this should be done server-side)
-        // For demo purposes, we'll trust the client
-
-        alert(`Rakeback de ${rakebackAvailable.toFixed(2)} € réclamé avec succès !`);
+        const result = await claimRakebackTransaction(currentUser.uid);
+        alert(`Rakeback de ${result.rakebackClaimed.toFixed(2)} € réclamé avec succès !`);
     } catch (error) {
         console.error('Error claiming rakeback:', error);
-        alert('Erreur lors de la réclamation du rakeback.');
+        if (error.message === 'NO_RAKEBACK_AVAILABLE') {
+            alert('Aucun rakeback disponible à réclamer.');
+        } else {
+            alert('Erreur lors de la réclamation du rakeback.');
+        }
+    } finally {
+        // Button will be re-enabled automatically when userData updates via subscription
+        elements.claimRakebackBtn.innerHTML = '<span>Réclamer le rakeback</span><span class="claim-amount" id="rakebackAvailable">0.00 €</span>';
     }
 }
 
@@ -259,6 +265,10 @@ function setupEventListeners() {
                 alert('Erreur lors du dépôt');
             }
         }
+    });
+
+    elements.adminBtn.addEventListener('click', () => {
+        window.location.href = 'admin.html';
     });
 
     elements.logoutBtn.addEventListener('click', async () => {

@@ -175,25 +175,7 @@ function setupEventListeners() {
     // Bet amount input
     document.getElementById('betAmount').addEventListener('input', updateProfit);
 
-    // Deposit button
-    document.getElementById('depositBtn').addEventListener('click', async () => {
-        if (!currentUser) {
-            alert('Veuillez vous connecter');
-            return;
-        }
-
-        const amount = prompt('Montant à déposer (€):');
-        const depositAmount = parseFloat(amount);
-        if (amount && !isNaN(depositAmount) && depositAmount > 0) {
-            try {
-                await addFunds(currentUser.uid, depositAmount);
-                alert(`${depositAmount.toFixed(2)} € ajoutés à votre solde!`);
-            } catch (error) {
-                console.error('Error adding funds:', error);
-                alert('Erreur lors du dépôt');
-            }
-        }
-    });
+    // Deposit button is now handled by deposit-modal.js
 }
 
 // Calculate multiplier based on win chance
@@ -506,78 +488,72 @@ function drawCanvas(result = null, won = null) {
     if (result !== null && animatedCursorX !== null) {
         const cursorX = animatedCursorX;
 
-        // Draw cursor shadow/glow
+        // Draw vertical line connecting the arrows
         ctx.save();
-        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
-        ctx.shadowBlur = 20;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-
-        // Draw cursor line with gradient
-        const cursorGradient = ctx.createLinearGradient(cursorX, 0, cursorX, height);
-        cursorGradient.addColorStop(0, won ? 'rgba(0, 208, 132, 0.2)' : 'rgba(255, 68, 68, 0.2)');
-        cursorGradient.addColorStop(0.5, won ? 'rgba(0, 208, 132, 1)' : 'rgba(255, 68, 68, 1)');
-        cursorGradient.addColorStop(1, won ? 'rgba(0, 208, 132, 0.2)' : 'rgba(255, 68, 68, 0.2)');
-
-        ctx.strokeStyle = cursorGradient;
-        ctx.lineWidth = 6;
+        ctx.strokeStyle = won ? '#00d084' : '#ff4444';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 4]);
         ctx.beginPath();
         ctx.moveTo(cursorX, 0);
         ctx.lineTo(cursorX, height);
         ctx.stroke();
+        ctx.setLineDash([]);
         ctx.restore();
 
-        // Draw cursor marker at top
+        // Draw big arrow at top pointing down
         ctx.save();
         ctx.fillStyle = won ? '#00d084' : '#ff4444';
-        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
-        ctx.shadowBlur = 15;
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.9)' : 'rgba(255, 68, 68, 0.9)';
+        ctx.shadowBlur = 25;
 
-        // Triangle pointer at top
+        // Large triangle arrow pointing down
         ctx.beginPath();
-        ctx.moveTo(cursorX, 0);
-        ctx.lineTo(cursorX - 15, 25);
-        ctx.lineTo(cursorX + 15, 25);
+        ctx.moveTo(cursorX, 60); // Arrow tip (pointing down)
+        ctx.lineTo(cursorX - 30, 0); // Left point
+        ctx.lineTo(cursorX + 30, 0); // Right point
         ctx.closePath();
         ctx.fill();
         ctx.restore();
 
-        // Draw cursor marker at bottom
+        // Draw big arrow at bottom pointing up
         ctx.save();
         ctx.fillStyle = won ? '#00d084' : '#ff4444';
-        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
-        ctx.shadowBlur = 15;
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.9)' : 'rgba(255, 68, 68, 0.9)';
+        ctx.shadowBlur = 25;
 
-        // Triangle pointer at bottom
+        // Large triangle arrow pointing up
         ctx.beginPath();
-        ctx.moveTo(cursorX, height);
-        ctx.lineTo(cursorX - 15, height - 25);
-        ctx.lineTo(cursorX + 15, height - 25);
+        ctx.moveTo(cursorX, height - 60); // Arrow tip (pointing up)
+        ctx.lineTo(cursorX - 30, height); // Left point
+        ctx.lineTo(cursorX + 30, height); // Right point
         ctx.closePath();
         ctx.fill();
         ctx.restore();
 
-        // Draw result circle in center
+        // Draw result circle in center with pulsing effect
         ctx.save();
         ctx.fillStyle = won ? '#00d084' : '#ff4444';
         ctx.shadowColor = won ? 'rgba(0, 208, 132, 1)' : 'rgba(255, 68, 68, 1)';
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 30;
         ctx.beginPath();
-        ctx.arc(cursorX, height / 2, 28, 0, Math.PI * 2);
+        ctx.arc(cursorX, height / 2, 40, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
         // Draw result value in circle
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 20px Arial';
+        ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(result.toFixed(2), cursorX, height / 2);
 
-        // Draw win/loss text above circle
-        ctx.font = 'bold 28px Arial';
+        // Draw win/loss text above circle with larger font
+        ctx.font = 'bold 36px Arial';
         ctx.fillStyle = won ? '#00d084' : '#ff4444';
-        ctx.fillText(won ? 'WIN!' : 'LOSS', cursorX, height / 2 - 50);
+        ctx.shadowColor = won ? 'rgba(0, 208, 132, 0.8)' : 'rgba(255, 68, 68, 0.8)';
+        ctx.shadowBlur = 20;
+        ctx.fillText(won ? 'WIN!' : 'LOSS', cursorX, height / 2 - 70);
+        ctx.restore();
     }
 }
 

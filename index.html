@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino - Accueil</title>
+    <title>Casino Originals - Le meilleur casino en ligne</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="deposit-modal.css">
 </head>
 <body>
     <!-- Header -->
@@ -31,12 +33,16 @@
             <div class="user-section">
                 <div class="balance">
                     <span class="balance-label">Solde:</span>
-                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                    <span class="balance-amount" id="userBalance">---</span>
                 </div>
                 <button class="btn-secondary" id="depositBtn">Dépôt</button>
                 <button class="btn-chat" id="chatToggleBtn">
                     <span>💬</span>
                     <span>Chat</span>
+                </button>
+                <button class="btn-admin" id="adminBtn">
+                    <span class="admin-icon">⚙️</span>
+                    <span>Admin</span>
                 </button>
                 <button class="btn-logout" id="logoutBtn">Déconnexion</button>
             </div>
@@ -44,139 +50,281 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <!-- Banner -->
-        <section class="banner">
-            <div class="banner-content">
-                <h2>Bienvenue sur Casino</h2>
-                <p>Profitez de nos jeux de casino en ligne</p>
-                <button class="btn-primary">Bonus de bienvenue - 100%</button>
+    <main class="home-main">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-background">
+                <div class="hero-gradient"></div>
+                <div class="hero-pattern"></div>
             </div>
-        </section>
-
-        <!-- Stats Panel -->
-        <section class="stats-section">
-            <div class="stats-header">
-                <h2 class="section-title">Vos statistiques</h2>
-                <p class="stats-subtitle">Suivez vos performances globales et par jeu</p>
-            </div>
-            <div class="stats-grid">
-                <div class="stats-card">
-                    <div class="stats-card-header">
-                        <h3>Global</h3>
-                        <span class="stats-chip">📊</span>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Bienvenue chez
+                        <span class="gradient-text">Casino Originals</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Découvrez nos jeux de casino originaux et profitez d'une expérience de jeu unique
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn-hero-primary" id="heroCTABtn">
+                            Commencer à jouer
+                        </button>
+                        <button class="btn-hero-secondary" id="heroVIPBtn">
+                            Programme VIP
+                        </button>
                     </div>
-                    <div class="stats-row">
-                        <span>Total misé</span>
-                        <span id="statTotalWagered">0.00 €</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Total gagné</span>
-                        <span id="statTotalWon">0.00 €</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Résultat net</span>
-                        <span id="statNetProfit" class="stat-net">0.00 €</span>
-                    </div>
-                    <div class="stats-footnote" id="statGamesPlayed">0 parties jouées</div>
-                </div>
-                <div class="stats-card">
-                    <div class="stats-card-header">
-                        <h3>Dice</h3>
-                        <span class="stats-chip">🎲</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Parties</span>
-                        <span id="statDiceGames">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Victoires</span>
-                        <span id="statDiceWins">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Taux de victoire</span>
-                        <span id="statDiceWinRate">0%</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Meilleur profit</span>
-                        <span id="statDiceBestWin">0.00 €</span>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="hero-stat-value" id="heroUsers">1,234</div>
+                            <div class="hero-stat-label">Joueurs actifs</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-value" id="heroWins">€125,450</div>
+                            <div class="hero-stat-label">Gains aujourd'hui</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-value">5</div>
+                            <div class="hero-stat-label">Jeux disponibles</div>
+                        </div>
                     </div>
                 </div>
-                <div class="stats-card">
-                    <div class="stats-card-header">
-                        <h3>Plinko</h3>
-                        <span class="stats-chip">🎯</span>
+                <div class="hero-visual">
+                    <div class="floating-card card-1">
+                        <div class="game-preview dice-preview">
+                            <span class="preview-icon">🎲</span>
+                            <span class="preview-name">Dice</span>
+                        </div>
                     </div>
-                    <div class="stats-row">
-                        <span>Parties</span>
-                        <span id="statPlinkoGames">0</span>
+                    <div class="floating-card card-2">
+                        <div class="game-preview plinko-preview">
+                            <span class="preview-icon">🎯</span>
+                            <span class="preview-name">Plinko</span>
+                        </div>
                     </div>
-                    <div class="stats-row">
-                        <span>Total gagné</span>
-                        <span id="statPlinkoTotalWon">0.00 €</span>
+                    <div class="floating-card card-3">
+                        <div class="game-preview mines-preview">
+                            <span class="preview-icon">💣</span>
+                            <span class="preview-name">Mines</span>
+                        </div>
                     </div>
-                    <div class="stats-row">
-                        <span>Plus gros gain</span>
-                        <span id="statPlinkoBestWin">0.00 €</span>
+                    <div class="floating-card card-4">
+                        <div class="game-preview blackjack-preview">
+                            <span class="preview-icon">🃏</span>
+                            <span class="preview-name">Blackjack</span>
+                        </div>
                     </div>
-                </div>
-                <div class="stats-card">
-                    <div class="stats-card-header">
-                        <h3>Blackjack</h3>
-                        <span class="stats-chip">🃏</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Mains</span>
-                        <span id="statBlackjackHands">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Victoires</span>
-                        <span id="statBlackjackWins">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Blackjacks</span>
-                        <span id="statBlackjackBlackjacks">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Profit</span>
-                        <span id="statBlackjackProfit">0.00 €</span>
-                    </div>
-                </div>
-                <div class="stats-card">
-                    <div class="stats-card-header">
-                        <h3>Mines</h3>
-                        <span class="stats-chip">💣</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Parties</span>
-                        <span id="statMinesGames">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Cashouts</span>
-                        <span id="statMinesCashouts">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Best multi</span>
-                        <span id="statMinesBestMultiplier">0.00x</span>
-                    </div>
-                    <div class="stats-row">
-                        <span>Profit</span>
-                        <span id="statMinesProfit">0.00 €</span>
+                    <div class="floating-card card-5">
+                        <div class="game-preview tower-preview">
+                            <span class="preview-icon">🗼</span>
+                            <span class="preview-name">Tower</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Game Categories -->
-        <section class="game-categories" id="categoriesContainer">
-            <!-- Category buttons generated dynamically -->
+        <!-- Quick Stats -->
+        <section class="quick-stats">
+            <div class="stats-container">
+                <div class="quick-stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="quickStatWagered">0.00 €</div>
+                        <div class="stat-label">Total misé</div>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="quickStatWon">0.00 €</div>
+                        <div class="stat-label">Total gagné</div>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="quickStatGames">0</div>
+                        <div class="stat-label">Parties jouées</div>
+                    </div>
+                </div>
+                <div class="quick-stat-card vip-card">
+                    <div class="stat-icon">💎</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="quickStatVIP">Bronze</div>
+                        <div class="stat-label">Niveau VIP</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <!-- Games Grid -->
-        <section class="games-section">
-            <h2 class="section-title" id="gamesSectionTitle">Jeux populaires</h2>
-            <div class="games-grid" id="gamesGrid">
-                <!-- Game cards will be generated here -->
+        <!-- Games Section -->
+        <section class="games-showcase">
+            <div class="section-header">
+                <h2 class="section-title">Nos jeux</h2>
+                <p class="section-subtitle">Choisissez votre jeu favori et tentez votre chance</p>
+            </div>
+            <div class="games-grid">
+                <!-- Dice -->
+                <a href="dice.html" class="game-card dice-card">
+                    <div class="game-card-header">
+                        <div class="game-icon">🎲</div>
+                        <div class="game-badge">Popular</div>
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-title">Dice</h3>
+                        <p class="game-description">Prédisez si le dé tombera au-dessus ou en-dessous</p>
+                        <div class="game-stats">
+                            <div class="game-stat">
+                                <span class="stat-label">Parties</span>
+                                <span class="stat-value" id="gameDiceCount">0</span>
+                            </div>
+                            <div class="game-stat">
+                                <span class="stat-label">Taux de gain</span>
+                                <span class="stat-value" id="gameDiceWinRate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <button class="btn-play">Jouer maintenant</button>
+                    </div>
+                </a>
+
+                <!-- Plinko -->
+                <a href="plinko.html" class="game-card plinko-card">
+                    <div class="game-card-header">
+                        <div class="game-icon">🎯</div>
+                        <div class="game-badge hot">Hot</div>
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-title">Plinko</h3>
+                        <p class="game-description">Laissez tomber la bille et observez où elle atterrit</p>
+                        <div class="game-stats">
+                            <div class="game-stat">
+                                <span class="stat-label">Parties</span>
+                                <span class="stat-value" id="gamePlinkoCount">0</span>
+                            </div>
+                            <div class="game-stat">
+                                <span class="stat-label">Gain max</span>
+                                <span class="stat-value" id="gamePlinkoBest">0.00 €</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <button class="btn-play">Jouer maintenant</button>
+                    </div>
+                </a>
+
+                <!-- Mines -->
+                <a href="mines.html" class="game-card mines-card">
+                    <div class="game-card-header">
+                        <div class="game-icon">💣</div>
+                        <div class="game-badge">New</div>
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-title">Mines</h3>
+                        <p class="game-description">Évitez les mines et multipliez vos gains</p>
+                        <div class="game-stats">
+                            <div class="game-stat">
+                                <span class="stat-label">Parties</span>
+                                <span class="stat-value" id="gameMinesCount">0</span>
+                            </div>
+                            <div class="game-stat">
+                                <span class="stat-label">Multi max</span>
+                                <span class="stat-value" id="gameMinesBestMulti">0.00x</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <button class="btn-play">Jouer maintenant</button>
+                    </div>
+                </a>
+
+                <!-- Blackjack -->
+                <a href="blackjack.html" class="game-card blackjack-card">
+                    <div class="game-card-header">
+                        <div class="game-icon">🃏</div>
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-title">Blackjack</h3>
+                        <p class="game-description">Le classique du casino, battez le croupier</p>
+                        <div class="game-stats">
+                            <div class="game-stat">
+                                <span class="stat-label">Mains</span>
+                                <span class="stat-value" id="gameBlackjackCount">0</span>
+                            </div>
+                            <div class="game-stat">
+                                <span class="stat-label">Blackjacks</span>
+                                <span class="stat-value" id="gameBlackjackBJ">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <button class="btn-play">Jouer maintenant</button>
+                    </div>
+                </a>
+
+                <!-- Tower -->
+                <a href="tower.html" class="game-card tower-card">
+                    <div class="game-card-header">
+                        <div class="game-icon">🗼</div>
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-title">Tower</h3>
+                        <p class="game-description">Montez la tour et multipliez vos gains</p>
+                        <div class="game-stats">
+                            <div class="game-stat">
+                                <span class="stat-label">Parties</span>
+                                <span class="stat-value" id="gameTowerCount">0</span>
+                            </div>
+                            <div class="game-stat">
+                                <span class="stat-label">Multi max</span>
+                                <span class="stat-value" id="gameTowerBestMulti">0.00x</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <button class="btn-play">Jouer maintenant</button>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- VIP Promo Section -->
+        <section class="vip-promo">
+            <div class="vip-promo-content">
+                <div class="vip-promo-text">
+                    <span class="vip-badge">Programme VIP</span>
+                    <h2>Rejoignez notre programme VIP</h2>
+                    <p>Plus vous jouez, plus vous gagnez de récompenses exclusives</p>
+                    <ul class="vip-benefits">
+                        <li>💰 Jusqu'à 8% de rakeback</li>
+                        <li>🎁 Bonus hebdomadaires</li>
+                        <li>⚡ Retraits prioritaires</li>
+                        <li>🎖️ Manager VIP dédié</li>
+                    </ul>
+                    <button class="btn-vip-join" id="vipJoinBtn">Découvrir le programme VIP</button>
+                </div>
+                <div class="vip-promo-visual">
+                    <div class="vip-tier-showcase">
+                        <div class="vip-tier bronze">🥉 Bronze</div>
+                        <div class="vip-tier silver">🥈 Argent</div>
+                        <div class="vip-tier gold">🥇 Or</div>
+                        <div class="vip-tier platinum">💎 Platine</div>
+                        <div class="vip-tier diamond">💠 Diamant</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leaderboard Teaser -->
+        <section class="leaderboard-teaser">
+            <div class="section-header">
+                <h2 class="section-title">Top joueurs</h2>
+                <a href="leaderboard.html" class="view-all-link">Voir le classement complet →</a>
+            </div>
+            <div class="top-players" id="topPlayersPreview">
+                <!-- Top 3 players will be loaded here -->
             </div>
         </section>
     </main>
@@ -185,25 +333,38 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>À propos</h3>
-                <a href="#">À propos de nous</a>
-                <a href="#">Conditions d'utilisation</a>
-                <a href="#">Politique de confidentialité</a>
+                <h3>Casino Originals</h3>
+                <p>Le meilleur casino en ligne avec des jeux originaux et équitables.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Discord</a>
+                    <a href="#" class="social-link">Telegram</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Jeux</h3>
+                <a href="dice.html">Dice</a>
+                <a href="plinko.html">Plinko</a>
+                <a href="mines.html">Mines</a>
+                <a href="blackjack.html">Blackjack</a>
+                <a href="tower.html">Tower</a>
+            </div>
+            <div class="footer-section">
+                <h3>Casino</h3>
+                <a href="leaderboard.html">Leaderboard</a>
+                <a href="vip.html">Programme VIP</a>
+                <a href="#">Promotions</a>
             </div>
             <div class="footer-section">
                 <h3>Support</h3>
                 <a href="#">Centre d'aide</a>
-                <a href="#">Contact</a>
                 <a href="#">FAQ</a>
-            </div>
-            <div class="footer-section">
-                <h3>Responsable</h3>
+                <a href="#">Contact</a>
                 <a href="#">Jeu responsable</a>
-                <a href="#">18+</a>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 Casino. Tous droits réservés.</p>
+            <p>&copy; 2025 Casino Originals. Tous droits réservés. Jouez de manière responsable. 18+</p>
         </div>
     </footer>
 
@@ -233,7 +394,8 @@
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module" src="global-deposit.js"></script>
+    <script type="module" src="index.js"></script>
     <script type="module">
         import { initializeGlobalChat } from './global-chat.js';
         import { initializeAdminNav } from './admin-nav.js';

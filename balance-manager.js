@@ -374,7 +374,7 @@ export async function resetUserStats(userId) {
 
 export async function updateUsername(userId, username) {
     if (!username || typeof username !== 'string') {
-        throw new Error('Nom d’utilisateur invalide');
+        throw new Error('Nom d'utilisateur invalide');
     }
     const sanitized = username.trim();
     if (sanitized.length < 3 || sanitized.length > 16) {
@@ -390,4 +390,35 @@ export async function updateUsername(userId, username) {
     });
 
     return sanitized;
+}
+
+export async function claimRakeback(userId) {
+    const userRef = getUserRef(userId);
+
+    return runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(userRef);
+        if (!snapshot.exists()) {
+            throw new Error('User not found');
+        }
+
+        const current = mergeWithDefaults(snapshot.data());
+        const rakebackAvailable = current.rakebackAvailable || 0;
+
+        if (rakebackAvailable <= 0) {
+            throw new Error('NO_RAKEBACK_AVAILABLE');
+        }
+
+        const newBalance = roundCurrency(current.balance + rakebackAvailable);
+
+        transaction.update(userRef, {
+            balance: newBalance,
+            rakebackAvailable: 0,
+            lastRakebackClaim: new Date().toISOString()
+        });
+
+        return {
+            balance: newBalance,
+            rakebackClaimed: rakebackAvailable
+        };
+    });
 }
