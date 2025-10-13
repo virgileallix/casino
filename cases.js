@@ -19,22 +19,27 @@ let stats = {
 // Payout tables for each difficulty (multiplier: weight)
 const PAYOUT_TABLES = {
     easy: {
-        multipliers: [2, 3, 4, 5, 8, 10, 15, 20, 25],
-        weights: [35, 25, 15, 10, 7, 4, 2, 1.5, 0.5]
+        multipliers: [0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50],
+        weights:      [45, 20, 15, 8, 6, 3, 2, 0.7, 0.25, 0.05]
+        // RTP ≈ 92%
     },
     medium: {
-        multipliers: [2, 3, 5, 8, 10, 15, 20, 30, 40, 50],
-        weights: [30, 20, 15, 12, 10, 6, 4, 2, 0.8, 0.2]
+        multipliers: [0, 0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100],
+        weights:      [50, 15, 10, 8, 6, 4, 3, 2, 1, 0.5, 0.5]
+        // RTP ≈ 88%
     },
     hard: {
-        multipliers: [2, 3, 5, 10, 15, 20, 30, 50, 75, 100],
-        weights: [25, 18, 15, 12, 10, 8, 6, 4, 1.5, 0.5]
+        multipliers: [0, 0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100, 250],
+        weights:      [55, 10, 8, 6, 5, 4, 3, 2, 1, 0.5, 0.3, 0.2]
+        // RTP ≈ 84%
     },
     expert: {
-        multipliers: [2, 3, 5, 10, 20, 50, 100, 500, 1000, 10000],
-        weights: [40, 25, 15, 10, 5, 3, 1.5, 0.3, 0.15, 0.05]
+        multipliers: [0, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 50, 100, 1000],
+        weights:      [60, 10, 7, 5, 4, 3, 2.5, 2, 1, 0.3, 0.15, 0.05]
+        // RTP ≈ 80%
     }
 };
+
 
 // Initialize
 function init() {
@@ -273,31 +278,49 @@ async function openCase() {
     }
 }
 
-// Animate carousel spinning
 async function animateCarousel() {
     const carousel = document.getElementById('caseCarousel');
     const caseItems = carousel.querySelectorAll('.case-item');
     const middleIndex = Math.floor(caseItems.length / 2);
-    const caseWidth = 135; // 120px width + 15px gap
-
-    // Calculate offset to center the winning case
+    const caseWidth = 135; // largeur + marge
     const offset = -(middleIndex * caseWidth) + (window.innerWidth / 2) - 200;
 
-    // Spin animation
-    carousel.style.transform = 'translateX(100px)';
+    // Réinitialise le style avant lancement
+    carousel.style.transition = 'none';
+    carousel.style.transform = 'translateX(0)';
+    await new Promise(r => setTimeout(r, 100));
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // 1️⃣ Phase rapide — démarre à fond
+    carousel.style.transition = 'transform 0.6s cubic-bezier(0.1, 0.7, 0.3, 1)';
+    carousel.style.transform = `translateX(-${caseWidth * 10}px)`;
+    await new Promise(r => setTimeout(r, 600));
 
-    carousel.style.transition = 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    // 2️⃣ Phase moyenne — ralentit
+    carousel.style.transition = 'transform 1.2s cubic-bezier(0.1, 0.9, 0.3, 1)';
+    carousel.style.transform = `translateX(-${caseWidth * 16}px)`;
+    await new Promise(r => setTimeout(r, 1200));
+
+    // 3️⃣ Phase finale — suspense
+    carousel.style.transition = 'transform 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    carousel.style.transform = `translateX(${offset}px)`;
+    await new Promise(r => setTimeout(r, 2200));
+
+    // 4️⃣ Petit "secousse" finale
+    carousel.style.transition = 'transform 0.2s ease-in-out';
+    carousel.style.transform = `translateX(${offset + 8}px)`;
+    await new Promise(r => setTimeout(r, 150));
+    carousel.style.transform = `translateX(${offset - 4}px)`;
+    await new Promise(r => setTimeout(r, 150));
     carousel.style.transform = `translateX(${offset}px)`;
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // 5️⃣ Highlight gagnant
+    const winner = caseItems[middleIndex];
+    winner.classList.add('winner');
+    winner.classList.add('winner-flash');
 
-    // Highlight winner
-    caseItems[middleIndex].classList.add('winner');
-
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(r => setTimeout(r, 500));
 }
+
 
 // Display result
 function displayResult(multiplier, profit, won) {
