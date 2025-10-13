@@ -49,3 +49,193 @@ To learn about active projects for the CLI, visit https://firebase.google.com/do
     at async /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/command.js:262:17
 [error] 
 [error] Error: Failed to authenticate, have you run firebase login?
+[debug] [2025-10-13T01:47:09.708Z] ----------------------------------------------------------------------
+[debug] [2025-10-13T01:47:09.711Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules
+[debug] [2025-10-13T01:47:09.711Z] CLI Version:   14.19.1
+[debug] [2025-10-13T01:47:09.711Z] Platform:      linux
+[debug] [2025-10-13T01:47:09.711Z] Node Version:  v22.17.0
+[debug] [2025-10-13T01:47:09.712Z] Time:          Mon Oct 13 2025 01:47:09 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-13T01:47:09.712Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-13T01:47:09.712Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-13T01:47:09.714Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[error] 
+[error] Error: No currently active project.
+To run this command, you need to specify a project. You have two options:
+- Run this command with --project <alias_or_project_id>.
+- Set an active project by running firebase use --add, then rerun this command.
+To list all the Firebase projects to which you have access, run firebase projects:list.
+To learn about active projects for the CLI, visit https://firebase.google.com/docs/cli#project_aliases
+
+
+[debug] [2025-10-13T01:47:10.418Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-10-13T01:47:10.419Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-10-13T01:47:25.462Z] ----------------------------------------------------------------------
+[debug] [2025-10-13T01:47:25.464Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules --project casino-eaa24
+[debug] [2025-10-13T01:47:25.464Z] CLI Version:   14.19.1
+[debug] [2025-10-13T01:47:25.464Z] Platform:      linux
+[debug] [2025-10-13T01:47:25.465Z] Node Version:  v22.17.0
+[debug] [2025-10-13T01:47:25.465Z] Time:          Mon Oct 13 2025 01:47:25 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-13T01:47:25.465Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-13T01:47:25.465Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-13T01:47:25.785Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-13T01:47:25.806Z] Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+    at GoogleAuth.getApplicationDefaultAsync (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:287:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async GoogleAuth._GoogleAuth_determineClient (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:834:32)
+    at async GoogleAuth.getClient (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:698:20)
+    at async GoogleAuth.getAccessToken (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/google-auth-library/build/src/auth/googleauth.js:722:24)
+    at async autoAuth (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/requireAuth.js:28:19)
+    at async requireAuth (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/requireAuth.js:91:20)
+    at async requirePermissions (/home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/requirePermissions.js:17:5)
+    at async /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/firebase-tools/lib/command.js:262:17
+[error] 
+[error] Error: Failed to authenticate, have you run firebase login?
+[debug] [2025-10-13T01:47:37.949Z] ----------------------------------------------------------------------
+[debug] [2025-10-13T01:47:37.950Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase login --no-localhost
+[debug] [2025-10-13T01:47:37.951Z] CLI Version:   14.19.1
+[debug] [2025-10-13T01:47:37.951Z] Platform:      linux
+[debug] [2025-10-13T01:47:37.951Z] Node Version:  v22.17.0
+[debug] [2025-10-13T01:47:37.951Z] Time:          Mon Oct 13 2025 01:47:37 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-13T01:47:37.951Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-13T01:47:37.951Z] ----------------------------------------------------------------------
+[debug] 
+[error] 
+[error] Error: Cannot run login in non-interactive mode. See login:ci to generate a token for use in non-interactive environments.
+[debug] [2025-10-13T01:58:10.463Z] ----------------------------------------------------------------------
+[debug] [2025-10-13T01:58:10.464Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules --token 
+[debug] [2025-10-13T01:58:10.465Z] CLI Version:   14.19.1
+[debug] [2025-10-13T01:58:10.465Z] Platform:      linux
+[debug] [2025-10-13T01:58:10.465Z] Node Version:  v22.17.0
+[debug] [2025-10-13T01:58:10.465Z] Time:          Mon Oct 13 2025 01:58:10 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-13T01:58:10.465Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-13T01:58:10.465Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-13T01:58:10.751Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-13T01:58:10.753Z] > authorizing via FIREBASE_TOKEN environment variable
+[warn] ⚠  Authenticating with `FIREBASE_TOKEN` is deprecated and will be removed in a future major version of `firebase-tools`. Instead, use a service account key with `GOOGLE_APPLICATION_CREDENTIALS`: https://cloud.google.com/docs/authentication/getting-started 
+[debug] [2025-10-13T01:58:10.753Z] [iam] checking project casino-eaa24 for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2025-10-13T01:58:10.755Z] No OAuth tokens found
+[debug] [2025-10-13T01:58:10.755Z] No OAuth tokens found
+[debug] [2025-10-13T01:58:10.755Z] > refreshing access token with scopes: []
+[debug] [2025-10-13T01:58:10.757Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-13T01:58:10.758Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-13T01:58:10.845Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-13T01:58:10.845Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-13T01:58:10.845Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions [none]
+[debug] [2025-10-13T01:58:10.845Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions x-goog-quota-user=projects/casino-eaa24
+[debug] [2025-10-13T01:58:10.845Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2025-10-13T01:58:11.519Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions 200
+[debug] [2025-10-13T01:58:11.519Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'casino-eaa24'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-10-13T01:58:11.521Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:11.521Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:11.521Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/casino-eaa24/services/firestore.googleapis.com [none]
+[debug] [2025-10-13T01:58:11.521Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/casino-eaa24/services/firestore.googleapis.com x-goog-quota-user=projects/casino-eaa24
+[debug] [2025-10-13T01:58:12.279Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/casino-eaa24/services/firestore.googleapis.com 200
+[debug] [2025-10-13T01:58:12.279Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/casino-eaa24/services/firestore.googleapis.com [omitted]
+[info] ✔  firestore: required API firestore.googleapis.com is enabled 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-10-13T01:58:12.283Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:12.283Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:12.283Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) [none]
+[debug] [2025-10-13T01:58:12.413Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) 200
+[debug] [2025-10-13T01:58:12.413Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) {"name":"projects/casino-eaa24/databases/(default)","uid":"7e755153-e6ff-493c-aeac-11cb318f8219","createTime":"2025-10-10T16:09:56.119207Z","updateTime":"2025-10-10T16:09:56.119207Z","locationId":"eur3","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2025-10-13T00:58:12.390935Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"e","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IKSNvsyJoJADMMmohriCmpAD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2025-10-13T01:58:12.414Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:12.414Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:12.414Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test [none]
+[debug] [2025-10-13T01:58:12.414Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test [omitted]
+[debug] [2025-10-13T01:58:13.182Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test 200
+[debug] [2025-10-13T01:58:13.182Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2025-10-13T01:58:13.183Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:13.183Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:13.184Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases pageSize=10&pageToken=
+[debug] [2025-10-13T01:58:13.820Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases 200
+[debug] [2025-10-13T01:58:13.821Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases {"releases":[{"name":"projects/casino-eaa24/releases/cloud.firestore","rulesetName":"projects/casino-eaa24/rulesets/fc9cc376-440b-4a28-9172-bc81df1b7131","createTime":"2025-10-10T16:10:01.660392Z","updateTime":"2025-10-13T01:52:58.225035Z"}]}
+[debug] [2025-10-13T01:58:13.821Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:13.821Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:13.822Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/fc9cc376-440b-4a28-9172-bc81df1b7131 [none]
+[debug] [2025-10-13T01:58:14.442Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/fc9cc376-440b-4a28-9172-bc81df1b7131 200
+[debug] [2025-10-13T01:58:14.443Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/fc9cc376-440b-4a28-9172-bc81df1b7131 [omitted]
+[info] i  firestore: latest version of firestore.rules already up to date, skipping upload... 
+[debug] [2025-10-13T01:58:14.444Z] [rules] releasing cloud.firestore/(default) with ruleset projects/casino-eaa24/rulesets/fc9cc376-440b-4a28-9172-bc81df1b7131
+[debug] [2025-10-13T01:58:14.445Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:14.445Z] Checked if tokens are valid: true, expires at: 1760324289845
+[debug] [2025-10-13T01:58:14.445Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) [none]
+[debug] [2025-10-13T01:58:14.445Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) {"release":{"name":"projects/casino-eaa24/releases/cloud.firestore/(default)","rulesetName":"projects/casino-eaa24/rulesets/fc9cc376-440b-4a28-9172-bc81df1b7131"}}
+[debug] [2025-10-13T01:58:15.253Z] <<< [apiv2][status] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) 200
+[debug] [2025-10-13T02:09:38.988Z] ----------------------------------------------------------------------
+[debug] [2025-10-13T02:09:38.990Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules --token 
+[debug] [2025-10-13T02:09:38.990Z] CLI Version:   14.19.1
+[debug] [2025-10-13T02:09:38.990Z] Platform:      linux
+[debug] [2025-10-13T02:09:38.991Z] Node Version:  v22.17.0
+[debug] [2025-10-13T02:09:38.991Z] Time:          Mon Oct 13 2025 02:09:38 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-13T02:09:38.991Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-13T02:09:38.991Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-13T02:09:39.276Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-13T02:09:39.277Z] > authorizing via FIREBASE_TOKEN environment variable
+[warn] ⚠  Authenticating with `FIREBASE_TOKEN` is deprecated and will be removed in a future major version of `firebase-tools`. Instead, use a service account key with `GOOGLE_APPLICATION_CREDENTIALS`: https://cloud.google.com/docs/authentication/getting-started 
+[debug] [2025-10-13T02:09:39.278Z] [iam] checking project casino-eaa24 for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2025-10-13T02:09:39.279Z] No OAuth tokens found
+[debug] [2025-10-13T02:09:39.279Z] No OAuth tokens found
+[debug] [2025-10-13T02:09:39.279Z] > refreshing access token with scopes: []
+[debug] [2025-10-13T02:09:39.281Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-13T02:09:39.281Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-13T02:09:39.362Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-13T02:09:39.362Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-13T02:09:39.362Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions [none]
+[debug] [2025-10-13T02:09:39.362Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions x-goog-quota-user=projects/casino-eaa24
+[debug] [2025-10-13T02:09:39.363Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2025-10-13T02:09:39.937Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions 200
+[debug] [2025-10-13T02:09:39.937Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'casino-eaa24'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-10-13T02:09:39.939Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:39.940Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:39.940Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) [none]
+[debug] [2025-10-13T02:09:40.073Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) 200
+[debug] [2025-10-13T02:09:40.073Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) {"name":"projects/casino-eaa24/databases/(default)","uid":"7e755153-e6ff-493c-aeac-11cb318f8219","createTime":"2025-10-10T16:09:56.119207Z","updateTime":"2025-10-10T16:09:56.119207Z","locationId":"eur3","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2025-10-13T01:09:40.040812Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"e","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IPXxsJSMoJADMMmohriCmpAD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2025-10-13T02:09:40.074Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:40.074Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:40.074Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test [none]
+[debug] [2025-10-13T02:09:40.074Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test [omitted]
+[debug] [2025-10-13T02:09:40.757Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test 200
+[debug] [2025-10-13T02:09:40.758Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2025-10-13T02:09:40.759Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:40.759Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:40.759Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases pageSize=10&pageToken=
+[debug] [2025-10-13T02:09:41.016Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases 200
+[debug] [2025-10-13T02:09:41.016Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases {"releases":[{"name":"projects/casino-eaa24/releases/cloud.firestore","rulesetName":"projects/casino-eaa24/rulesets/0db7c112-51b6-4642-8e53-f841e58f2599","createTime":"2025-10-10T16:10:01.660392Z","updateTime":"2025-10-13T02:02:52.830305Z"}]}
+[debug] [2025-10-13T02:09:41.017Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:41.017Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:41.017Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/0db7c112-51b6-4642-8e53-f841e58f2599 [none]
+[debug] [2025-10-13T02:09:41.644Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/0db7c112-51b6-4642-8e53-f841e58f2599 200
+[debug] [2025-10-13T02:09:41.644Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/0db7c112-51b6-4642-8e53-f841e58f2599 [omitted]
+[info] i  firestore: uploading rules firestore.rules... 
+[debug] [2025-10-13T02:09:41.645Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:41.645Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:41.645Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets [none]
+[debug] [2025-10-13T02:09:41.645Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets [omitted]
+[debug] [2025-10-13T02:09:42.055Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets 200
+[debug] [2025-10-13T02:09:42.056Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets {"name":"projects/casino-eaa24/rulesets/8a223d8f-9bd8-4202-a649-993cec55dca1","source":{"files":[{"content":"rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    // ========================================\n    // HELPER FUNCTIONS\n    // ========================================\n\n    // V�rifie si l'utilisateur est authentifi�\n    function isAuthenticated() {\n      return request.auth != null;\n    }\n\n    // V�rifie si l'utilisateur est le propri�taire de la ressource\n    function isOwner(userId) {\n      return isAuthenticated() && request.auth.uid == userId;\n    }\n\n    // V�rifie si l'utilisateur est administrateur\n    function isAdmin() {\n      return isAuthenticated() &&\n             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&\n             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == 1;\n    }\n\n    // V�rifie que les champs requis d'un utilisateur sont pr�sents\n    function hasValidUserFields() {\n      return request.resource.data.keys().hasAll([\n        'balance',\n        'totalWagered',\n        'totalWon',\n        'gamesPlayed'\n      ]);\n    }\n\n    // V�rifie que le solde est un nombre valide et non n�gatif\n    function hasValidBalance() {\n      return request.resource.data.balance is number &&\n             request.resource.data.balance >= 0;\n    }\n\n    // V�rifie que seuls les champs autoris�s sont modifi�s\n    function onlyUpdatesAllowedFields(allowedFields) {\n      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);\n    }\n\n    // V�rifie qu'un message chat a une longueur valide\n    function isValidChatMessage() {\n      return request.resource.data.message is string &&\n             request.resource.data.message.size() > 0 &&\n             request.resource.data.message.size() <= 250;\n    }\n\n\n    // ========================================\n    // COLLECTION: users\n    // ========================================\n\n    match /users/{userId} {\n      // Lecture: Tous les utilisateurs authentifi�s peuvent lire (pour leaderboard et profils)\n      allow read: if isAuthenticated();\n\n      // Cr�ation: Seulement lors de l'inscription (cr�ation initiale)\n      // L'utilisateur peut cr�er son propre document avec les champs par d�faut\n      allow create: if isOwner(userId) &&\n                       hasValidUserFields() &&\n                       hasValidBalance() &&\n                       request.resource.data.admin == 0; // Nouvel utilisateur ne peut pas se cr�er admin\n\n      // Mise � jour: L'utilisateur peut modifier certains champs de son propre document\n      allow update: if isOwner(userId) &&\n                       // Si balance est modifi�, doit �tre un nombre >= 0\n                       (!('balance' in request.resource.data) || (request.resource.data.balance is number && request.resource.data.balance >= 0)) &&\n                       // L'utilisateur ne peut pas modifier son statut admin\n                       (!('admin' in request.resource.data) || request.resource.data.admin == resource.data.admin) &&\n                       // Tous les champs num�riques modifi�s doivent �tre >= 0\n                       (!('totalWagered' in request.resource.data) || request.resource.data.totalWagered >= 0) &&\n                       (!('totalWon' in request.resource.data) || request.resource.data.totalWon >= 0) &&\n                       (!('gamesPlayed' in request.resource.data) || request.resource.data.gamesPlayed >= 0);\n\n      // Suppression: Seulement l'utilisateur lui-même\n      allow delete: if isOwner(userId);\n    }\n\n\n    // ========================================\n    // COLLECTION: chatMessages\n    // ========================================\n\n    match /chatMessages/{messageId} {\n      // Lecture: Tous les utilisateurs authentifi�s peuvent lire les messages\n      allow read: if isAuthenticated();\n\n      // Cr�ation: Utilisateurs authentifi�s peuvent cr�er des messages\n      allow create: if isAuthenticated() &&\n                       isValidChatMessage() &&\n                       request.resource.data.userId == request.auth.uid &&\n                       request.resource.data.keys().hasAll(['userId', 'displayName', 'message', 'createdAt']);\n\n      // Mise � jour: Personne ne peut modifier les messages (immuables)\n      allow update: if false;\n\n      // Suppression: Seulement les admins ou le propri�taire du message\n      allow delete: if isAdmin() ||\n                       (isAuthenticated() && resource.data.userId == request.auth.uid);\n    }\n\n\n    // ========================================\n    // COLLECTION: gameHistory (optionnel - si vous l'ajoutez plus tard)\n    // ========================================\n\n    match /gameHistory/{historyId} {\n      // Lecture: L'utilisateur peut lire son propre historique OU admin\n      allow read: if isAuthenticated() &&\n                     (resource.data.userId == request.auth.uid || isAdmin());\n\n      // Cr�ation: Syst�me uniquement (via transactions)\n      allow create: if isAuthenticated() &&\n                       request.resource.data.userId == request.auth.uid;\n\n      // Mise � jour et suppression: Seulement admin\n      allow update, delete: if isAdmin();\n    }\n\n\n    // ========================================\n    // COLLECTION: transactions (optionnel - pour audit)\n    // ========================================\n\n    match /transactions/{transactionId} {\n      // Lecture: L'utilisateur peut lire ses propres transactions OU admin\n      allow read: if isAuthenticated() &&\n                     (resource.data.userId == request.auth.uid || isAdmin());\n\n      // Cr�ation: Utilisateurs peuvent cr�er leurs transactions\n      allow create: if isAuthenticated() &&\n                       request.resource.data.userId == request.auth.uid;\n\n      // Mise � jour et suppression: Seulement admin\n      allow update, delete: if isAdmin();\n    }\n\n\n    // ========================================\n    // COLLECTION: vipRewards (optionnel)\n    // ========================================\n\n    match /vipRewards/{rewardId} {\n      // Lecture: L'utilisateur peut lire ses propres r�compenses OU admin\n      allow read: if isAuthenticated() &&\n                     (resource.data.userId == request.auth.uid || isAdmin());\n\n      // Cr�ation, mise � jour, suppression: Seulement admin\n      allow create, update, delete: if isAdmin();\n    }\n\n\n    // ========================================\n    // COLLECTION: settings (configuration globale)\n    // ========================================\n\n    match /settings/{settingId} {\n      // Lecture: Tous les utilisateurs authentifi�s\n      allow read: if isAuthenticated();\n\n      // �criture: Seulement admin\n      allow write: if isAdmin();\n    }\n\n\n    // ========================================\n    // COLLECTION: notifications (optionnel)\n    // ========================================\n\n    match /notifications/{notificationId} {\n      // Lecture: L'utilisateur peut lire ses propres notifications\n      allow read: if isAuthenticated() &&\n                     resource.data.userId == request.auth.uid;\n\n      // Cr�ation: Admin ou syst�me\n      allow create: if isAdmin();\n\n      // Mise � jour: L'utilisateur peut marquer comme lu\n      allow update: if isAuthenticated() &&\n                       resource.data.userId == request.auth.uid &&\n                       onlyUpdatesAllowedFields(['read', 'readAt']);\n\n      // Suppression: Admin ou propri�taire\n      allow delete: if isAdmin() ||\n                       (isAuthenticated() && resource.data.userId == request.auth.uid);\n    }\n\n\n    // ========================================\n    // R�GLE PAR D�FAUT: TOUT REFUSER\n    // ========================================\n\n    // Tout ce qui n'est pas explicitement autoris� est refus�\n    match /{document=**} {\n      allow read, write: if false;\n    }\n  }\n}\n","name":"firestore.rules"}]},"createTime":"2025-10-13T02:09:41.949359Z","metadata":{"services":["cloud.firestore"]}}
+[debug] [2025-10-13T02:09:42.056Z] [rules] created ruleset projects/casino-eaa24/rulesets/8a223d8f-9bd8-4202-a649-993cec55dca1
+[debug] [2025-10-13T02:09:42.056Z] [rules] releasing cloud.firestore/(default) with ruleset projects/casino-eaa24/rulesets/8a223d8f-9bd8-4202-a649-993cec55dca1
+[debug] [2025-10-13T02:09:42.057Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:42.057Z] Checked if tokens are valid: true, expires at: 1760324978362
+[debug] [2025-10-13T02:09:42.057Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) [none]
+[debug] [2025-10-13T02:09:42.057Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) {"release":{"name":"projects/casino-eaa24/releases/cloud.firestore/(default)","rulesetName":"projects/casino-eaa24/rulesets/8a223d8f-9bd8-4202-a649-993cec55dca1"}}
+[debug] [2025-10-13T02:09:42.873Z] <<< [apiv2][status] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) 200

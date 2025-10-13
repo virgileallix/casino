@@ -33,7 +33,9 @@ const DEFAULT_USER_FIELDS = {
     lastRakebackClaim: null,
     username: null,
     // Admin System
-    admin: 0
+    admin: 0,
+    // Privacy
+    isPrivate: false
 };
 
 function roundCurrency(value) {

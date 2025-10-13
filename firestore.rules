@@ -2,200 +2,204 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId} {
-      allow create: if isAuthenticatedOwner(userId) && isValidUserCreate();
-      allow read: if request.auth != null;
-      allow update: if isAuthenticatedOwner(userId) && isValidUserUpdate();
-      allow delete: if false;
+
+    // ========================================
+    // HELPER FUNCTIONS
+    // ========================================
+
+    // V�rifie si l'utilisateur est authentifi�
+    function isAuthenticated() {
+      return request.auth != null;
     }
+
+    // V�rifie si l'utilisateur est le propri�taire de la ressource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // V�rifie si l'utilisateur est administrateur
+    function isAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == 1;
+    }
+
+    // V�rifie que les champs requis d'un utilisateur sont pr�sents
+    function hasValidUserFields() {
+      return request.resource.data.keys().hasAll([
+        'balance',
+        'totalWagered',
+        'totalWon',
+        'gamesPlayed'
+      ]);
+    }
+
+    // V�rifie que le solde est un nombre valide et non n�gatif
+    function hasValidBalance() {
+      return request.resource.data.balance is number &&
+             request.resource.data.balance >= 0;
+    }
+
+    // V�rifie que seuls les champs autoris�s sont modifi�s
+    function onlyUpdatesAllowedFields(allowedFields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
+    }
+
+    // V�rifie qu'un message chat a une longueur valide
+    function isValidChatMessage() {
+      return request.resource.data.message is string &&
+             request.resource.data.message.size() > 0 &&
+             request.resource.data.message.size() <= 250;
+    }
+
+
+    // ========================================
+    // COLLECTION: users
+    // ========================================
+
+    match /users/{userId} {
+      // Lecture: Tous les utilisateurs authentifi�s peuvent lire (pour leaderboard et profils)
+      allow read: if isAuthenticated();
+
+      // Cr�ation: Seulement lors de l'inscription (cr�ation initiale)
+      // L'utilisateur peut cr�er son propre document avec les champs par d�faut
+      allow create: if isOwner(userId) &&
+                       hasValidUserFields() &&
+                       hasValidBalance() &&
+                       request.resource.data.admin == 0; // Nouvel utilisateur ne peut pas se cr�er admin
+
+      // Mise � jour: L'utilisateur peut modifier certains champs de son propre document
+      allow update: if isOwner(userId) &&
+                       // Si balance est modifi�, doit �tre un nombre >= 0
+                       (!('balance' in request.resource.data) || (request.resource.data.balance is number && request.resource.data.balance >= 0)) &&
+                       // L'utilisateur ne peut pas modifier son statut admin
+                       (!('admin' in request.resource.data) || request.resource.data.admin == resource.data.admin) &&
+                       // Tous les champs num�riques modifi�s doivent �tre >= 0
+                       (!('totalWagered' in request.resource.data) || request.resource.data.totalWagered >= 0) &&
+                       (!('totalWon' in request.resource.data) || request.resource.data.totalWon >= 0) &&
+                       (!('gamesPlayed' in request.resource.data) || request.resource.data.gamesPlayed >= 0);
+
+      // Suppression: Seulement l'utilisateur lui-même
+      allow delete: if isOwner(userId);
+    }
+
+
+    // ========================================
+    // COLLECTION: chatMessages
+    // ========================================
 
     match /chatMessages/{messageId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null &&
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.message is string &&
-                      request.resource.data.message.size() > 0 &&
-                      request.resource.data.message.size() <= 250;
-      allow update, delete: if false;
+      // Lecture: Tous les utilisateurs authentifi�s peuvent lire les messages
+      allow read: if isAuthenticated();
+
+      // Cr�ation: Utilisateurs authentifi�s peuvent cr�er des messages
+      allow create: if isAuthenticated() &&
+                       isValidChatMessage() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['userId', 'displayName', 'message', 'createdAt']);
+
+      // Mise � jour: Personne ne peut modifier les messages (immuables)
+      allow update: if false;
+
+      // Suppression: Seulement les admins ou le propri�taire du message
+      allow delete: if isAdmin() ||
+                       (isAuthenticated() && resource.data.userId == request.auth.uid);
     }
 
+
+    // ========================================
+    // COLLECTION: gameHistory (optionnel - si vous l'ajoutez plus tard)
+    // ========================================
+
+    match /gameHistory/{historyId} {
+      // Lecture: L'utilisateur peut lire son propre historique OU admin
+      allow read: if isAuthenticated() &&
+                     (resource.data.userId == request.auth.uid || isAdmin());
+
+      // Cr�ation: Syst�me uniquement (via transactions)
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Mise � jour et suppression: Seulement admin
+      allow update, delete: if isAdmin();
+    }
+
+
+    // ========================================
+    // COLLECTION: transactions (optionnel - pour audit)
+    // ========================================
+
+    match /transactions/{transactionId} {
+      // Lecture: L'utilisateur peut lire ses propres transactions OU admin
+      allow read: if isAuthenticated() &&
+                     (resource.data.userId == request.auth.uid || isAdmin());
+
+      // Cr�ation: Utilisateurs peuvent cr�er leurs transactions
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Mise � jour et suppression: Seulement admin
+      allow update, delete: if isAdmin();
+    }
+
+
+    // ========================================
+    // COLLECTION: vipRewards (optionnel)
+    // ========================================
+
+    match /vipRewards/{rewardId} {
+      // Lecture: L'utilisateur peut lire ses propres r�compenses OU admin
+      allow read: if isAuthenticated() &&
+                     (resource.data.userId == request.auth.uid || isAdmin());
+
+      // Cr�ation, mise � jour, suppression: Seulement admin
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ========================================
+    // COLLECTION: settings (configuration globale)
+    // ========================================
+
+    match /settings/{settingId} {
+      // Lecture: Tous les utilisateurs authentifi�s
+      allow read: if isAuthenticated();
+
+      // �criture: Seulement admin
+      allow write: if isAdmin();
+    }
+
+
+    // ========================================
+    // COLLECTION: notifications (optionnel)
+    // ========================================
+
+    match /notifications/{notificationId} {
+      // Lecture: L'utilisateur peut lire ses propres notifications
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+
+      // Cr�ation: Admin ou syst�me
+      allow create: if isAdmin();
+
+      // Mise � jour: L'utilisateur peut marquer comme lu
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       onlyUpdatesAllowedFields(['read', 'readAt']);
+
+      // Suppression: Admin ou propri�taire
+      allow delete: if isAdmin() ||
+                       (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+
+    // ========================================
+    // R�GLE PAR D�FAUT: TOUT REFUSER
+    // ========================================
+
+    // Tout ce qui n'est pas explicitement autoris� est refus�
     match /{document=**} {
       allow read, write: if false;
     }
-  }
-
-  function isAuthenticatedOwner(userId) {
-    return request.auth != null && request.auth.uid == userId;
-  }
-
-  function isAdmin() {
-    return request.auth != null &&
-           exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == 1;
-  }
-
-  function allowedUserFields() {
-    return [
-      'email',
-      'createdAt',
-      'balance',
-      'totalWagered',
-      'totalWon',
-      'gamesPlayed',
-      'diceGamesPlayed',
-      'diceWins',
-      'diceLosses',
-      'diceBestWin',
-      'plinkoGamesPlayed',
-      'plinkoTotalWon',
-      'plinkoBestWin',
-      'blackjackHandsPlayed',
-      'blackjackWins',
-      'blackjackBlackjacks',
-      'blackjackTotalProfit',
-      'minesGamesPlayed',
-      'minesCashouts',
-      'minesBestMultiplier',
-      'minesTotalProfit',
-      'towerGamesPlayed',
-      'towerCashouts',
-      'towerBestMultiplier',
-      'towerTotalProfit',
-      'totalWager',
-      'rakebackAvailable',
-      'totalRakebackEarned',
-      'lastRakebackClaim',
-      'username',
-      'admin'
-    ];
-  }
-
-  function requiredUserFields() {
-    return [
-      'balance',
-      'totalWagered',
-      'totalWon',
-      'gamesPlayed'
-    ];
-  }
-
-  function hasAllowedKeys() {
-    return request.resource.data.keys().hasOnly(allowedUserFields());
-  }
-
-  function isNonNegativeNumber(field) {
-    return (request.resource.data[field] is number || request.resource.data[field] is int) &&
-           request.resource.data[field] >= 0;
-  }
-
-  function isNonNegativeInt(field) {
-    return request.resource.data[field] is int &&
-           request.resource.data[field] >= 0;
-  }
-
-  function isNumber(field) {
-    return request.resource.data[field] is number;
-  }
-
-  function isValidOptionalNumber(field) {
-    return !request.resource.data.keys().hasAny([field]) ||
-           request.resource.data[field] == null ||
-           (request.resource.data[field] is number && request.resource.data[field] >= 0) ||
-           (request.resource.data[field] is int && request.resource.data[field] >= 0);
-  }
-
-  function isValidOptionalInt(field) {
-    return !request.resource.data.keys().hasAny([field]) ||
-           request.resource.data[field] == null ||
-           (request.resource.data[field] is int && request.resource.data[field] >= 0);
-  }
-
-  function hasValidNumberFields() {
-    return (!request.resource.data.keys().hasAny(['balance']) || isNonNegativeNumber('balance')) &&
-           (!request.resource.data.keys().hasAny(['totalWagered']) || isNonNegativeNumber('totalWagered')) &&
-           (!request.resource.data.keys().hasAny(['totalWon']) || isNonNegativeNumber('totalWon')) &&
-           (!request.resource.data.keys().hasAny(['gamesPlayed']) || isNonNegativeInt('gamesPlayed')) &&
-           isValidOptionalInt('diceGamesPlayed') &&
-           isValidOptionalInt('diceWins') &&
-           isValidOptionalInt('diceLosses') &&
-           isValidOptionalNumber('diceBestWin') &&
-           isValidOptionalInt('plinkoGamesPlayed') &&
-           isValidOptionalNumber('plinkoTotalWon') &&
-           isValidOptionalNumber('plinkoBestWin') &&
-           isValidOptionalInt('blackjackHandsPlayed') &&
-           isValidOptionalInt('blackjackWins') &&
-           isValidOptionalInt('blackjackBlackjacks') &&
-           isValidOptionalNumber('blackjackTotalProfit') &&
-           isValidOptionalInt('minesGamesPlayed') &&
-           isValidOptionalInt('minesCashouts') &&
-           isValidOptionalNumber('minesBestMultiplier') &&
-           isValidOptionalNumber('minesTotalProfit') &&
-           isValidOptionalInt('towerGamesPlayed') &&
-           isValidOptionalInt('towerCashouts') &&
-           isValidOptionalNumber('towerBestMultiplier') &&
-           isValidOptionalNumber('towerTotalProfit') &&
-           isValidOptionalNumber('totalWager') &&
-           isValidOptionalNumber('rakebackAvailable') &&
-           isValidOptionalNumber('totalRakebackEarned');
-  }
-
-  function hasValidCreateMetadata() {
-    return (request.resource.data.email == null ||
-            (request.resource.data.email is string &&
-             (request.auth.token.email == null ||
-              request.auth.token.email == request.resource.data.email)));
-  }
-
-  function hasValidAdminField() {
-    return !request.resource.data.keys().hasAny(['admin']) ||
-           (request.resource.data.admin is int &&
-            (request.resource.data.admin == 0 || request.resource.data.admin == 1));
-  }
-
-  function hasValidUsernameField() {
-    return !request.resource.data.keys().hasAny(['username']) ||
-           request.resource.data.username == null ||
-           (request.resource.data.username is string &&
-            request.resource.data.username.size() >= 0 &&
-            request.resource.data.username.size() <= 16);
-  }
-
-  function hasValidRakebackClaimField() {
-    return !request.resource.data.keys().hasAny(['lastRakebackClaim']) ||
-           request.resource.data.lastRakebackClaim == null ||
-           request.resource.data.lastRakebackClaim is string;
-  }
-
-  function hasValidCreatedAtField() {
-    return !request.resource.data.keys().hasAny(['createdAt']) ||
-           (request.resource.data.createdAt is string);
-  }
-
-  function canModifyAdminField() {
-    return !request.resource.data.keys().hasAny(['admin']) ||
-           (request.resource.data.admin == 0 && !resource.data.keys().hasAny(['admin'])) ||
-           (resource.data.keys().hasAny(['admin']) && resource.data.admin == request.resource.data.admin) ||
-           isAdmin();
-  }
-
-  function isValidUserCreate() {
-    return hasAllowedKeys() &&
-           hasValidNumberFields() &&
-           hasValidCreateMetadata() &&
-           hasValidAdminField() &&
-           hasValidUsernameField() &&
-           hasValidRakebackClaimField() &&
-           hasValidCreatedAtField() &&
-           (!request.resource.data.keys().hasAny(['admin']) || request.resource.data.admin == 0);
-  }
-
-  function isValidUserUpdate() {
-    return hasAllowedKeys() &&
-           hasValidNumberFields() &&
-           hasValidAdminField() &&
-           hasValidUsernameField() &&
-           hasValidRakebackClaimField() &&
-           hasValidCreatedAtField() &&
-           canModifyAdminField();
   }
 }

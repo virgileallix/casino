@@ -18,7 +18,11 @@ export function initializeGlobalChat() {
     // Initialize chat
     chatInstance = initializeChat({
         containerId: 'globalChatPanel',
-        messageLimit: 10
+        messageLimit: 10,
+        onUserSelected: (userId) => {
+            // Navigate to user profile when clicking on username
+            window.location.href = `profile.html?id=${userId}`;
+        }
     });
 
     // Toggle chat open/close

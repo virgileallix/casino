@@ -20,6 +20,7 @@
             </a>
             <nav class="nav">
                 <a href="index.html" class="nav-link">Casino</a>
+                <a href="leaderboard.html" class="nav-link">Leaderboard</a>
                 <a href="dice.html" class="nav-link">Dice</a>
                 <a href="plinko.html" class="nav-link">Plinko</a>
                 <a href="mines.html" class="nav-link">Mines</a>
@@ -241,6 +242,12 @@
     <script type="module">
         import { initializeGlobalChat } from './global-chat.js';
         initializeGlobalChat();
+    </script>
+    <script type="module">
+        import { initializeAdminNav } from './admin-nav.js';
+        import { initializeURLCleaner } from './url-cleaner.js';
+        initializeAdminNav();
+        initializeURLCleaner();
     </script>
 </body>
 </html>
