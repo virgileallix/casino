@@ -359,8 +359,8 @@ async function processCardDeposit() {
         // Simulate payment processing
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        await addFunds(currentUser.uid, amount);
-        alert(`Dépôt de ${amount.toFixed(2)} € effectué avec succès!`);
+        //await addFunds(currentUser.uid, amount);
+        alert(`Dépôt de ${amount.toFixed(2)} € n'a pas été effectué avec succès!`);
         closeDepositModal();
     } catch (error) {
         console.error('Error processing deposit:', error);
@@ -417,8 +417,8 @@ async function processEwalletDeposit() {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const fees = amount * 0.025;
-        await addFunds(currentUser.uid, amount);
-        alert(`Dépôt de ${amount.toFixed(2)} € effectué avec succès! (Frais: ${fees.toFixed(2)} €)`);
+        //await addFunds(currentUser.uid, amount);
+        alert(`Dépôt de ${amount.toFixed(2)} € n'a pas été effectué avec succès! (Frais: ${fees.toFixed(2)} €)`);
         closeDepositModal();
     } catch (error) {
         console.error('Error processing deposit:', error);

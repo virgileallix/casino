@@ -1,6 +1,6 @@
 import { db, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction } from './firebase-config.js';
 
-const INITIAL_BALANCE = 1000;
+const INITIAL_BALANCE = 100;
 
 const DEFAULT_USER_FIELDS = {
     balance: INITIAL_BALANCE,
@@ -42,7 +42,7 @@ const DEFAULT_USER_FIELDS = {
     // Admin System
     admin: 0,
     // Privacy
-    isPrivate: false
+    isPrivate: true
 };
 
 function roundCurrency(value) {
