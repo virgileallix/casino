@@ -29,6 +29,10 @@ const DEFAULT_USER_FIELDS = {
     kenoGamesPlayed: 0,
     kenoWins: 0,
     kenoBestWin: 0,
+    casesGamesPlayed: 0,
+    casesWins: 0,
+    casesBestMultiplier: 0,
+    casesTotalProfit: 0,
     // VIP System
     totalWager: 0,
     rakebackAvailable: 0,
@@ -276,6 +280,17 @@ export async function applyGameResult(userId, { betAmount, payout, game, metadat
             if (profit > 0) {
                 updates.kenoBestWin = Math.max(current.kenoBestWin || 0, profit);
             }
+        }
+
+        if (game === 'cases') {
+            updates.casesGamesPlayed = current.casesGamesPlayed + 1;
+            if (metadata.result === 'win') {
+                updates.casesWins = current.casesWins + 1;
+            }
+            if (metadata.multiplier) {
+                updates.casesBestMultiplier = Math.max(current.casesBestMultiplier || 0, metadata.multiplier);
+            }
+            updates.casesTotalProfit = roundCurrency((current.casesTotalProfit || 0) + profit);
         }
 
         transaction.update(userRef, updates);
