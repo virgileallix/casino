@@ -387,11 +387,11 @@ export async function resetUserStats(userId) {
 
 export async function updateUsername(userId, username) {
     if (!username || typeof username !== 'string') {
-        throw new Error('Nom d'utilisateur invalide');
+        throw new Error('Nom d\'utilisateur invalide');
     }
     const sanitized = username.trim();
     if (sanitized.length < 3 || sanitized.length > 16) {
-        throw new Error('Le pseudo doit contenir entre 3 et 16 caractères.');
+        throw new Error('Le pseudo doit contenir entre 3 et 16 caracteres.');
     }
     if (!/^[a-zA-Z0-9_]+$/.test(sanitized)) {
         throw new Error('Le pseudo ne peut contenir que des lettres, chiffres ou underscores.');
