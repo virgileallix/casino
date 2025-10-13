@@ -19,12 +19,12 @@ let stats = {
 // Payout tables for each difficulty (multiplier: weight)
 const PAYOUT_TABLES = {
     easy: {
-        multipliers: [0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50],
+        multipliers: [0.2, 0.4, 0.5, 0.80, 1, 2, 5, 10, 20, 50],
         weights:      [45, 20, 15, 8, 6, 3, 2, 0.7, 0.25, 0.05]
         // RTP ≈ 92%
     },
     medium: {
-        multipliers: [0, 0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100],
+        multipliers: [0.1, 0.2, 0.40, 0.5, 1, 2, 5, 10, 25, 50, 100],
         weights:      [50, 15, 10, 8, 6, 4, 3, 2, 1, 0.5, 0.5]
         // RTP ≈ 88%
     },
