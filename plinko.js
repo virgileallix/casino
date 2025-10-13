@@ -659,7 +659,7 @@ document.getElementById('depositBtn').addEventListener('click', async () => {
     const depositAmount = parseFloat(amount);
     if (amount && !isNaN(depositAmount) && depositAmount > 0) {
         try {
-            await addFunds(currentUser.uid, depositAmount);
+            //await addFunds(currentUser.uid, depositAmount);
             alert(`${depositAmount.toFixed(2)} € ajoutés à votre solde!`);
         } catch (error) {
             console.error('Error adding funds:', error);
