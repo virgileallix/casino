@@ -26,6 +26,9 @@ const DEFAULT_USER_FIELDS = {
     towerCashouts: 0,
     towerBestMultiplier: 0,
     towerTotalProfit: 0,
+    kenoGamesPlayed: 0,
+    kenoWins: 0,
+    kenoBestWin: 0,
     // VIP System
     totalWager: 0,
     rakebackAvailable: 0,
@@ -263,6 +266,16 @@ export async function applyGameResult(userId, { betAmount, payout, game, metadat
                 updates.towerBestMultiplier = Math.max(current.towerBestMultiplier || 0, metadata.multiplier || 0);
             }
             updates.towerTotalProfit = roundCurrency((current.towerTotalProfit || 0) + profit);
+        }
+
+        if (game === 'keno') {
+            updates.kenoGamesPlayed = current.kenoGamesPlayed + 1;
+            if (metadata.result === 'win') {
+                updates.kenoWins = current.kenoWins + 1;
+            }
+            if (profit > 0) {
+                updates.kenoBestWin = Math.max(current.kenoBestWin || 0, profit);
+            }
         }
 
         transaction.update(userRef, updates);

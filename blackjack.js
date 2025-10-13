@@ -143,13 +143,24 @@ function renderHand(container, hand, hideHole = false) {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
         cardDiv.style.setProperty('--index', index);
+
         if (hideHole && index === 1) {
             cardDiv.classList.add('face-down');
-            cardDiv.removeAttribute('style');
-            cardDiv.style.setProperty('--index', index);
         } else {
-            cardDiv.style.backgroundImage = `url('${getCardImage(card)}')`;
+            // Set card display attributes
+            const suitSymbols = {
+                hearts: '♥',
+                diamonds: '♦',
+                clubs: '♣',
+                spades: '♠'
+            };
+
+            const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
+            cardDiv.style.setProperty('--card-color', isRed ? '#dc143c' : '#000');
+            cardDiv.setAttribute('data-display', card.rank);
+            cardDiv.setAttribute('data-suit', suitSymbols[card.suit] || '');
         }
+
         cardDiv.classList.add('deal');
         setTimeout(() => cardDiv.classList.remove('deal'), 600);
         container.appendChild(cardDiv);

@@ -1,0 +1,547 @@
+/* Keno Main Layout */
+.keno-main {
+    padding: 90px 20px 40px;
+    min-height: 100vh;
+}
+
+.keno-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: 20px;
+}
+
+/* Left Panel - Controls */
+.keno-left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.game-info-card,
+.control-card,
+.stats-card,
+.payout-table-card,
+.history-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.game-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.game-icon {
+    font-size: 2rem;
+}
+
+.game-badge {
+    padding: 4px 12px;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.game-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Controls */
+.control-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bet-input-container {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.bet-input {
+    width: 100%;
+    padding: 14px 45px 14px 16px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.bet-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.1);
+}
+
+.currency {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.quick-bets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.quick-bet {
+    padding: 10px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-bet:hover {
+    border-color: var(--accent-primary);
+    background: rgba(0, 208, 132, 0.1);
+}
+
+/* Risk Selector */
+.risk-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.risk-btn {
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.risk-btn:hover {
+    border-color: var(--accent-primary);
+}
+
+.risk-btn.active {
+    background: rgba(0, 208, 132, 0.1);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+/* Payout Card */
+.payout-card {
+    background: linear-gradient(135deg, rgba(0, 208, 132, 0.1), rgba(138, 43, 226, 0.1));
+    border-color: rgba(0, 208, 132, 0.3);
+}
+
+.payout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
+.payout-multiplier {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.payout-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+}
+
+.btn-play,
+.btn-clear {
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-play {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+}
+
+.btn-play:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 208, 132, 0.4);
+}
+
+.btn-play:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-clear {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-clear:hover {
+    border-color: var(--accent-primary);
+    background: rgba(0, 208, 132, 0.1);
+}
+
+/* Stats */
+.stats-title,
+.history-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+/* Center Panel - Game Board */
+.keno-center-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.keno-board-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1;
+}
+
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.selected-count {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.selected-count span {
+    color: var(--accent-primary);
+}
+
+.result-info {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+/* Keno Board */
+.keno-board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.keno-number {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.keno-number:hover:not(.disabled) {
+    border-color: var(--accent-primary);
+    transform: scale(1.05);
+}
+
+.keno-number.selected {
+    background: rgba(0, 208, 132, 0.2);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.keno-number.hit {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-color: var(--accent-primary);
+    color: white;
+    animation: hit-pulse 0.5s ease;
+}
+
+.keno-number.miss {
+    background: rgba(255, 68, 68, 0.2);
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.keno-number.drawn {
+    background: rgba(138, 43, 226, 0.2);
+    border-color: rgba(138, 43, 226, 0.5);
+    color: #b794f6;
+}
+
+.keno-number.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes hit-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.board-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-quick-pick {
+    padding: 12px 24px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-quick-pick:hover {
+    border-color: var(--accent-primary);
+    background: rgba(0, 208, 132, 0.1);
+}
+
+/* Right Panel - Payout Table */
+.keno-right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.payout-table-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.payout-table-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.payout-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.payout-table th,
+.payout-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.payout-table th {
+    font-weight: 600;
+    color: var(--accent-primary);
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+}
+
+.payout-table td {
+    color: var(--text-primary);
+}
+
+.payout-table tr.highlighted {
+    background: rgba(0, 208, 132, 0.1);
+}
+
+.payout-table .multiplier {
+    color: var(--accent-primary);
+    font-weight: 700;
+}
+
+/* History */
+.history-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.history-item:last-child {
+    margin-bottom: 0;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.history-result {
+    font-weight: 700;
+}
+
+.history-result.win {
+    color: var(--accent-primary);
+}
+
+.history-result.loss {
+    color: #ff4444;
+}
+
+.history-details {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 10px;
+}
+
+.no-history {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+}
+
+/* Scrollbar Styling */
+.payout-table-scroll::-webkit-scrollbar,
+.history-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.payout-table-scroll::-webkit-scrollbar-track,
+.history-list::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+.payout-table-scroll::-webkit-scrollbar-thumb,
+.history-list::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .keno-container {
+        grid-template-columns: 280px 1fr 280px;
+    }
+
+    .keno-board {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 8px;
+    }
+
+    .keno-number {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .keno-container {
+        grid-template-columns: 1fr;
+    }
+
+    .keno-left-panel,
+    .keno-right-panel {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .keno-board {
+        grid-template-columns: repeat(10, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .keno-left-panel,
+    .keno-right-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .keno-board {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 6px;
+    }
+
+    .keno-number {
+        font-size: 1rem;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .keno-board {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}

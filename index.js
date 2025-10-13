@@ -78,6 +78,10 @@ function updateGameStats() {
     // Tower
     document.getElementById('gameTowerCount').textContent = userData.towerGamesPlayed || 0;
     document.getElementById('gameTowerBestMulti').textContent = `${(userData.towerBestMultiplier || 0).toFixed(2)}x`;
+
+    // Keno
+    document.getElementById('gameKenoCount').textContent = userData.kenoGamesPlayed || 0;
+    document.getElementById('gameKenoBest').textContent = `${(userData.kenoBestWin || 0).toFixed(2)} €`;
 }
 
 // Load top players preview
