@@ -813,6 +813,31 @@ body {
     color: var(--bg-primary);
 }
 
+.btn-profile {
+    padding: 8px 16px;
+    background: rgba(0, 208, 132, 0.1);
+    border: 1px solid rgba(0, 208, 132, 0.3);
+    border-radius: 8px;
+    color: var(--accent-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.btn-profile:hover {
+    background: rgba(0, 208, 132, 0.2);
+    border-color: rgba(0, 208, 132, 0.5);
+    color: var(--accent-secondary);
+}
+
+.profile-icon {
+    font-size: 1rem;
+}
+
 .btn-admin {
     padding: 8px 16px;
     background: rgba(138, 43, 226, 0.1);

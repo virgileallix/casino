@@ -149,6 +149,16 @@ function setupEventListeners() {
         window.location.href = 'vip.html';
     });
 
+    // Profile button
+    const profileBtn = document.getElementById('profileBtn');
+    if (profileBtn) {
+        profileBtn.addEventListener('click', () => {
+            if (currentUser) {
+                window.location.href = `profile.html?uid=${currentUser.uid}`;
+            }
+        });
+    }
+
     // Admin button
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
@@ -171,27 +181,46 @@ function setupEventListeners() {
     });
 }
 
-// Animate hero stats
-function animateHeroStats() {
-    // Simulate real-time stats
-    setInterval(() => {
-        const usersEl = document.getElementById('heroUsers');
-        const currentUsers = parseInt(usersEl.textContent.replace(',', ''));
-        const newUsers = currentUsers + Math.floor(Math.random() * 3) - 1;
-        usersEl.textContent = Math.max(1000, newUsers).toLocaleString();
+// Load real global stats
+async function loadGlobalStats() {
+    try {
+        const { collection, getDocs } = await import('./firebase-config.js');
+        const { db } = await import('./firebase-config.js');
 
-        const winsEl = document.getElementById('heroWins');
-        const currentWins = parseFloat(winsEl.textContent.replace('€', '').replace(',', ''));
-        const newWins = currentWins + (Math.random() * 100);
-        winsEl.textContent = '€' + newWins.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    }, 5000);
+        const usersRef = collection(db, 'users');
+        const snapshot = await getDocs(usersRef);
+
+        let totalUsers = 0;
+        let totalWinsToday = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            totalUsers++;
+
+            // Pour les gains du jour, on prend le total gagné (à améliorer avec lastGameDate)
+            if (data.totalWon) {
+                totalWinsToday += data.totalWon;
+            }
+        });
+
+        // Update hero stats
+        document.getElementById('heroUsers').textContent = totalUsers.toLocaleString();
+        document.getElementById('heroWins').textContent = '€' + totalWinsToday.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+        // Refresh every 30 seconds
+        setTimeout(loadGlobalStats, 30000);
+    } catch (error) {
+        console.error('Error loading global stats:', error);
+    }
 }
 
 // Initialize
 function init() {
     setupEventListeners();
     loadTopPlayers();
-    animateHeroStats();
+    loadGlobalStats();
 }
 
 // Auth state listener

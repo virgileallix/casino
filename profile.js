@@ -181,7 +181,7 @@ function renderProfile(userData) {
                     <div class="profile-avatar">${initials}</div>
                     <div class="profile-info">
                         <h1 class="profile-name">${displayName}</h1>
-                        <p class="profile-email">${userData.email || ''}</p>
+                        ${isOwnProfile ? `<p class="profile-email">${userData.email || ''}</p>` : ''}
                         <div style="margin-top: 0.75rem;">
                             <span class="profile-vip" style="color: ${vipTier.color}">
                                 ${vipTier.icon} ${vipTier.name}
