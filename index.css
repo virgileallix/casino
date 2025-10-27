@@ -767,3 +767,22 @@
         font-size: 2rem;
     }
 }
+
+/* New Game Cards Styles */
+.slots-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(138, 43, 226, 0.1) 100%);
+}
+
+.slots-card:hover {
+    border-color: var(--accent-secondary);
+    box-shadow: 0 10px 30px rgba(138, 43, 226, 0.3);
+}
+
+.crash-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255, 69, 0, 0.1) 100%);
+}
+
+.crash-card:hover {
+    border-color: #ff4500;
+    box-shadow: 0 10px 30px rgba(255, 69, 0, 0.3);
+}
