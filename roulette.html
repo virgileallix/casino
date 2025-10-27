@@ -49,8 +49,8 @@
 
     <!-- Main Content -->
     <main class="roulette-main">
-        <div class="roulette-container">
-            <section class="roulette-display">
+        <div class="roulette-wrapper">
+            <section class="roulette-left">
                 <header class="roulette-header">
                     <div>
                         <h1>🎡 Roulette</h1>
@@ -83,48 +83,35 @@
                 </div>
             </section>
 
-            <aside class="roulette-controls">
-                <div class="control-card">
-                    <label for="betAmount" class="control-label">Mise (€)</label>
-                    <div class="bet-input">
-                        <input type="number" id="betAmount" min="0.10" step="0.10" value="1.00">
-                        <span class="currency">€</span>
+            <section class="roulette-right">
+                <div class="chips-panel">
+                    <span class="control-label">Jetons</span>
+                    <div class="chips-list" id="chipsList"></div>
+                    <div class="selected-chip">Jeton sélectionné: <span id="selectedChipDisplay">1.00 €</span></div>
+                    <div class="chip-hints">Clique pour ajouter un jeton, clic droit pour retirer la mise.</div>
+                </div>
+
+                <div class="roulette-table-wrapper">
+                    <div class="roulette-table" id="rouletteTable"></div>
+                </div>
+
+                <div class="betting-summary">
+                    <div class="summary-item">
+                        <span>Total misé</span>
+                        <strong id="totalBetDisplay">0.00 €</strong>
                     </div>
-                    <div class="bet-quick-buttons">
-                        <button data-action="half">½</button>
-                        <button data-action="double">2x</button>
-                        <button data-action="min">Min</button>
-                        <button data-action="max">Max</button>
+                    <div class="summary-item">
+                        <span>Gain max possible</span>
+                        <strong id="maxWinDisplay">0.00 €</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Nombre de paris</span>
+                        <strong id="betCountDisplay">0</strong>
                     </div>
                 </div>
 
-                <div class="control-card">
-                    <span class="control-label">Type de pari</span>
-                    <div class="bet-type-tabs" id="betTypeTabs">
-                        <button class="active" data-type="color">Couleur</button>
-                        <button data-type="parity">Pair/Impair</button>
-                        <button data-type="dozen">Douzaine</button>
-                        <button data-type="range">1-18 / 19-36</button>
-                        <button data-type="number">Numéro</button>
-                    </div>
-                </div>
-
-                <div class="control-card">
-                    <div class="bet-options" id="betOptions"></div>
-                </div>
-
-                <div class="control-card">
-                    <div class="summary-row">
-                        <span>Gain potentiel</span>
-                        <span id="potentialWin">0.00 €</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Multiplicateur</span>
-                        <span id="payoutMultiplier">0.00x</span>
-                    </div>
-                </div>
-
-                <div class="control-card">
+                <div class="betting-actions">
+                    <button class="btn-secondary-outline" id="clearBets">Tout effacer</button>
                     <button class="spin-button" id="spinButton">
                         <span>🎡 Lancer la roue</span>
                     </button>
@@ -151,7 +138,7 @@
                         </div>
                     </div>
                 </div>
-            </aside>
+            </section>
         </div>
     </main>
 
