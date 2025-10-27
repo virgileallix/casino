@@ -1,15 +1,12 @@
-import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, serverTimestamp } from './firebase-config.js';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from './firebase-config.js';
 import { updateBalance, getUserBalance } from './balance-manager.js';
 
 let currentUser = null;
-let gameState = 'waiting';
-let currentMultiplier = 1.00;
-let betAmount = 0;
-let hasBet = false;
-let gameInterval = null;
-let startTime = 0;
-let crashPoint = 0;
-let history = [];
+let currentGameId = null;
+let gameStateListener = null;
+let betsListener = null;
+let myBetId = null;
+let myBetAmount = 0;
 let stats = { totalWagered: 0, totalWon: 0, gamesPlayed: 0, bestCashout: 0 };
 
 onAuthStateChanged(auth, async (user) => {
@@ -18,6 +15,7 @@ onAuthStateChanged(auth, async (user) => {
         await loadUserBalance();
         await loadStats();
         initializeGame();
+        listenToGameState();
     } else {
         window.location.href = 'login.html';
     }
@@ -53,6 +51,7 @@ function updateStatsDisplay() {
 }
 
 function initializeGame() {
+    // Bet controls
     document.getElementById('betHalf').addEventListener('click', () => {
         const input = document.getElementById('betAmount');
         input.value = Math.max(0.10, (parseFloat(input.value) / 2).toFixed(2));
@@ -79,7 +78,174 @@ function initializeGame() {
         window.location.href = 'profile.html';
     });
 
-    startGame();
+    // Initialize game state
+    ensureGameExists();
+}
+
+// Listen to global game state
+function listenToGameState() {
+    const gameRef = doc(db, 'crashGame', 'current');
+
+    gameStateListener = onSnapshot(gameRef, async (docSnap) => {
+        if (!docSnap.exists()) {
+            await ensureGameExists();
+            return;
+        }
+
+        const gameData = docSnap.data();
+        currentGameId = gameData.gameId;
+
+        if (gameData.state === 'waiting') {
+            handleWaitingState(gameData);
+        } else if (gameData.state === 'running') {
+            handleRunningState(gameData);
+        } else if (gameData.state === 'crashed') {
+            handleCrashedState(gameData);
+        }
+
+        // Listen to bets for this game
+        listenToBets(currentGameId);
+    });
+}
+
+function handleWaitingState(gameData) {
+    const timeLeft = Math.max(0, 5 - ((Date.now() - gameData.startTime) / 1000));
+    document.getElementById('crashStatus').textContent = `Prochaine manche dans ${Math.ceil(timeLeft)}s`;
+    document.getElementById('crashMultiplier').textContent = '1.00x';
+    document.getElementById('crashMultiplier').classList.remove('crashed');
+
+    // Enable betting
+    if (!myBetId) {
+        document.getElementById('placeBetBtn').disabled = false;
+        document.getElementById('placeBetBtn').classList.remove('hidden');
+        document.getElementById('cashoutBtn').classList.add('hidden');
+    }
+}
+
+function handleRunningState(gameData) {
+    document.getElementById('crashStatus').textContent = 'EN COURS...';
+
+    // Disable betting
+    document.getElementById('placeBetBtn').disabled = true;
+
+    // Calculate current multiplier
+    const elapsed = (Date.now() - gameData.runStartTime) / 1000;
+    const multiplier = Math.pow(1.0595, elapsed);
+
+    document.getElementById('crashMultiplier').textContent = multiplier.toFixed(2) + 'x';
+    document.getElementById('crashMultiplier').classList.remove('crashed');
+
+    // Update cashout button
+    if (myBetId) {
+        const potential = myBetAmount * multiplier;
+        document.getElementById('cashoutAmount').textContent = potential.toFixed(2) + ' €';
+        document.getElementById('cashoutBtn').classList.remove('hidden');
+
+        // Auto cashout
+        if (document.getElementById('autoCashoutEnabled').checked) {
+            const autoCashoutValue = parseFloat(document.getElementById('autoCashoutValue').value);
+            if (multiplier >= autoCashoutValue && myBetId) {
+                cashout();
+            }
+        }
+    }
+
+    // Check if should crash
+    if (multiplier >= gameData.crashPoint) {
+        // Will be handled by server/another client
+    }
+}
+
+function handleCrashedState(gameData) {
+    document.getElementById('crashStatus').textContent = 'CRASHED!';
+    document.getElementById('crashMultiplier').textContent = gameData.crashPoint.toFixed(2) + 'x';
+    document.getElementById('crashMultiplier').classList.add('crashed');
+
+    // If we had a bet and didn't cash out, we lost
+    if (myBetId) {
+        handleLostBet();
+    }
+
+    // Add to history
+    addToHistory(gameData.crashPoint);
+}
+
+async function ensureGameExists() {
+    const gameRef = doc(db, 'crashGame', 'current');
+    const gameDoc = await getDoc(gameRef);
+
+    if (!gameDoc.exists()) {
+        // Create initial game
+        await setDoc(gameRef, {
+            gameId: Date.now().toString(),
+            state: 'waiting',
+            startTime: Date.now(),
+            crashPoint: generateCrashPoint(),
+            runStartTime: null
+        });
+
+        // Start game loop (only if no one else started it)
+        setTimeout(() => startGameLoop(), 5000);
+    } else {
+        // Check if game is stuck
+        const gameData = gameDoc.data();
+        if (gameData.state === 'waiting' && (Date.now() - gameData.startTime) > 10000) {
+            // Restart game
+            await updateDoc(gameRef, {
+                state: 'running',
+                runStartTime: Date.now()
+            });
+        }
+    }
+}
+
+async function startGameLoop() {
+    const gameRef = doc(db, 'crashGame', 'current');
+    const gameDoc = await getDoc(gameRef);
+
+    if (!gameDoc.exists()) return;
+
+    const gameData = gameDoc.data();
+
+    if (gameData.state === 'waiting') {
+        // Start running
+        await updateDoc(gameRef, {
+            state: 'running',
+            runStartTime: Date.now()
+        });
+
+        // Calculate crash time
+        const crashPoint = gameData.crashPoint;
+        const crashTime = Math.log(crashPoint) / Math.log(1.0595) * 1000;
+
+        setTimeout(async () => {
+            await updateDoc(gameRef, {
+                state: 'crashed'
+            });
+
+            // Process all bets that didn't cash out
+            await processLostBets(gameData.gameId);
+
+            // Start new game after 3 seconds
+            setTimeout(async () => {
+                const newGameId = Date.now().toString();
+                await setDoc(gameRef, {
+                    gameId: newGameId,
+                    state: 'waiting',
+                    startTime: Date.now(),
+                    crashPoint: generateCrashPoint(),
+                    runStartTime: null
+                });
+
+                setTimeout(() => startGameLoop(), 5000);
+            }, 3000);
+        }, crashTime);
+    }
+}
+
+function generateCrashPoint() {
+    const r = Math.random();
+    return Math.max(1.01, Math.pow(0.99 / r, 0.5));
 }
 
 async function placeBet() {
@@ -91,16 +257,30 @@ async function placeBet() {
         return;
     }
 
-    if (gameState !== 'waiting') {
-        alert('Attendez la prochaine manche');
+    if (!currentGameId) {
+        alert('Jeu en cours de chargement...');
         return;
     }
 
+    // Deduct balance
     await updateBalance(currentUser.uid, -bet);
     await loadUserBalance();
 
-    betAmount = bet;
-    hasBet = true;
+    // Create bet in Firebase
+    const betRef = await addDoc(collection(db, 'crashBets'), {
+        gameId: currentGameId,
+        userId: currentUser.uid,
+        username: currentUser.email.split('@')[0],
+        betAmount: bet,
+        cashedOut: false,
+        cashoutMultiplier: null,
+        winAmount: null,
+        timestamp: serverTimestamp()
+    });
+
+    myBetId = betRef.id;
+    myBetAmount = bet;
+
     stats.totalWagered += bet;
     stats.gamesPlayed += 1;
     updateStatsDisplay();
@@ -110,98 +290,115 @@ async function placeBet() {
 }
 
 async function cashout() {
-    if (!hasBet || gameState !== 'running') return;
+    if (!myBetId) return;
 
-    const winAmount = betAmount * currentMultiplier;
+    const gameRef = doc(db, 'crashGame', 'current');
+    const gameDoc = await getDoc(gameRef);
+
+    if (!gameDoc.exists() || gameDoc.data().state !== 'running') return;
+
+    const gameData = gameDoc.data();
+    const elapsed = (Date.now() - gameData.runStartTime) / 1000;
+    const multiplier = Math.pow(1.0595, elapsed);
+
+    const winAmount = myBetAmount * multiplier;
+
+    // Credit balance
     await updateBalance(currentUser.uid, winAmount);
     await loadUserBalance();
 
-    stats.totalWon += winAmount;
-    stats.bestCashout = Math.max(stats.bestCashout, currentMultiplier);
-    updateStatsDisplay();
-    await saveGameStats(betAmount, winAmount, currentMultiplier);
+    // Update bet in Firebase
+    const betRef = doc(db, 'crashBets', myBetId);
+    await updateDoc(betRef, {
+        cashedOut: true,
+        cashoutMultiplier: multiplier,
+        winAmount: winAmount
+    });
 
-    hasBet = false;
+    stats.totalWon += winAmount;
+    stats.bestCashout = Math.max(stats.bestCashout, multiplier);
+    updateStatsDisplay();
+    await saveGameStats(myBetAmount, winAmount, multiplier);
+
+    myBetId = null;
+    myBetAmount = 0;
+
     document.getElementById('cashoutBtn').classList.add('hidden');
     document.getElementById('placeBetBtn').classList.remove('hidden');
 }
 
-function startGame() {
-    gameState = 'waiting';
-    currentMultiplier = 1.00;
-    document.getElementById('crashStatus').textContent = 'Nouvelle manche dans 5s...';
-    document.getElementById('crashMultiplier').textContent = '1.00x';
-    document.getElementById('crashMultiplier').classList.remove('crashed');
-
-    setTimeout(() => {
-        gameState = 'running';
-        crashPoint = generateCrashPoint();
-        startTime = Date.now();
-        document.getElementById('crashStatus').textContent = 'En cours...';
-        runGame();
-    }, 5000);
+function handleLostBet() {
+    saveGameStats(myBetAmount, 0, 0);
+    myBetId = null;
+    myBetAmount = 0;
+    document.getElementById('cashoutBtn').classList.add('hidden');
+    document.getElementById('placeBetBtn').classList.remove('hidden');
 }
 
-function generateCrashPoint() {
-    const r = Math.random();
-    return Math.max(1.01, Math.pow(0.99 / r, 0.5));
+async function processLostBets(gameId) {
+    // This would be handled by cloud functions in production
+    // For now, each client handles their own lost bet
 }
 
-function runGame() {
-    gameInterval = setInterval(() => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        currentMultiplier = Math.pow(1.0595, elapsed);
-
-        document.getElementById('crashMultiplier').textContent = currentMultiplier.toFixed(2) + 'x';
-
-        if (hasBet) {
-            const potential = betAmount * currentMultiplier;
-            document.getElementById('cashoutAmount').textContent = potential.toFixed(2) + ' €';
-
-            if (document.getElementById('autoCashoutEnabled').checked) {
-                const autoCashoutValue = parseFloat(document.getElementById('autoCashoutValue').value);
-                if (currentMultiplier >= autoCashoutValue) {
-                    cashout();
-                }
-            }
-        }
-
-        if (currentMultiplier >= crashPoint) {
-            crash();
-        }
-    }, 50);
-}
-
-async function crash() {
-    clearInterval(gameInterval);
-    gameState = 'crashed';
-
-    document.getElementById('crashStatus').textContent = 'CRASHED!';
-    document.getElementById('crashMultiplier').textContent = crashPoint.toFixed(2) + 'x';
-    document.getElementById('crashMultiplier').classList.add('crashed');
-
-    if (hasBet) {
-        hasBet = false;
-        await saveGameStats(betAmount, 0, crashPoint);
-        document.getElementById('cashoutBtn').classList.add('hidden');
-        document.getElementById('placeBetBtn').classList.remove('hidden');
+function listenToBets(gameId) {
+    if (betsListener) {
+        betsListener();
     }
 
-    addToHistory(crashPoint);
-    setTimeout(() => startGame(), 3000);
+    const betsQuery = query(
+        collection(db, 'crashBets'),
+        orderBy('timestamp', 'desc'),
+        limit(20)
+    );
+
+    betsListener = onSnapshot(betsQuery, (snapshot) => {
+        const liveBetsList = document.getElementById('liveBetsList');
+        liveBetsList.innerHTML = '';
+
+        if (snapshot.empty) {
+            liveBetsList.innerHTML = '<div class="empty-bets">Aucun pari actif</div>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const bet = doc.data();
+            if (bet.gameId === gameId) {
+                const betEl = document.createElement('div');
+                betEl.className = 'live-bet-item';
+
+                let status = '';
+                if (bet.cashedOut) {
+                    status = `<span class="overlay-profit">${bet.cashoutMultiplier.toFixed(2)}x - ${bet.winAmount.toFixed(2)}€</span>`;
+                } else {
+                    status = '<span class="overlay-loss">En jeu...</span>';
+                }
+
+                betEl.innerHTML = `
+                    <div>
+                        <strong>${bet.username}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${bet.betAmount.toFixed(2)}€</div>
+                    </div>
+                    <div>${status}</div>
+                `;
+
+                liveBetsList.appendChild(betEl);
+            }
+        });
+    });
 }
 
 function addToHistory(multiplier) {
-    history.unshift(multiplier);
-    if (history.length > 10) history.pop();
-
     const historyEl = document.getElementById('crashHistory');
-    const items = history.map(m => {
-        const className = m < 2 ? 'low' : m < 5 ? 'medium' : 'high';
-        const value = m.toFixed(2);
-        return '<div class="history-item ' + className + '">' + value + 'x</div>';
-    }).join('');
-    historyEl.innerHTML = items;
+    const historyItem = document.createElement('div');
+    historyItem.className = 'history-item ' + (multiplier < 2 ? 'low' : multiplier < 5 ? 'medium' : 'high');
+    historyItem.textContent = multiplier.toFixed(2) + 'x';
+
+    historyEl.insertBefore(historyItem, historyEl.firstChild);
+
+    // Keep only last 10
+    while (historyEl.children.length > 10) {
+        historyEl.removeChild(historyEl.lastChild);
+    }
 }
 
 async function saveGameStats(wagered, won, multiplier) {
@@ -237,3 +434,10 @@ async function saveGameStats(wagered, won, multiplier) {
         console.error('Error saving stats:', error);
     }
 }
+
+// Start the game loop on page load (only one instance will actually run it)
+setTimeout(() => {
+    if (currentUser) {
+        ensureGameExists();
+    }
+}, 2000);
