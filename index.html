@@ -24,6 +24,7 @@
             <nav class="nav">
                 <a href="index.html" class="nav-link active">Casino</a>
                 <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="roulette.html" class="nav-link">Roulette</a>
                 <a href="vip.html" class="nav-link">VIP</a>
             </nav>
             <div class="user-section">
@@ -84,7 +85,7 @@
                             <div class="hero-stat-label">Gains aujourd'hui</div>
                         </div>
                         <div class="hero-stat">
-                            <div class="hero-stat-value">9</div>
+                            <div class="hero-stat-value">10</div>
                             <div class="hero-stat-label">Jeux disponibles</div>
                         </div>
                     </div>
@@ -127,10 +128,11 @@
                         </div>
                     </div>
                     <div class="floating-card card-7">
-                        <div class="game-preview cases-preview">
-                            <span class="preview-icon">📦</span>
-                            <span class="preview-name">Cases</span>
+                        <div class="game-preview roulette-preview">
+                            <span class="preview-icon">🎡</span>
+                            <span class="preview-name">Roulette</span>
                         </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -198,6 +200,31 @@
                     </div>
                     <div class="game-card-footer">
                         <button class="btn-play">Jouer maintenant</button>
+                    </div>
+                </a>
+
+                <!-- Roulette -->
+                <a href="roulette.html" class="game-card roulette-card">
+                    <div class="game-card-header">
+                        <div class="game-icon">🎡</div>
+                        <div class="game-badge">Nouveau</div>
+                    </div>
+                    <div class="game-card-body">
+                        <h3 class="game-title">Roulette</h3>
+                        <p class="game-description">Pariez sur la roue européenne et tentez le plein.</p>
+                        <div class="game-stats">
+                            <div class="game-stat">
+                                <span class="stat-label">Parties</span>
+                                <span class="stat-value" id="gameRouletteCount">0</span>
+                            </div>
+                            <div class="game-stat">
+                                <span class="stat-label">Plus gros gain</span>
+                                <span class="stat-value" id="gameRouletteBest">0.00 €</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card-footer">
+                        <button class="btn-play">Tourner la roue</button>
                     </div>
                 </a>
 

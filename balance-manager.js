@@ -14,6 +14,10 @@ const DEFAULT_USER_FIELDS = {
     plinkoGamesPlayed: 0,
     plinkoTotalWon: 0,
     plinkoBestWin: 0,
+    rouletteGamesPlayed: 0,
+    rouletteWins: 0,
+    rouletteBestWin: 0,
+    rouletteTotalWon: 0,
     blackjackHandsPlayed: 0,
     blackjackWins: 0,
     blackjackBlackjacks: 0,
@@ -57,6 +61,8 @@ function mergeWithDefaults(data = {}) {
     merged.diceBestWin = roundCurrency(merged.diceBestWin);
     merged.plinkoTotalWon = roundCurrency(merged.plinkoTotalWon);
     merged.plinkoBestWin = roundCurrency(merged.plinkoBestWin);
+    merged.rouletteBestWin = roundCurrency(merged.rouletteBestWin);
+    merged.rouletteTotalWon = roundCurrency(merged.rouletteTotalWon);
     merged.blackjackTotalProfit = roundCurrency(merged.blackjackTotalProfit);
     merged.minesBestMultiplier = roundCurrency(merged.minesBestMultiplier);
     merged.minesTotalProfit = roundCurrency(merged.minesTotalProfit);
@@ -240,6 +246,15 @@ export async function applyGameResult(userId, { betAmount, payout, game, metadat
             updates.plinkoTotalWon = roundCurrency(current.plinkoTotalWon + payout);
             if (payout > 0) {
                 updates.plinkoBestWin = Math.max(current.plinkoBestWin, payout);
+            }
+        }
+
+        if (game === 'roulette') {
+            updates.rouletteGamesPlayed = (current.rouletteGamesPlayed || 0) + 1;
+            if (payout > 0) {
+                updates.rouletteWins = (current.rouletteWins || 0) + 1;
+                updates.rouletteTotalWon = roundCurrency((current.rouletteTotalWon || 0) + payout);
+                updates.rouletteBestWin = Math.max(current.rouletteBestWin || 0, payout);
             }
         }
 

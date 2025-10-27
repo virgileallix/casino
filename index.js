@@ -67,6 +67,10 @@ function updateGameStats() {
     document.getElementById('gamePlinkoCount').textContent = userData.plinkoGamesPlayed || 0;
     document.getElementById('gamePlinkoBest').textContent = `${(userData.plinkoBestWin || 0).toFixed(2)} €`;
 
+    // Roulette
+    document.getElementById('gameRouletteCount').textContent = userData.rouletteGamesPlayed || 0;
+    document.getElementById('gameRouletteBest').textContent = `${(userData.rouletteBestWin || 0).toFixed(2)} €`;
+
     // Mines
     document.getElementById('gameMinesCount').textContent = userData.minesGamesPlayed || 0;
     document.getElementById('gameMinesBestMulti').textContent = `${(userData.minesBestMultiplier || 0).toFixed(2)}x`;
