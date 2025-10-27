@@ -148,9 +148,15 @@ function startMultiplierAnimation() {
         clearInterval(animationInterval);
     }
 
+    // Validate runStartTime exists
+    if (!currentGameData || !currentGameData.runStartTime) {
+        console.error('runStartTime is missing!');
+        return;
+    }
+
     // Update multiplier every 50ms for smooth animation
     animationInterval = setInterval(() => {
-        if (!currentGameData || currentGameData.state !== 'running') {
+        if (!currentGameData || currentGameData.state !== 'running' || !currentGameData.runStartTime) {
             clearInterval(animationInterval);
             animationInterval = null;
             return;
@@ -158,6 +164,15 @@ function startMultiplierAnimation() {
 
         // Calculate current multiplier
         const elapsed = (Date.now() - currentGameData.runStartTime) / 1000;
+
+        // Prevent negative or invalid elapsed time
+        if (elapsed < 0 || elapsed > 1000) {
+            console.error('Invalid elapsed time:', elapsed);
+            clearInterval(animationInterval);
+            animationInterval = null;
+            return;
+        }
+
         const multiplier = Math.pow(1.0595, elapsed);
 
         document.getElementById('crashMultiplier').textContent = multiplier.toFixed(2) + 'x';
@@ -226,12 +241,39 @@ async function ensureGameExists() {
     } else {
         // Check if game is stuck
         const gameData = gameDoc.data();
-        if (gameData.state === 'waiting' && (Date.now() - gameData.startTime) > 10000) {
-            // Restart game
-            await updateDoc(gameRef, {
-                state: 'running',
-                runStartTime: Date.now()
+        const now = Date.now();
+
+        // If waiting for more than 10 seconds, restart
+        if (gameData.state === 'waiting' && (now - gameData.startTime) > 10000) {
+            await setDoc(gameRef, {
+                gameId: now.toString(),
+                state: 'waiting',
+                startTime: now,
+                crashPoint: generateCrashPoint(),
+                runStartTime: null
             });
+            setTimeout(() => startGameLoop(), 5000);
+        }
+
+        // If running for more than 60 seconds (impossible), force crash
+        if (gameData.state === 'running' && gameData.runStartTime && (now - gameData.runStartTime) > 60000) {
+            await updateDoc(gameRef, {
+                state: 'crashed'
+            });
+        }
+
+        // If crashed for more than 5 seconds, start new game
+        if (gameData.state === 'crashed') {
+            setTimeout(async () => {
+                await setDoc(gameRef, {
+                    gameId: Date.now().toString(),
+                    state: 'waiting',
+                    startTime: Date.now(),
+                    crashPoint: generateCrashPoint(),
+                    runStartTime: null
+                });
+                setTimeout(() => startGameLoop(), 5000);
+            }, 3000);
         }
     }
 }
@@ -432,8 +474,8 @@ function addToHistory(multiplier) {
 
     historyEl.insertBefore(historyItem, historyEl.firstChild);
 
-    // Keep only last 10
-    while (historyEl.children.length > 10) {
+    // Keep only last 5
+    while (historyEl.children.length > 5) {
         historyEl.removeChild(historyEl.lastChild);
     }
 }
