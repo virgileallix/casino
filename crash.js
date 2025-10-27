@@ -1,7 +1,5 @@
-import { auth, db } from './firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, serverTimestamp } from './firebase-config.js';
 import { updateBalance, getUserBalance } from './balance-manager.js';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 let currentUser = null;
 let gameState = 'waiting';

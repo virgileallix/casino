@@ -444,11 +444,26 @@
             </div>
             <div class="game-modal-body">
                 <div class="game-iframe-container">
+                    <!-- Balance Overlay -->
+                    <div class="game-balance-overlay" id="gameBalanceOverlay">
+                        <div class="overlay-balance-label">Votre Solde</div>
+                        <div class="overlay-balance-amount" id="overlayBalance">---</div>
+                        <div class="overlay-session-info" id="overlaySessionInfo" style="display: none;">
+                            <div class="overlay-session-row">
+                                <span>Session:</span>
+                                <span id="overlaySessionBet">---</span>
+                            </div>
+                            <div class="overlay-session-row">
+                                <span>Profit/Perte:</span>
+                                <span id="overlayProfit">---</span>
+                            </div>
+                        </div>
+                    </div>
                     <iframe id="gameIframe" allowfullscreen></iframe>
                 </div>
                 <div class="game-demo-notice">
                     <i class="fas fa-info-circle"></i>
-                    <p>Note: Les jeux sont en mode démo. Pour l'intégration complète avec API, contactez un provider de jeux.</p>
+                    <p>Votre solde réel est affiché en temps réel en haut à droite du jeu. Jouez de manière responsable!</p>
                 </div>
             </div>
         </div>

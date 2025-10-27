@@ -57,6 +57,14 @@ async function loadUserBalance() {
     if (modalBalance) {
         modalBalance.textContent = balance.toFixed(2) + ' €';
     }
+
+    // Update overlay balance
+    const overlayBalance = document.getElementById('overlayBalance');
+    if (overlayBalance) {
+        overlayBalance.textContent = balance.toFixed(2) + ' €';
+    }
+
+    return balance;
 }
 
 function initializeSlots() {
@@ -97,7 +105,9 @@ function initializeSlots() {
     }, 5000);
 }
 
-function playGame(gameId) {
+let balanceCheckInterval = null;
+
+async function playGame(gameId) {
     const gameUrl = GAME_URLS[gameId];
     const gameName = GAME_NAMES[gameId];
 
@@ -115,10 +125,30 @@ function playGame(gameId) {
     modal.classList.add('active');
 
     // Refresh balance
-    loadUserBalance();
+    await loadUserBalance();
+
+    // Start balance monitoring (rafraîchir toutes les 3 secondes)
+    startBalanceMonitoring();
 }
 
-function closeGameModal() {
+function startBalanceMonitoring() {
+    if (balanceCheckInterval) {
+        clearInterval(balanceCheckInterval);
+    }
+
+    // Rafraîchir le solde toutes les 2 secondes pendant que le jeu est ouvert
+    balanceCheckInterval = setInterval(async () => {
+        await loadUserBalance();
+    }, 2000);
+}
+
+async function closeGameModal() {
+    // Stop balance monitoring
+    if (balanceCheckInterval) {
+        clearInterval(balanceCheckInterval);
+        balanceCheckInterval = null;
+    }
+
     const modal = document.getElementById('gameModal');
     modal.classList.remove('active');
 
@@ -126,7 +156,7 @@ function closeGameModal() {
     document.getElementById('gameIframe').src = '';
 
     // Refresh balance one last time
-    loadUserBalance();
+    await loadUserBalance();
 }
 
 // Close modal on ESC key
