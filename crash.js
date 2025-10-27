@@ -8,6 +8,8 @@ let betsListener = null;
 let myBetId = null;
 let myBetAmount = 0;
 let stats = { totalWagered: 0, totalWon: 0, gamesPlayed: 0, bestCashout: 0 };
+let animationInterval = null;
+let currentGameData = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -109,6 +111,13 @@ function listenToGameState() {
 }
 
 function handleWaitingState(gameData) {
+    // Stop animation
+    if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+    }
+    currentGameData = null;
+
     const timeLeft = Math.max(0, 5 - ((Date.now() - gameData.startTime) / 1000));
     document.getElementById('crashStatus').textContent = `Prochaine manche dans ${Math.ceil(timeLeft)}s`;
     document.getElementById('crashMultiplier').textContent = '1.00x';
@@ -124,39 +133,67 @@ function handleWaitingState(gameData) {
 
 function handleRunningState(gameData) {
     document.getElementById('crashStatus').textContent = 'EN COURS...';
+    currentGameData = gameData;
 
     // Disable betting
     document.getElementById('placeBetBtn').disabled = true;
 
-    // Calculate current multiplier
-    const elapsed = (Date.now() - gameData.runStartTime) / 1000;
-    const multiplier = Math.pow(1.0595, elapsed);
+    // Start continuous animation
+    startMultiplierAnimation();
+}
 
-    document.getElementById('crashMultiplier').textContent = multiplier.toFixed(2) + 'x';
-    document.getElementById('crashMultiplier').classList.remove('crashed');
+function startMultiplierAnimation() {
+    // Clear any existing animation
+    if (animationInterval) {
+        clearInterval(animationInterval);
+    }
 
-    // Update cashout button
-    if (myBetId) {
-        const potential = myBetAmount * multiplier;
-        document.getElementById('cashoutAmount').textContent = potential.toFixed(2) + ' €';
-        document.getElementById('cashoutBtn').classList.remove('hidden');
+    // Update multiplier every 50ms for smooth animation
+    animationInterval = setInterval(() => {
+        if (!currentGameData || currentGameData.state !== 'running') {
+            clearInterval(animationInterval);
+            animationInterval = null;
+            return;
+        }
 
-        // Auto cashout
-        if (document.getElementById('autoCashoutEnabled').checked) {
-            const autoCashoutValue = parseFloat(document.getElementById('autoCashoutValue').value);
-            if (multiplier >= autoCashoutValue && myBetId) {
-                cashout();
+        // Calculate current multiplier
+        const elapsed = (Date.now() - currentGameData.runStartTime) / 1000;
+        const multiplier = Math.pow(1.0595, elapsed);
+
+        document.getElementById('crashMultiplier').textContent = multiplier.toFixed(2) + 'x';
+        document.getElementById('crashMultiplier').classList.remove('crashed');
+
+        // Update cashout button
+        if (myBetId) {
+            const potential = myBetAmount * multiplier;
+            document.getElementById('cashoutAmount').textContent = potential.toFixed(2) + ' €';
+            document.getElementById('cashoutBtn').classList.remove('hidden');
+
+            // Auto cashout
+            if (document.getElementById('autoCashoutEnabled').checked) {
+                const autoCashoutValue = parseFloat(document.getElementById('autoCashoutValue').value);
+                if (multiplier >= autoCashoutValue && myBetId) {
+                    cashout();
+                }
             }
         }
-    }
 
-    // Check if should crash
-    if (multiplier >= gameData.crashPoint) {
-        // Will be handled by server/another client
-    }
+        // Check if should crash
+        if (multiplier >= currentGameData.crashPoint) {
+            clearInterval(animationInterval);
+            animationInterval = null;
+        }
+    }, 50);
 }
 
 function handleCrashedState(gameData) {
+    // Stop animation
+    if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+    }
+    currentGameData = null;
+
     document.getElementById('crashStatus').textContent = 'CRASHED!';
     document.getElementById('crashMultiplier').textContent = gameData.crashPoint.toFixed(2) + 'x';
     document.getElementById('crashMultiplier').classList.add('crashed');

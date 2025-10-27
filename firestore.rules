@@ -194,6 +194,44 @@ service cloud.firestore {
 
 
     // ========================================
+    // COLLECTION: crashGame (multiplayer crash game state)
+    // ========================================
+
+    match /crashGame/{gameId} {
+      // Lecture: Tous les utilisateurs authentifi�s peuvent voir l'�tat du jeu
+      allow read: if isAuthenticated();
+
+      // Cr�ation et mise � jour: Tous les utilisateurs authentifi�s peuvent cr�er/mettre � jour
+      // (n�cessaire pour le game loop automatique)
+      allow create, update: if isAuthenticated();
+
+      // Suppression: Seulement admin
+      allow delete: if isAdmin();
+    }
+
+
+    // ========================================
+    // COLLECTION: crashBets (paris des joueurs)
+    // ========================================
+
+    match /crashBets/{betId} {
+      // Lecture: Tous les utilisateurs authentifi�s peuvent voir les paris
+      allow read: if isAuthenticated();
+
+      // Cr�ation: Utilisateur peut cr�er son propre pari
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Mise � jour: L'utilisateur peut mettre � jour son propre pari (cashout)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+
+      // Suppression: Seulement admin
+      allow delete: if isAdmin();
+    }
+
+
+    // ========================================
     // R�GLE PAR D�FAUT: TOUT REFUSER
     // ========================================
 

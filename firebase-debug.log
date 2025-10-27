@@ -239,3 +239,67 @@ To learn about active projects for the CLI, visit https://firebase.google.com/do
 [debug] [2025-10-13T02:09:42.057Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) [none]
 [debug] [2025-10-13T02:09:42.057Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) {"release":{"name":"projects/casino-eaa24/releases/cloud.firestore/(default)","rulesetName":"projects/casino-eaa24/rulesets/8a223d8f-9bd8-4202-a649-993cec55dca1"}}
 [debug] [2025-10-13T02:09:42.873Z] <<< [apiv2][status] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) 200
+[debug] [2025-10-27T10:59:42.521Z] ----------------------------------------------------------------------
+[debug] [2025-10-27T10:59:42.524Z] Command:       /usr/local/share/nvm/versions/node/v22.17.0/bin/node /home/codespace/.npm/_npx/7750544ccf494d8b/node_modules/.bin/firebase deploy --only firestore:rules
+[debug] [2025-10-27T10:59:42.524Z] CLI Version:   14.22.0
+[debug] [2025-10-27T10:59:42.524Z] Platform:      linux
+[debug] [2025-10-27T10:59:42.525Z] Node Version:  v22.17.0
+[debug] [2025-10-27T10:59:42.525Z] Time:          Mon Oct 27 2025 10:59:42 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-27T10:59:42.525Z] Env Overrides: GITHUB_API_URL, GITHUB_API_URL
+[debug] [2025-10-27T10:59:42.525Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-27T10:59:42.528Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-10-27T10:59:43.017Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-10-27T10:59:43.018Z] > authorizing via FIREBASE_TOKEN environment variable
+[warn] ⚠  Authenticating with `FIREBASE_TOKEN` is deprecated and will be removed in a future major version of `firebase-tools`. Instead, use a service account key with `GOOGLE_APPLICATION_CREDENTIALS`: https://cloud.google.com/docs/authentication/getting-started 
+[debug] [2025-10-27T10:59:43.018Z] [iam] checking project casino-eaa24 for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2025-10-27T10:59:43.019Z] No OAuth tokens found
+[debug] [2025-10-27T10:59:43.019Z] No OAuth tokens found
+[debug] [2025-10-27T10:59:43.019Z] > refreshing access token with scopes: []
+[debug] [2025-10-27T10:59:43.020Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-27T10:59:43.020Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-27T10:59:43.091Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-27T10:59:43.091Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-27T10:59:43.092Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions [none]
+[debug] [2025-10-27T10:59:43.092Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions x-goog-quota-user=projects/casino-eaa24
+[debug] [2025-10-27T10:59:43.092Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2025-10-27T10:59:43.247Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-10-27T10:59:43.247Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-10-27T10:59:43.681Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions 200
+[debug] [2025-10-27T10:59:43.681Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/casino-eaa24:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'casino-eaa24'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-10-27T10:59:43.686Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:43.686Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:43.686Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) [none]
+[debug] [2025-10-27T10:59:43.816Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) 200
+[debug] [2025-10-27T10:59:43.816Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/casino-eaa24/databases/(default) {"name":"projects/casino-eaa24/databases/(default)","uid":"7e755153-e6ff-493c-aeac-11cb318f8219","createTime":"2025-10-10T16:09:56.119207Z","updateTime":"2025-10-10T16:09:56.119207Z","locationId":"eur3","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2025-10-27T09:59:43.878641Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"e","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IN2W7t+cxJADMMmohriCmpAD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2025-10-27T10:59:43.817Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:43.817Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:43.817Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test [none]
+[debug] [2025-10-27T10:59:43.817Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test [omitted]
+[debug] [2025-10-27T10:59:44.068Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test 200
+[debug] [2025-10-27T10:59:44.068Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/casino-eaa24:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2025-10-27T10:59:44.069Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:44.069Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:44.070Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases pageSize=10&pageToken=
+[debug] [2025-10-27T10:59:44.248Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases 200
+[debug] [2025-10-27T10:59:44.249Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases {"releases":[{"name":"projects/casino-eaa24/releases/cloud.firestore","rulesetName":"projects/casino-eaa24/rulesets/4b24efb6-e1d5-4ade-8c3f-db262965bf67","createTime":"2025-10-10T16:10:01.660392Z","updateTime":"2025-10-27T10:58:20.112589Z"}]}
+[debug] [2025-10-27T10:59:44.249Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:44.249Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:44.250Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/4b24efb6-e1d5-4ade-8c3f-db262965bf67 [none]
+[debug] [2025-10-27T10:59:44.539Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/4b24efb6-e1d5-4ade-8c3f-db262965bf67 200
+[debug] [2025-10-27T10:59:44.539Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/casino-eaa24/rulesets/4b24efb6-e1d5-4ade-8c3f-db262965bf67 [omitted]
+[info] i  firestore: latest version of firestore.rules already up to date, skipping upload... 
+[debug] [2025-10-27T10:59:44.540Z] [rules] releasing cloud.firestore/(default) with ruleset projects/casino-eaa24/rulesets/4b24efb6-e1d5-4ade-8c3f-db262965bf67
+[debug] [2025-10-27T10:59:44.541Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:44.541Z] Checked if tokens are valid: true, expires at: 1761566382091
+[debug] [2025-10-27T10:59:44.541Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) [none]
+[debug] [2025-10-27T10:59:44.541Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) {"release":{"name":"projects/casino-eaa24/releases/cloud.firestore/(default)","rulesetName":"projects/casino-eaa24/rulesets/4b24efb6-e1d5-4ade-8c3f-db262965bf67"}}
+[debug] [2025-10-27T10:59:45.393Z] <<< [apiv2][status] PATCH https://firebaserules.googleapis.com/v1/projects/casino-eaa24/releases/cloud.firestore/(default) 200
