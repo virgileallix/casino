@@ -1,5 +1,5 @@
 import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from './firebase-config.js';
-import { updateBalance, getUserBalance } from './balance-manager.js';
+import { updateBalance, getUserBalance, getUserProfile } from './balance-manager.js';
 
 let currentUser = null;
 let currentGameId = null;
@@ -7,6 +7,7 @@ let gameStateListener = null;
 let betsListener = null;
 let myBetId = null;
 let myBetAmount = 0;
+let currentUserProfile = null;
 let stats = { totalWagered: 0, totalWon: 0, gamesPlayed: 0, bestCashout: 0 };
 let animationInterval = null;
 let countdownInterval = null;
@@ -15,7 +16,10 @@ let currentGameData = null;
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        await loadUserBalance();
+        await Promise.all([
+            loadUserBalance(),
+            loadUserProfile()
+        ]);
         await loadStats();
         initializeGame();
         listenToGameState();
@@ -27,6 +31,15 @@ onAuthStateChanged(auth, async (user) => {
 async function loadUserBalance() {
     const balance = await getUserBalance(currentUser.uid);
     document.getElementById('userBalance').textContent = balance.toFixed(2) + ' €';
+}
+
+async function loadUserProfile() {
+    try {
+        currentUserProfile = await getUserProfile(currentUser.uid);
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+        currentUserProfile = null;
+    }
 }
 
 async function loadStats() {
@@ -391,6 +404,16 @@ function startWaitingCountdown(timestamp) {
     }, 250);
 }
 
+function getCurrentDisplayName() {
+    if (currentUserProfile?.username) return currentUserProfile.username;
+    if (currentUserProfile?.displayName) return currentUserProfile.displayName;
+    if (currentUser?.displayName) return currentUser.displayName;
+    const email = currentUserProfile?.email || currentUser?.email;
+    if (email) return email.split('@')[0];
+    if (currentUser?.uid) return `Joueur-${currentUser.uid.slice(0, 6)}`;
+    return 'Joueur';
+}
+
 async function placeBet() {
     const bet = parseFloat(document.getElementById('betAmount').value);
     const balance = await getUserBalance(currentUser.uid);
@@ -410,10 +433,11 @@ async function placeBet() {
     await loadUserBalance();
 
     // Create bet in Firebase
+    const displayName = getCurrentDisplayName();
     const betRef = await addDoc(collection(db, 'crashBets'), {
         gameId: currentGameId,
         userId: currentUser.uid,
-        username: currentUser.email.split('@')[0],
+        username: displayName,
         betAmount: bet,
         cashedOut: false,
         cashoutMultiplier: null,
@@ -508,6 +532,7 @@ function listenToBets(gameId) {
             if (bet.gameId === gameId) {
                 const betEl = document.createElement('div');
                 betEl.className = 'live-bet-item';
+                const displayName = bet.username || bet.displayName || 'Joueur';
 
                 let status = '';
                 if (bet.cashedOut) {
@@ -518,7 +543,7 @@ function listenToBets(gameId) {
 
                 betEl.innerHTML = `
                     <div>
-                        <strong>${bet.username}</strong>
+                        <strong>${displayName}</strong>
                         <div style="font-size: 0.8rem; color: var(--text-secondary);">${bet.betAmount.toFixed(2)}€</div>
                     </div>
                     <div>${status}</div>

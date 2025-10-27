@@ -1,9 +1,11 @@
 import { initializeChat } from './chat.js';
 import { auth, onAuthStateChanged } from './firebase-config.js';
+import { subscribeToUserData } from './balance-manager.js';
 
 let chatInstance = null;
 let currentUser = null;
 let isChatOpen = false;
+let profileUnsubscribe = null;
 
 export function initializeGlobalChat() {
     const chatContainer = document.getElementById('globalChatContainer');
@@ -39,10 +41,22 @@ export function initializeGlobalChat() {
     // Listen to auth state
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
+        if (profileUnsubscribe) {
+            profileUnsubscribe();
+            profileUnsubscribe = null;
+        }
         if (chatInstance && chatInstance.setUserContext) {
             chatInstance.setUserContext({
-                user: user,
+                user,
                 profile: null
+            });
+        }
+        if (user && chatInstance && chatInstance.setUserContext) {
+            profileUnsubscribe = subscribeToUserData(user.uid, (profile) => {
+                chatInstance.setUserContext({
+                    user,
+                    profile
+                });
             });
         }
     });
@@ -94,6 +108,10 @@ function closeChat() {
 }
 
 export function destroyGlobalChat() {
+    if (profileUnsubscribe) {
+        profileUnsubscribe();
+        profileUnsubscribe = null;
+    }
     if (chatInstance && chatInstance.destroy) {
         chatInstance.destroy();
     }

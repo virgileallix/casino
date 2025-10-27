@@ -13,16 +13,12 @@ const DEFAULT_LIMIT = 100;
 const MESSAGE_MAX_LENGTH = 250;
 
 function computeDisplayName(profile, user) {
-    if (profile?.username) {
-        return profile.username;
-    }
+    if (profile?.username) return profile.username;
+    if (profile?.displayName) return profile.displayName;
+    if (user?.displayName) return user.displayName;
     const email = profile?.email || user?.email;
-    if (email) {
-        return email.split('@')[0];
-    }
-    if (user?.uid) {
-        return `Joueur-${user.uid.slice(0, 6)}`;
-    }
+    if (email) return email.split('@')[0];
+    if (user?.uid) return `Joueur-${user.uid.slice(0, 6)}`;
     return 'Anonyme';
 }
 
