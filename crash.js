@@ -1,6 +1,6 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-import { updateBalance, getBalance } from './balance-manager.js';
+import { updateBalance, getUserBalance } from './balance-manager.js';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 let currentUser = null;
@@ -26,7 +26,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 async function loadUserBalance() {
-    const balance = await getBalance(currentUser.uid);
+    const balance = await getUserBalance(currentUser.uid);
     document.getElementById('userBalance').textContent = balance.toFixed(2) + ' €';
 }
 
@@ -62,7 +62,7 @@ function initializeGame() {
 
     document.getElementById('betDouble').addEventListener('click', async () => {
         const input = document.getElementById('betAmount');
-        const balance = await getBalance(currentUser.uid);
+        const balance = await getUserBalance(currentUser.uid);
         input.value = Math.min(balance, parseFloat(input.value) * 2).toFixed(2);
     });
 
@@ -86,7 +86,7 @@ function initializeGame() {
 
 async function placeBet() {
     const bet = parseFloat(document.getElementById('betAmount').value);
-    const balance = await getBalance(currentUser.uid);
+    const balance = await getUserBalance(currentUser.uid);
 
     if (bet <= 0 || bet > balance) {
         alert('Mise invalide ou solde insuffisant');

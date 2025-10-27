@@ -313,6 +313,33 @@ export async function getUserBalance(userId) {
     return data.balance;
 }
 
+// Alias for backward compatibility
+export async function getBalance(userId) {
+    return getUserBalance(userId);
+}
+
+// Simple balance update function
+export async function updateBalance(userId, amount) {
+    const userRef = getUserRef(userId);
+
+    return runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(userRef);
+        if (!snapshot.exists()) {
+            throw new Error('User not found');
+        }
+
+        const current = mergeWithDefaults(snapshot.data());
+        const newBalance = roundCurrency(current.balance + amount);
+
+        if (newBalance < 0) {
+            throw new Error('INSUFFICIENT_FUNDS');
+        }
+
+        transaction.update(userRef, { balance: newBalance });
+        return newBalance;
+    });
+}
+
 export async function getUserProfile(userId) {
     const userRef = getUserRef(userId);
     const snapshot = await getDoc(userRef);
