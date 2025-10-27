@@ -9,6 +9,7 @@ let myBetId = null;
 let myBetAmount = 0;
 let stats = { totalWagered: 0, totalWon: 0, gamesPlayed: 0, bestCashout: 0 };
 let animationInterval = null;
+let countdownInterval = null;
 let currentGameData = null;
 
 onAuthStateChanged(auth, async (user) => {
@@ -116,10 +117,10 @@ function handleWaitingState(gameData) {
         clearInterval(animationInterval);
         animationInterval = null;
     }
+    clearWaitingCountdown();
     currentGameData = null;
 
-    const timeLeft = Math.max(0, 5 - ((Date.now() - gameData.startTime) / 1000));
-    document.getElementById('crashStatus').textContent = `Prochaine manche dans ${Math.ceil(timeLeft)}s`;
+    startWaitingCountdown(gameData.startTime);
     document.getElementById('crashMultiplier').textContent = '1.00x';
     document.getElementById('crashMultiplier').classList.remove('crashed');
 
@@ -134,6 +135,7 @@ function handleWaitingState(gameData) {
 function handleRunningState(gameData) {
     document.getElementById('crashStatus').textContent = 'EN COURS...';
     currentGameData = gameData;
+    clearWaitingCountdown();
 
     // Disable betting
     document.getElementById('placeBetBtn').disabled = true;
@@ -207,6 +209,7 @@ function handleCrashedState(gameData) {
         clearInterval(animationInterval);
         animationInterval = null;
     }
+    clearWaitingCountdown();
     currentGameData = null;
 
     document.getElementById('crashStatus').textContent = 'CRASHED!';
@@ -325,6 +328,59 @@ async function startGameLoop() {
 function generateCrashPoint() {
     const r = Math.random();
     return Math.max(1.01, Math.pow(0.99 / r, 0.5));
+}
+
+function normalizeTimestampToMillis(timestamp) {
+    if (!timestamp) return null;
+    if (typeof timestamp === 'number') return timestamp;
+    if (typeof timestamp.toMillis === 'function') {
+        try {
+            return timestamp.toMillis();
+        } catch (error) {
+            console.error('Failed to convert timestamp:', error);
+        }
+    }
+    return null;
+}
+
+function clearWaitingCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+}
+
+function updateWaitingStatus(startTime) {
+    const statusEl = document.getElementById('crashStatus');
+    if (!statusEl) return;
+
+    const elapsed = (Date.now() - startTime) / 1000;
+    const timeLeft = Math.max(0, 5 - elapsed);
+
+    if (timeLeft > 0) {
+        statusEl.textContent = `Prochaine manche dans ${Math.ceil(timeLeft)}s`;
+    } else {
+        statusEl.textContent = 'Préparation...';
+    }
+}
+
+function startWaitingCountdown(timestamp) {
+    const startTime = normalizeTimestampToMillis(timestamp);
+    const statusEl = document.getElementById('crashStatus');
+
+    if (!startTime || !statusEl) {
+        if (statusEl) statusEl.textContent = 'En attente...';
+        return;
+    }
+
+    updateWaitingStatus(startTime);
+
+    countdownInterval = setInterval(() => {
+        updateWaitingStatus(startTime);
+        if (Date.now() - startTime >= 5000) {
+            clearWaitingCountdown();
+        }
+    }, 250);
 }
 
 async function placeBet() {
