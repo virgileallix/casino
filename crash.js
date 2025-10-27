@@ -151,24 +151,32 @@ function startMultiplierAnimation() {
     }
 
     // Validate runStartTime exists
-    if (!currentGameData || !currentGameData.runStartTime) {
+    const runStartTime = normalizeTimestampToMillis(currentGameData?.runStartTime);
+    if (!currentGameData || !Number.isFinite(runStartTime)) {
         console.error('runStartTime is missing!');
         return;
     }
 
     // Update multiplier every 50ms for smooth animation
     animationInterval = setInterval(() => {
-        if (!currentGameData || currentGameData.state !== 'running' || !currentGameData.runStartTime) {
+        if (!currentGameData || currentGameData.state !== 'running') {
             clearInterval(animationInterval);
             animationInterval = null;
             return;
         }
 
         // Calculate current multiplier
-        const elapsed = (Date.now() - currentGameData.runStartTime) / 1000;
+        const runStart = normalizeTimestampToMillis(currentGameData.runStartTime);
+        if (!Number.isFinite(runStart)) {
+            console.error('Invalid runStartTime value:', currentGameData.runStartTime);
+            clearInterval(animationInterval);
+            animationInterval = null;
+            return;
+        }
+        const elapsed = (Date.now() - runStart) / 1000;
 
         // Prevent negative or invalid elapsed time
-        if (elapsed < 0 || elapsed > 1000) {
+        if (!Number.isFinite(elapsed) || elapsed < 0 || elapsed > 1000) {
             console.error('Invalid elapsed time:', elapsed);
             clearInterval(animationInterval);
             animationInterval = null;
@@ -368,7 +376,7 @@ function startWaitingCountdown(timestamp) {
     const startTime = normalizeTimestampToMillis(timestamp);
     const statusEl = document.getElementById('crashStatus');
 
-    if (!startTime || !statusEl) {
+    if (!Number.isFinite(startTime) || !statusEl) {
         if (statusEl) statusEl.textContent = 'En attente...';
         return;
     }
