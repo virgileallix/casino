@@ -535,6 +535,24 @@ function getChipsBreakdown(amount) {
     return result;
 }
 
+function renderChipStackHTML(amount, { label = '', type = 'main', emptyLabel = 'Placez vos jetons' } = {}) {
+    const safeAmount = Math.max(0, Math.floor(amount || 0));
+    const chips = getChipsBreakdown(safeAmount).slice(0, 7);
+    const isEmpty = safeAmount === 0;
+    const stackClass = ['chip-stack', type, isEmpty ? 'empty' : ''].filter(Boolean).join(' ');
+    const chipsHTML = chips.map((chip, index) =>
+        `<span class="chip chip-${chip} chip-table" style="--stack-index:${index};" aria-hidden="true">${chip}</span>`
+    ).join('');
+    const labelHTML = label ? `<small>${label}</small>` : '';
+
+    return `
+        <div class="${stackClass}">
+            ${isEmpty ? `<span class="chip-stack-placeholder">${emptyLabel}</span>` : chipsHTML}
+            <span class="chip-stack-total">${safeAmount}€${labelHTML}</span>
+        </div>
+    `;
+}
+
 async function addChipToSeat(seatNum) {
     if (!currentTableId || !tableState) return;
     if (tableState.state !== 'waiting' && tableState.state !== 'betting') return;
@@ -574,7 +592,12 @@ async function updateSeatBet(seatNum, amount) {
     if (!currentTableId || !tableState) return;
 
     const minBet = currentTableConfig.minBet;
-    if (amount < minBet) {
+    if (amount < 0) {
+        alert('La mise ne peut pas être négative');
+        return;
+    }
+
+    if (amount !== 0 && amount < minBet) {
         alert(`La mise minimum est de ${minBet}€`);
         return;
     }
@@ -657,16 +680,55 @@ function renderMultiSeatsArea() {
             seatDiv.classList.add('occupied');
             if (isMe) seatDiv.classList.add('my-seat');
 
+            const mainBetStack = renderChipStackHTML(seat.bet || 0, {
+                label: 'Mise principale',
+                type: 'main',
+                emptyLabel: 'Cliquez pour miser'
+            });
+
+            const show21plus3 = elements.enable21Plus3?.checked;
+            const showPerfectPairs = elements.enablePerfectPairs?.checked;
+
+            const side21HTML = show21plus3 ? `
+                <div class="side-bet-circle side-21" data-seat-side21="${i}">
+                    ${renderChipStackHTML(seat.sideBet21Plus3 || 0, {
+                        label: '21+3',
+                        type: 'side',
+                        emptyLabel: '21+3'
+                    })}
+                </div>
+            ` : '';
+
+            const sidePerfectHTML = showPerfectPairs ? `
+                <div class="side-bet-circle side-pp" data-seat-sidepp="${i}">
+                    ${renderChipStackHTML(seat.sideBetPerfectPairs || 0, {
+                        label: 'Perfect Pairs',
+                        type: 'side',
+                        emptyLabel: 'Perfect Pairs'
+                    })}
+                </div>
+            ` : '';
+
             seatDiv.innerHTML = `
-                <div class="seat-info">
+                <div class="seat-hand-area">
+                    <div class="seat-hand" data-seat-hand="${i}"></div>
+                    <div class="seat-total" data-seat-total="${i}">Total: 0</div>
+                </div>
+                <div class="seat-bet-area">
+                    <div class="main-bet-circle" data-seat-bet="${i}">
+                        ${mainBetStack}
+                    </div>
+                    ${(show21plus3 || showPerfectPairs) ? `
+                    <div class="seat-side-bets">
+                        ${side21HTML}
+                        ${sidePerfectHTML}
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="seat-footer">
                     <div class="seat-number-display">Place ${i}</div>
                     <div class="seat-player">${isMe ? 'Vous' : seat.username}</div>
-                    <div class="seat-bet-display">${seat.bet}€</div>
-                    ${seat.sideBet21Plus3 > 0 ? `<div class="side-bet-display">21+3: ${seat.sideBet21Plus3}€</div>` : ''}
-                    ${seat.sideBetPerfectPairs > 0 ? `<div class="side-bet-display">PP: ${seat.sideBetPerfectPairs}€</div>` : ''}
                 </div>
-                <div class="seat-hand" data-seat-hand="${i}"></div>
-                <div class="seat-total" data-seat-total="${i}">Total: 0</div>
             `;
 
             // Render hand
@@ -676,6 +738,34 @@ function renderMultiSeatsArea() {
 
                 const totalElement = seatDiv.querySelector(`[data-seat-total="${i}"]`);
                 totalElement.textContent = `Total: ${handTotal(seat.hand)}`;
+            }
+            // Enable felt betting interactions for my seats during betting phase
+            const canBet = isMe && (tableState.state === 'waiting' || tableState.state === 'betting');
+            if (canBet) {
+                const betCircle = seatDiv.querySelector(`[data-seat-bet="${i}"]`);
+                betCircle?.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    addChipToSeat(i);
+                });
+                betCircle?.classList.add('bet-circle-clickable');
+
+                if (show21plus3) {
+                    const side21Circle = seatDiv.querySelector(`[data-seat-side21="${i}"]`);
+                    side21Circle?.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        addChipToSideBet(i, '21plus3');
+                    });
+                    side21Circle?.classList.add('bet-circle-clickable');
+                }
+
+                if (showPerfectPairs) {
+                    const sidePPCircle = seatDiv.querySelector(`[data-seat-sidepp="${i}"]`);
+                    sidePPCircle?.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        addChipToSideBet(i, 'perfectpairs');
+                    });
+                    sidePPCircle?.classList.add('bet-circle-clickable');
+                }
             }
         } else {
             seatDiv.innerHTML = `
@@ -1181,6 +1271,8 @@ async function playerHit(seatNum) {
     if (!currentTableId || !tableState) return;
 
     const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    let shouldCheckDealer = false;
+
     await runTransaction(db, async (transaction) => {
         const tableDoc = await transaction.get(tableRef);
         if (!tableDoc.exists()) return;
@@ -1197,19 +1289,27 @@ async function playerHit(seatNum) {
             const total = handTotal(seat.hand);
             if (total > 21) {
                 seat.status = 'bust';
+                shouldCheckDealer = true;
             } else if (total === 21) {
                 seat.status = 'standing';
+                shouldCheckDealer = true;
             }
 
             transaction.update(tableRef, data);
         }
     });
+
+    if (shouldCheckDealer) {
+        setTimeout(() => checkDealerTurn(), 500);
+    }
 }
 
 async function playerStand(seatNum) {
     if (!currentTableId || !tableState) return;
 
     const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    let shouldCheckDealer = false;
+
     await runTransaction(db, async (transaction) => {
         const tableDoc = await transaction.get(tableRef);
         if (!tableDoc.exists()) return;
@@ -1220,8 +1320,13 @@ async function playerStand(seatNum) {
         if (!seat || seat.userId !== currentUser.uid || seat.status !== 'playing') return;
 
         seat.status = 'standing';
+        shouldCheckDealer = true;
         transaction.update(tableRef, data);
     });
+
+    if (shouldCheckDealer) {
+        setTimeout(() => checkDealerTurn(), 500);
+    }
 }
 
 async function playerDouble(seatNum) {
