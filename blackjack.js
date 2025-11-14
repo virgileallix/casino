@@ -603,14 +603,8 @@ async function addChipToSideBet(seatNum, type) {
 async function updateSeatBet(seatNum, amount) {
     if (!currentTableId || !tableState) return;
 
-    const minBet = currentTableConfig.minBet;
     if (amount < 0) {
         alert('La mise ne peut pas être négative');
-        return;
-    }
-
-    if (amount !== 0 && amount < minBet) {
-        alert(`La mise minimum est de ${minBet}€`);
         return;
     }
 
@@ -1059,13 +1053,11 @@ async function readyToPlay() {
         transaction.update(tableRef, { seats: data.seats });
     });
 
-    // Auto-start only when no betting timer is running (e.g., first round)
-    if (!tableState || tableState.state !== 'betting' || !tableState.bettingTimer) {
-        checkAndStartRound();
-    }
+    // Vérifie immédiatement si tous les joueurs nécessaires sont prêts
+    checkAndStartRound();
 }
 
-async function checkAndStartRound() {
+async function checkAndStartRound(force = false) {
     if (!currentTableId || !tableState) return;
 
     const seats = Object.values(tableState.seats || {});
@@ -1075,7 +1067,7 @@ async function checkAndStartRound() {
     const hasReadyPlayers = seats.some(seat => seat.status === 'ready');
     const isBettingState = tableState.state === 'betting' || tableState.state === 'waiting';
 
-    if (hasReadyPlayers && isBettingState) {
+    if (force || (hasReadyPlayers && isBettingState)) {
         await startRound();
     }
 }
@@ -1096,54 +1088,25 @@ async function handleBettingTimerExpiration() {
             if (!isBettingState) return;
 
             const seats = data.seats || {};
-            const minBet = data.minBet || (currentTableConfig?.minBet ?? 0);
-            let readySeats = 0;
-            let seatsChanged = false;
             const hasPlayers = Object.keys(seats).length > 0;
+            const hasReadySeats = Object.values(seats).some(seat => seat && seat.status === 'ready');
 
-            Object.keys(seats).forEach(seatNum => {
-                const seat = seats[seatNum];
-                if (!seat) return;
-
-                const mainBet = seat.bet || 0;
-                if (mainBet >= minBet) {
-                    if (seat.status !== 'ready') {
-                        seat.status = 'ready';
-                        seat.inactiveRounds = 0;
-                        seatsChanged = true;
-                    }
-                    readySeats += 1;
-                } else if (seat.status === 'ready') {
-                    seat.status = 'waiting';
-                    seatsChanged = true;
-                }
-            });
-
-            if (readySeats > 0) {
+            if (hasReadySeats) {
                 shouldStart = true;
                 transaction.update(tableRef, {
-                    seats,
                     bettingTimer: null,
                     lastActivity: serverTimestamp()
                 });
             } else if (hasPlayers) {
                 transaction.update(tableRef, {
-                    seats,
                     state: 'betting',
                     bettingTimer: {
                         startTime: serverTimestamp(),
                         duration: data.bettingTimer?.duration || BETTING_TIMER_DURATION
                     }
                 });
-            } else if (seatsChanged) {
-                transaction.update(tableRef, {
-                    seats,
-                    state: 'waiting',
-                    bettingTimer: null
-                });
             } else {
                 transaction.update(tableRef, {
-                    seats,
                     state: 'waiting',
                     bettingTimer: null
                 });
