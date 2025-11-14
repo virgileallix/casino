@@ -89,9 +89,41 @@
 
                 <!-- Betting Panel (shown when seated) -->
                 <div class="control-section" id="bettingPanel" style="display: none;">
+                    <div class="chips-selector">
+                        <label>Sélectionner un jeton</label>
+                        <div class="chips-grid">
+                            <button class="chip-btn" data-value="1">
+                                <span class="chip chip-1">1</span>
+                            </button>
+                            <button class="chip-btn" data-value="5">
+                                <span class="chip chip-5">5</span>
+                            </button>
+                            <button class="chip-btn" data-value="10">
+                                <span class="chip chip-10">10</span>
+                            </button>
+                            <button class="chip-btn" data-value="25">
+                                <span class="chip chip-25">25</span>
+                            </button>
+                            <button class="chip-btn" data-value="50">
+                                <span class="chip chip-50">50</span>
+                            </button>
+                            <button class="chip-btn" data-value="100">
+                                <span class="chip chip-100">100</span>
+                            </button>
+                            <button class="chip-btn" data-value="500">
+                                <span class="chip chip-500">500</span>
+                            </button>
+                            <button class="chip-btn" data-value="1000">
+                                <span class="chip chip-1000">1000</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="active-seats-list" id="activeSeatsList">
                         <!-- Active seats with bet inputs -->
                     </div>
+
+                    <button class="btn-clear-bets" id="clearBetsBtn">Effacer les mises</button>
                 </div>
 
                 <div class="control-section">

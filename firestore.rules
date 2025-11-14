@@ -108,6 +108,26 @@ service cloud.firestore {
 
 
     // ========================================
+    // COLLECTION: blackjack-tables (NOUVEAU)
+    // ========================================
+
+    match /blackjack-tables/{tableId} {
+      // Lecture: Tous les utilisateurs authentifiés peuvent voir les tables
+      allow read: if isAuthenticated();
+
+      // Création: Tous les utilisateurs authentifiés peuvent créer des tables
+      allow create: if isAuthenticated();
+
+      // Mise à jour: Tous les utilisateurs authentifiés peuvent mettre à jour les tables
+      // (nécessaire pour le jeu multijoueur en temps réel)
+      allow update: if isAuthenticated();
+
+      // Suppression: Seulement admin
+      allow delete: if isAdmin();
+    }
+
+
+    // ========================================
     // COLLECTION: gameHistory (optionnel - si vous l'ajoutez plus tard)
     // ========================================
 

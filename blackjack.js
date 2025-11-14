@@ -29,6 +29,7 @@ let currentTableId = null;
 let currentTableConfig = null;
 let mySeats = []; // Array of seat numbers the player has claimed
 let tableState = null;
+let selectedChipValue = 10; // Default selected chip
 
 // Stats
 let stats = {
@@ -432,6 +433,13 @@ function renderActiveSeatsBetting() {
 
         const seatDiv = document.createElement('div');
         seatDiv.className = 'active-seat-betting';
+
+        // Calculate chips breakdown
+        const chipsBreakdown = getChipsBreakdown(seat.bet || 0);
+        const chipsHTML = chipsBreakdown.map(chip =>
+            `<span class="chip chip-${chip}" title="${chip}€">${chip}</span>`
+        ).join('');
+
         seatDiv.innerHTML = `
             <div class="seat-betting-header">
                 <span class="seat-label">Place ${seatNum}</span>
@@ -439,75 +447,115 @@ function renderActiveSeatsBetting() {
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="bet-input-group">
-                <input type="number"
-                       class="seat-bet-input"
-                       data-seat="${seatNum}"
-                       value="${seat.bet || currentTableConfig.minBet}"
-                       min="${currentTableConfig.minBet}"
-                       step="${currentTableConfig.minBet}">
-                <span class="currency">€</span>
+            <div class="bet-display-area">
+                <div class="bet-amount-display">${seat.bet || 0}€</div>
+                <div class="seat-chips-stack">${chipsHTML || '<span class="no-bet-text">Cliquez sur les jetons pour miser</span>'}</div>
             </div>
             <div class="quick-bet-buttons">
+                <button class="quick-bet" data-action="clear" data-seat="${seatNum}">Effacer</button>
                 <button class="quick-bet" data-action="min" data-seat="${seatNum}">Min</button>
-                <button class="quick-bet" data-action="half" data-seat="${seatNum}">½</button>
                 <button class="quick-bet" data-action="double" data-seat="${seatNum}">2x</button>
                 <button class="quick-bet" data-action="max" data-seat="${seatNum}">Max</button>
             </div>
 
             ${elements.enable21Plus3.checked ? `
             <div class="side-bet-input">
-                <label>21+3</label>
-                <input type="number"
-                       class="side-bet-amount"
-                       data-seat="${seatNum}"
-                       data-type="21plus3"
-                       value="${seat.sideBet21Plus3 || 0}"
-                       min="0"
-                       step="1">
+                <label>21+3: ${seat.sideBet21Plus3 || 0}€</label>
+                <button class="side-bet-chip-btn" data-seat="${seatNum}" data-type="21plus3">+${selectedChipValue}€</button>
             </div>
             ` : ''}
 
             ${elements.enablePerfectPairs.checked ? `
             <div class="side-bet-input">
-                <label>Perfect Pairs</label>
-                <input type="number"
-                       class="side-bet-amount"
-                       data-seat="${seatNum}"
-                       data-type="perfectpairs"
-                       value="${seat.sideBetPerfectPairs || 0}"
-                       min="0"
-                       step="1">
+                <label>Perfect Pairs: ${seat.sideBetPerfectPairs || 0}€</label>
+                <button class="side-bet-chip-btn" data-seat="${seatNum}" data-type="perfectpairs">+${selectedChipValue}€</button>
             </div>
             ` : ''}
         `;
+
+        // Add click listener for betting with chips
+        seatDiv.addEventListener('click', (e) => {
+            if (!e.target.closest('.btn-remove-seat') &&
+                !e.target.closest('.quick-bet') &&
+                !e.target.closest('.side-bet-chip-btn')) {
+                addChipToSeat(seatNum);
+            }
+        });
 
         // Event listeners
         seatDiv.querySelector('.btn-remove-seat').addEventListener('click', () => {
             toggleSeat(seatNum);
         });
 
-        const betInput = seatDiv.querySelector('.seat-bet-input');
-        betInput.addEventListener('change', () => updateSeatBet(seatNum, parseFloat(betInput.value)));
-
         seatDiv.querySelectorAll('.quick-bet').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const action = btn.getAttribute('data-action');
                 quickBetAction(seatNum, action);
             });
         });
 
-        // Side bet inputs
-        seatDiv.querySelectorAll('.side-bet-amount').forEach(input => {
-            input.addEventListener('change', () => {
-                const type = input.getAttribute('data-type');
-                const amount = parseFloat(input.value) || 0;
-                updateSideBet(seatNum, type, amount);
+        // Side bet buttons
+        seatDiv.querySelectorAll('.side-bet-chip-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const type = btn.getAttribute('data-type');
+                addChipToSideBet(seatNum, type);
             });
         });
 
         elements.activeSeatsList.appendChild(seatDiv);
     });
+}
+
+function getChipsBreakdown(amount) {
+    const chips = [1000, 500, 100, 50, 25, 10, 5, 1];
+    const result = [];
+    let remaining = Math.floor(amount);
+
+    for (const chip of chips) {
+        while (remaining >= chip) {
+            result.push(chip);
+            remaining -= chip;
+        }
+    }
+
+    return result;
+}
+
+async function addChipToSeat(seatNum) {
+    if (!currentTableId || !tableState) return;
+    if (tableState.state !== 'waiting' && tableState.state !== 'betting') return;
+
+    const seat = tableState.seats[seatNum];
+    if (!seat) return;
+
+    const newBet = (seat.bet || 0) + selectedChipValue;
+
+    if (newBet > balance) {
+        alert('Solde insuffisant');
+        return;
+    }
+
+    await updateSeatBet(seatNum, newBet);
+}
+
+async function addChipToSideBet(seatNum, type) {
+    if (!currentTableId || !tableState) return;
+    if (tableState.state !== 'waiting' && tableState.state !== 'betting') return;
+
+    const seat = tableState.seats[seatNum];
+    if (!seat) return;
+
+    const currentAmount = type === '21plus3' ? (seat.sideBet21Plus3 || 0) : (seat.sideBetPerfectPairs || 0);
+    const newAmount = currentAmount + selectedChipValue;
+
+    if (newAmount > balance) {
+        alert('Solde insuffisant');
+        return;
+    }
+
+    await updateSideBet(seatNum, type, newAmount);
 }
 
 async function updateSeatBet(seatNum, amount) {
@@ -553,29 +601,32 @@ async function updateSideBet(seatNum, type, amount) {
 }
 
 function quickBetAction(seatNum, action) {
-    const input = document.querySelector(`.seat-bet-input[data-seat="${seatNum}"]`);
-    if (!input) return;
+    if (!tableState || !tableState.seats[seatNum]) return;
 
-    let currentBet = parseFloat(input.value) || currentTableConfig.minBet;
+    const seat = tableState.seats[seatNum];
+    let currentBet = seat.bet || 0;
     const minBet = currentTableConfig.minBet;
+    let newBet = currentBet;
 
     switch (action) {
+        case 'clear':
+            newBet = 0;
+            break;
         case 'min':
-            currentBet = minBet;
+            newBet = minBet;
             break;
         case 'half':
-            currentBet = Math.max(minBet, currentBet / 2);
+            newBet = Math.max(0, currentBet / 2);
             break;
         case 'double':
-            currentBet = Math.min(balance, currentBet * 2);
+            newBet = Math.min(balance, currentBet * 2);
             break;
         case 'max':
-            currentBet = Math.max(minBet, balance);
+            newBet = Math.max(minBet, balance);
             break;
     }
 
-    input.value = currentBet.toFixed(2);
-    updateSeatBet(seatNum, currentBet);
+    updateSeatBet(seatNum, newBet);
 }
 
 function renderMultiSeatsArea() {
@@ -802,9 +853,10 @@ async function checkAndStartRound() {
     const seats = Object.values(tableState.seats || {});
     if (seats.length === 0) return;
 
-    const allReady = seats.every(seat => seat.status === 'ready');
+    // Check if at least one player is ready
+    const hasReadyPlayers = seats.some(seat => seat.status === 'ready');
 
-    if (allReady && tableState.state === 'betting') {
+    if (hasReadyPlayers && tableState.state === 'betting') {
         await startRound();
     }
 }
@@ -1317,6 +1369,40 @@ function setupEventListeners() {
     elements.backToLobbyBtn.addEventListener('click', leaveTable);
 
     elements.dealBtn.addEventListener('click', readyToPlay);
+
+    // Chip selection
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedChipValue = parseInt(btn.getAttribute('data-value'));
+
+            // Update UI
+            document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            // Update side bet buttons if visible
+            if (mySeats.length > 0) {
+                renderActiveSeatsBetting();
+            }
+        });
+    });
+
+    // Set default selected chip
+    const defaultChipBtn = document.querySelector('.chip-btn[data-value="10"]');
+    if (defaultChipBtn) {
+        defaultChipBtn.classList.add('selected');
+    }
+
+    // Clear all bets button
+    const clearBetsBtn = document.getElementById('clearBetsBtn');
+    if (clearBetsBtn) {
+        clearBetsBtn.addEventListener('click', async () => {
+            for (const seatNum of mySeats) {
+                await updateSeatBet(seatNum, 0);
+                await updateSideBet(seatNum, '21plus3', 0);
+                await updateSideBet(seatNum, 'perfectpairs', 0);
+            }
+        });
+    }
 
     elements.depositBtn.addEventListener('click', async () => {
         if (!currentUser) {
