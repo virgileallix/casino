@@ -17,6 +17,7 @@ const TABLE_CONFIGS = [
     { id: 'table-500', minBet: 500, maxPlayers: 7, name: '500€+' },
     { id: 'table-1000', minBet: 1000, maxPlayers: 7, name: '1000€+' }
 ];
+const BETTING_TIMER_DURATION = 15;
 
 // Game state
 let currentUser = null;
@@ -30,6 +31,12 @@ let currentTableConfig = null;
 let mySeats = []; // Array of seat numbers the player has claimed
 let tableState = null;
 let selectedChipValue = 10; // Default selected chip
+let bettingTimerInterval = null;
+let currentBettingTime = 0;
+let bettingTimerEndTime = null;
+let bettingTimerStartKey = null;
+let bettingTimerTriggered = false;
+let initializingBettingTimer = false;
 
 // Stats
 let stats = {
@@ -254,12 +261,15 @@ async function joinTable(tableId) {
             id: tableId,
             minBet: currentTableConfig.minBet,
             maxPlayers: currentTableConfig.maxPlayers,
-            state: 'waiting', // waiting, betting, dealing, playing, dealer-turn
+            state: 'betting', // waiting, betting, dealing, playing, dealer-turn
             seats: {},
             dealerHand: [],
             deck: [],
             currentRound: 0,
-            bettingTimer: null,
+            bettingTimer: {
+                startTime: serverTimestamp(),
+                duration: BETTING_TIMER_DURATION
+            },
             lastActivity: serverTimestamp()
         });
     }
@@ -288,6 +298,8 @@ function leaveTable() {
     if (unsubscribeTable) {
         unsubscribeTable();
     }
+
+    stopBettingTimer(true);
 
     // Clear my seats from the table
     if (currentTableId && mySeats.length > 0) {
@@ -709,8 +721,110 @@ function updateGameScreen() {
     // Update deal button
     updateDealButton();
 
+    // Update timer display
+    updateBettingTimerUI();
+
     // Setup player action buttons
     setupPlayerActionListeners();
+}
+
+function updateBettingTimerUI() {
+    if (!elements.roundTimer) return;
+
+    if (!tableState || tableState.state !== 'betting') {
+        stopBettingTimer(true);
+        return;
+    }
+
+    const timerData = tableState.bettingTimer;
+    if (!timerData || !timerData.startTime) {
+        const hasReadySeats = Object.values(tableState.seats || {}).some(seat => seat && seat.status === 'ready');
+        stopBettingTimer(true);
+        if (!hasReadySeats) {
+            ensureBettingTimerExists();
+        }
+        return;
+    }
+
+    const startTime = typeof timerData.startTime.toMillis === 'function'
+        ? timerData.startTime.toMillis()
+        : new Date(timerData.startTime).getTime();
+    const durationMs = (timerData.duration || BETTING_TIMER_DURATION) * 1000;
+    const endTime = startTime + durationMs;
+    const timerKey = `${currentTableId || 'table'}-${startTime}`;
+
+    if (bettingTimerEndTime !== endTime || bettingTimerStartKey !== timerKey) {
+        startLocalBettingTimer(endTime, timerKey);
+    }
+}
+
+function startLocalBettingTimer(endTime, timerKey) {
+    stopBettingTimer(false);
+    bettingTimerEndTime = endTime;
+    bettingTimerStartKey = timerKey;
+    bettingTimerTriggered = false;
+
+    if (elements.roundTimer) {
+        elements.roundTimer.style.display = 'flex';
+    }
+
+    updateBettingTimerDisplay();
+    bettingTimerInterval = setInterval(updateBettingTimerDisplay, 250);
+}
+
+function updateBettingTimerDisplay() {
+    if (!bettingTimerEndTime || !elements.timerValue) return;
+
+    const remainingMs = Math.max(0, bettingTimerEndTime - Date.now());
+    const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+    currentBettingTime = remainingSeconds;
+
+    elements.timerValue.textContent = `${remainingSeconds}s`;
+
+    if (remainingMs <= 0 && !bettingTimerTriggered) {
+        bettingTimerTriggered = true;
+        stopBettingTimer(false);
+        handleBettingTimerExpiration();
+    }
+}
+
+function stopBettingTimer(hide = true) {
+    if (bettingTimerInterval) {
+        clearInterval(bettingTimerInterval);
+        bettingTimerInterval = null;
+    }
+    bettingTimerEndTime = null;
+    bettingTimerStartKey = null;
+    bettingTimerTriggered = false;
+
+    if (elements.roundTimer && hide) {
+        elements.roundTimer.style.display = 'none';
+    }
+}
+
+async function ensureBettingTimerExists() {
+    if (!currentTableId || initializingBettingTimer) return;
+    if (!tableState || tableState.state !== 'betting') return;
+
+    const hasPlayers = Object.keys(tableState.seats || {}).length > 0;
+    if (!hasPlayers) return;
+
+    initializingBettingTimer = true;
+
+    try {
+        const tableRef = doc(db, 'blackjack-tables', currentTableId);
+        await updateDoc(tableRef, {
+            state: 'betting',
+            bettingTimer: {
+                startTime: serverTimestamp(),
+                duration: tableState?.bettingTimer?.duration || BETTING_TIMER_DURATION
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing betting timer:', error);
+    } finally {
+        initializingBettingTimer = false;
+    }
 }
 
 function updateGameStatus() {
@@ -843,8 +957,10 @@ async function readyToPlay() {
         transaction.update(tableRef, { seats: data.seats });
     });
 
-    // Check if all players are ready, then start round
-    checkAndStartRound();
+    // Auto-start only when no betting timer is running (e.g., first round)
+    if (!tableState || tableState.state !== 'betting' || !tableState.bettingTimer) {
+        checkAndStartRound();
+    }
 }
 
 async function checkAndStartRound() {
@@ -861,6 +977,77 @@ async function checkAndStartRound() {
     }
 }
 
+async function handleBettingTimerExpiration() {
+    if (!currentTableId) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    let shouldStart = false;
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const tableDoc = await transaction.get(tableRef);
+            if (!tableDoc.exists()) return;
+
+            const data = tableDoc.data();
+            if (data.state !== 'betting') return;
+
+            const seats = data.seats || {};
+            const minBet = data.minBet || (currentTableConfig?.minBet ?? 0);
+            let readySeats = 0;
+            let seatsChanged = false;
+            const hasPlayers = Object.keys(seats).length > 0;
+
+            Object.keys(seats).forEach(seatNum => {
+                const seat = seats[seatNum];
+                if (!seat) return;
+
+                const mainBet = seat.bet || 0;
+                if (mainBet >= minBet) {
+                    if (seat.status !== 'ready') {
+                        seat.status = 'ready';
+                        seat.inactiveRounds = 0;
+                        seatsChanged = true;
+                    }
+                    readySeats += 1;
+                } else if (seat.status === 'ready') {
+                    seat.status = 'waiting';
+                    seatsChanged = true;
+                }
+            });
+
+            if (readySeats > 0) {
+                shouldStart = true;
+                transaction.update(tableRef, {
+                    seats,
+                    bettingTimer: null,
+                    lastActivity: serverTimestamp()
+                });
+            } else if (hasPlayers) {
+                transaction.update(tableRef, {
+                    seats,
+                    bettingTimer: {
+                        startTime: serverTimestamp(),
+                        duration: data.bettingTimer?.duration || BETTING_TIMER_DURATION
+                    }
+                });
+            } else if (seatsChanged) {
+                transaction.update(tableRef, { seats });
+            } else {
+                transaction.update(tableRef, {
+                    seats,
+                    bettingTimer: null
+                });
+            }
+        });
+
+        if (shouldStart) {
+            await startRound();
+        }
+    } catch (error) {
+        console.error('Error handling betting timer expiration:', error);
+    }
+}
+
 async function startRound() {
     if (!currentTableId) return;
 
@@ -871,6 +1058,7 @@ async function startRound() {
         if (!tableDoc.exists()) return;
 
         const data = tableDoc.data();
+        if (data.state !== 'betting') return;
 
         // Create/shuffle deck if needed
         if (!data.deck || data.deck.length < 52) {
@@ -890,6 +1078,8 @@ async function startRound() {
 
         data.state = 'playing';
         data.currentRound = (data.currentRound || 0) + 1;
+        data.bettingTimer = null;
+        data.lastActivity = serverTimestamp();
 
         transaction.update(tableRef, data);
     });
@@ -1274,6 +1464,11 @@ async function resetTable() {
         // Reset table state
         data.dealerHand = [];
         data.state = 'betting';
+        data.bettingTimer = {
+            startTime: serverTimestamp(),
+            duration: BETTING_TIMER_DURATION
+        };
+        data.lastActivity = serverTimestamp();
 
         transaction.update(tableRef, data);
     });
