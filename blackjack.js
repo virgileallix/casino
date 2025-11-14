@@ -272,6 +272,18 @@ async function joinTable(tableId) {
             },
             lastActivity: serverTimestamp()
         });
+    } else {
+        const data = tableSnap.data();
+        if (data.state === 'waiting' || !data.bettingTimer) {
+            await updateDoc(tableRef, {
+                state: 'betting',
+                bettingTimer: {
+                    startTime: serverTimestamp(),
+                    duration: data.bettingTimer?.duration || BETTING_TIMER_DURATION
+                },
+                lastActivity: serverTimestamp()
+            });
+        }
     }
 
     // Subscribe to table updates
@@ -821,16 +833,16 @@ function updateGameScreen() {
 function updateBettingTimerUI() {
     if (!elements.roundTimer) return;
 
-    if (!tableState || tableState.state !== 'betting') {
+    if (!tableState || (tableState.state !== 'betting' && tableState.state !== 'waiting')) {
         stopBettingTimer(true);
         return;
     }
 
     const timerData = tableState.bettingTimer;
     if (!timerData || !timerData.startTime) {
-        const hasReadySeats = Object.values(tableState.seats || {}).some(seat => seat && seat.status === 'ready');
+        const hasPlayers = Object.keys(tableState.seats || {}).length > 0;
         stopBettingTimer(true);
-        if (!hasReadySeats) {
+        if (hasPlayers) {
             ensureBettingTimerExists();
         }
         return;
@@ -894,7 +906,7 @@ function stopBettingTimer(hide = true) {
 
 async function ensureBettingTimerExists() {
     if (!currentTableId || initializingBettingTimer) return;
-    if (!tableState || tableState.state !== 'betting') return;
+    if (!tableState || (tableState.state !== 'betting' && tableState.state !== 'waiting')) return;
 
     const hasPlayers = Object.keys(tableState.seats || {}).length > 0;
     if (!hasPlayers) return;
@@ -1061,8 +1073,9 @@ async function checkAndStartRound() {
 
     // Check if at least one player is ready
     const hasReadyPlayers = seats.some(seat => seat.status === 'ready');
+    const isBettingState = tableState.state === 'betting' || tableState.state === 'waiting';
 
-    if (hasReadyPlayers && tableState.state === 'betting') {
+    if (hasReadyPlayers && isBettingState) {
         await startRound();
     }
 }
@@ -1079,7 +1092,8 @@ async function handleBettingTimerExpiration() {
             if (!tableDoc.exists()) return;
 
             const data = tableDoc.data();
-            if (data.state !== 'betting') return;
+            const isBettingState = data.state === 'betting' || data.state === 'waiting';
+            if (!isBettingState) return;
 
             const seats = data.seats || {};
             const minBet = data.minBet || (currentTableConfig?.minBet ?? 0);
@@ -1115,16 +1129,22 @@ async function handleBettingTimerExpiration() {
             } else if (hasPlayers) {
                 transaction.update(tableRef, {
                     seats,
+                    state: 'betting',
                     bettingTimer: {
                         startTime: serverTimestamp(),
                         duration: data.bettingTimer?.duration || BETTING_TIMER_DURATION
                     }
                 });
             } else if (seatsChanged) {
-                transaction.update(tableRef, { seats });
+                transaction.update(tableRef, {
+                    seats,
+                    state: 'waiting',
+                    bettingTimer: null
+                });
             } else {
                 transaction.update(tableRef, {
                     seats,
+                    state: 'waiting',
                     bettingTimer: null
                 });
             }
@@ -1148,7 +1168,8 @@ async function startRound() {
         if (!tableDoc.exists()) return;
 
         const data = tableDoc.data();
-        if (data.state !== 'betting') return;
+        const isBettingState = data.state === 'betting' || data.state === 'waiting';
+        if (!isBettingState) return;
 
         // Create/shuffle deck if needed
         if (!data.deck || data.deck.length < 52) {
