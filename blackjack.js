@@ -1,24 +1,36 @@
-import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
-import { initializeUserBalance, subscribeToUserData, addFunds, applyGameResult } from './balance-manager.js';
+import { auth, signOut, onAuthStateChanged, db, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction, serverTimestamp } from './firebase-config.js';
+import { initializeUserBalance, subscribeToUserData, applyGameResult } from './balance-manager.js';
 
+// Card deck constants
 const suits = ['clubs', 'diamonds', 'hearts', 'spades'];
 const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const faceMapping = { 'A': 'ace', 'J': 'jack', 'Q': 'queen', 'K': 'king' };
 
+// Table configurations
+const TABLE_CONFIGS = [
+    { id: 'table-1', minBet: 1, maxPlayers: 7, name: '1€+' },
+    { id: 'table-5', minBet: 5, maxPlayers: 7, name: '5€+' },
+    { id: 'table-25', minBet: 25, maxPlayers: 7, name: '25€+' },
+    { id: 'table-50', minBet: 50, maxPlayers: 7, name: '50€+' },
+    { id: 'table-100', minBet: 100, maxPlayers: 7, name: '100€+' },
+    { id: 'table-250', minBet: 250, maxPlayers: 7, name: '250€+' },
+    { id: 'table-500', minBet: 500, maxPlayers: 7, name: '500€+' },
+    { id: 'table-1000', minBet: 1000, maxPlayers: 7, name: '1000€+' }
+];
+
+// Game state
 let currentUser = null;
 let unsubscribeUser = null;
+let unsubscribeTable = null;
 let balance = 0;
 let balanceLoaded = false;
 
-let deck = [];
-let playerHand = [];
-let dealerHand = [];
-let roundBet = 0;
-let roundActive = false;
-let playerHasActed = false;
-let doubleAvailable = false;
-let playerBlackjack = false;
+let currentTableId = null;
+let currentTableConfig = null;
+let mySeats = []; // Array of seat numbers the player has claimed
+let tableState = null;
 
+// Stats
 let stats = {
     handsPlayed: 0,
     handsWon: 0,
@@ -26,20 +38,54 @@ let stats = {
     totalProfit: 0
 };
 
+// Elements
 const elements = {
     userBalance: document.getElementById('userBalance'),
     depositBtn: document.getElementById('depositBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
-    betInput: document.getElementById('betAmount'),
+
+    // Lobby
+    lobbyScreen: document.getElementById('lobbyScreen'),
+    tablesGrid: document.getElementById('tablesGrid'),
+
+    // Game Screen
+    gameScreen: document.getElementById('gameScreen'),
+    backToLobbyBtn: document.getElementById('backToLobbyBtn'),
+    tableMinBet: document.getElementById('tableMinBet'),
+
+    // Seats
+    seatSelectionPanel: document.getElementById('seatSelectionPanel'),
+    seatsSelector: document.getElementById('seatsSelector'),
+    bettingPanel: document.getElementById('bettingPanel'),
+    activeSeatsList: document.getElementById('activeSeatsList'),
+
+    // Game Controls
     dealBtn: document.getElementById('dealBtn'),
+    gameStatus: document.getElementById('gameStatus'),
+    roundTimer: document.getElementById('roundTimer'),
+    timerValue: document.getElementById('timerValue'),
+
+    // Table
+    dealerHand: document.getElementById('dealerHand'),
+    dealerTotal: document.getElementById('dealerTotal'),
+    multiSeatsArea: document.getElementById('multiSeatsArea'),
+
+    // Actions
+    actionControls: document.getElementById('actionControls'),
+    currentSeatIndicator: document.getElementById('currentSeatIndicator'),
+    currentSeatNumber: document.getElementById('currentSeatNumber'),
     hitBtn: document.getElementById('hitBtn'),
     standBtn: document.getElementById('standBtn'),
     doubleBtn: document.getElementById('doubleBtn'),
-    gameStatus: document.getElementById('gameStatus'),
-    dealerHand: document.getElementById('dealerHand'),
-    dealerTotal: document.getElementById('dealerTotal'),
-    playerHand: document.getElementById('playerHand'),
-    playerTotal: document.getElementById('playerTotal'),
+
+    // Side Bets
+    enable21Plus3: document.getElementById('enable21Plus3'),
+    enablePerfectPairs: document.getElementById('enablePerfectPairs'),
+
+    // Players List
+    playersList: document.getElementById('playersList'),
+
+    // Stats
     resultsLog: document.getElementById('resultsLog'),
     stats: {
         handsPlayed: document.getElementById('handsPlayed'),
@@ -48,6 +94,10 @@ const elements = {
         totalProfit: document.getElementById('totalProfit')
     }
 };
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
 
 function setStatus(message, tone = 'neutral') {
     elements.gameStatus.textContent = message;
@@ -70,35 +120,12 @@ function updateStatsDisplay() {
     elements.stats.totalProfit.textContent = `${stats.totalProfit.toFixed(2)} €`;
 }
 
-function resetHands() {
-    playerHand = [];
-    dealerHand = [];
-    playerBlackjack = false;
-    renderHands(true);
-}
-
-function createDeck() {
-    deck = [];
-    suits.forEach(suit => {
-        ranks.forEach(rank => {
-            deck.push({ suit, rank });
-        });
-    });
-    shuffle(deck);
-}
-
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
-
-function drawCard() {
-    if (deck.length === 0) {
-        createDeck();
-    }
-    return deck.pop();
+function syncStatsFromUser(data) {
+    stats.handsPlayed = data.blackjackHandsPlayed ?? 0;
+    stats.handsWon = data.blackjackWins ?? 0;
+    stats.blackjacks = data.blackjackBlackjacks ?? 0;
+    stats.totalProfit = parseFloat((data.blackjackTotalProfit ?? 0).toFixed(2));
+    updateStatsDisplay();
 }
 
 function getCardImage(card) {
@@ -107,6 +134,7 @@ function getCardImage(card) {
 }
 
 function handTotal(hand) {
+    if (!hand || hand.length === 0) return 0;
     let total = 0;
     let aces = 0;
     hand.forEach(card => {
@@ -127,18 +155,11 @@ function handTotal(hand) {
     return total;
 }
 
-function renderHands(hideDealerHole) {
-    renderHand(elements.playerHand, playerHand);
-    renderHand(elements.dealerHand, dealerHand, hideDealerHole);
-
-    elements.playerTotal.textContent = `Total : ${handTotal(playerHand)}`;
-    elements.dealerTotal.textContent = hideDealerHole
-        ? 'Total : ?'
-        : `Total : ${handTotal(dealerHand)}`;
-}
-
 function renderHand(container, hand, hideHole = false) {
+    if (!container) return;
     container.innerHTML = '';
+    if (!hand || hand.length === 0) return;
+
     hand.forEach((card, index) => {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
@@ -147,7 +168,6 @@ function renderHand(container, hand, hideHole = false) {
         if (hideHole && index === 1) {
             cardDiv.classList.add('face-down');
         } else {
-            // Set card display attributes
             const suitSymbols = {
                 hearts: '♥',
                 diamonds: '♦',
@@ -164,6 +184,1046 @@ function renderHand(container, hand, hideHole = false) {
         cardDiv.classList.add('deal');
         setTimeout(() => cardDiv.classList.remove('deal'), 600);
         container.appendChild(cardDiv);
+    });
+}
+
+// ============================================================================
+// LOBBY FUNCTIONS
+// ============================================================================
+
+function renderLobby() {
+    elements.tablesGrid.innerHTML = '';
+
+    TABLE_CONFIGS.forEach(config => {
+        const tableCard = document.createElement('div');
+        tableCard.className = 'table-card';
+        tableCard.innerHTML = `
+            <div class="table-card-header">
+                <h3>${config.name}</h3>
+                <span class="table-min-bet">Mise min: ${config.minBet}€</span>
+            </div>
+            <div class="table-card-body">
+                <div class="table-info">
+                    <span><i class="fas fa-users"></i> <span class="player-count" data-table="${config.id}">0</span>/${config.maxPlayers}</span>
+                    <span><i class="fas fa-chair"></i> Places disponibles</span>
+                </div>
+                <button class="btn-join-table" data-table="${config.id}">
+                    Rejoindre la table
+                </button>
+            </div>
+        `;
+
+        tableCard.querySelector('.btn-join-table').addEventListener('click', () => {
+            joinTable(config.id);
+        });
+
+        elements.tablesGrid.appendChild(tableCard);
+    });
+
+    // Subscribe to all tables to show player counts
+    TABLE_CONFIGS.forEach(config => {
+        const tableRef = doc(db, 'blackjack-tables', config.id);
+        onSnapshot(tableRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                const playerCount = Object.keys(data.seats || {}).filter(seatNum => {
+                    const seat = data.seats[seatNum];
+                    return seat && seat.userId;
+                }).length;
+
+                const countElement = document.querySelector(`[data-table="${config.id}"]`);
+                if (countElement) {
+                    countElement.textContent = playerCount;
+                }
+            }
+        });
+    });
+}
+
+async function joinTable(tableId) {
+    currentTableId = tableId;
+    currentTableConfig = TABLE_CONFIGS.find(t => t.id === tableId);
+
+    // Initialize table in Firestore if it doesn't exist
+    const tableRef = doc(db, 'blackjack-tables', tableId);
+    const tableSnap = await getDoc(tableRef);
+
+    if (!tableSnap.exists()) {
+        await setDoc(tableRef, {
+            id: tableId,
+            minBet: currentTableConfig.minBet,
+            maxPlayers: currentTableConfig.maxPlayers,
+            state: 'waiting', // waiting, betting, dealing, playing, dealer-turn
+            seats: {},
+            dealerHand: [],
+            deck: [],
+            currentRound: 0,
+            bettingTimer: null,
+            lastActivity: serverTimestamp()
+        });
+    }
+
+    // Subscribe to table updates
+    if (unsubscribeTable) {
+        unsubscribeTable();
+    }
+
+    unsubscribeTable = onSnapshot(tableRef, (snapshot) => {
+        if (snapshot.exists()) {
+            tableState = snapshot.data();
+            updateGameScreen();
+        }
+    });
+
+    // Switch to game screen
+    elements.lobbyScreen.style.display = 'none';
+    elements.gameScreen.style.display = 'grid';
+    elements.tableMinBet.textContent = currentTableConfig.name;
+
+    renderSeatsSelector();
+}
+
+function leaveTable() {
+    if (unsubscribeTable) {
+        unsubscribeTable();
+    }
+
+    // Clear my seats from the table
+    if (currentTableId && mySeats.length > 0) {
+        const tableRef = doc(db, 'blackjack-tables', currentTableId);
+        runTransaction(db, async (transaction) => {
+            const tableDoc = await transaction.get(tableRef);
+            if (tableDoc.exists()) {
+                const data = tableDoc.data();
+                mySeats.forEach(seatNum => {
+                    if (data.seats[seatNum]) {
+                        delete data.seats[seatNum];
+                    }
+                });
+                transaction.update(tableRef, { seats: data.seats });
+            }
+        });
+    }
+
+    currentTableId = null;
+    currentTableConfig = null;
+    mySeats = [];
+    tableState = null;
+
+    elements.gameScreen.style.display = 'none';
+    elements.lobbyScreen.style.display = 'block';
+}
+
+// ============================================================================
+// SEAT MANAGEMENT
+// ============================================================================
+
+function renderSeatsSelector() {
+    elements.seatsSelector.innerHTML = '';
+
+    for (let i = 1; i <= 7; i++) {
+        const seatBtn = document.createElement('button');
+        seatBtn.className = 'seat-button';
+        seatBtn.setAttribute('data-seat', i);
+        seatBtn.innerHTML = `
+            <span class="seat-number">Place ${i}</span>
+            <span class="seat-status">Libre</span>
+        `;
+
+        seatBtn.addEventListener('click', () => toggleSeat(i));
+        elements.seatsSelector.appendChild(seatBtn);
+    }
+}
+
+async function toggleSeat(seatNumber) {
+    if (!currentTableId || !currentUser) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const tableDoc = await transaction.get(tableRef);
+            if (!tableDoc.exists()) return;
+
+            const data = tableDoc.data();
+            const seats = data.seats || {};
+
+            // Check if I'm already in this seat
+            if (mySeats.includes(seatNumber)) {
+                // Remove me from this seat
+                delete seats[seatNumber];
+                mySeats = mySeats.filter(s => s !== seatNumber);
+            } else {
+                // Check if seat is occupied
+                if (seats[seatNumber] && seats[seatNumber].userId !== currentUser.uid) {
+                    alert('Cette place est déjà occupée');
+                    return;
+                }
+
+                // Check if I can take more seats
+                if (mySeats.length >= 3) {
+                    alert('Vous ne pouvez occuper que 3 places maximum');
+                    return;
+                }
+
+                // Claim the seat
+                seats[seatNumber] = {
+                    userId: currentUser.uid,
+                    username: currentUser.email.split('@')[0],
+                    bet: 0,
+                    sideBet21Plus3: 0,
+                    sideBetPerfectPairs: 0,
+                    hand: [],
+                    status: 'waiting', // waiting, playing, standing, bust, blackjack, done
+                    inactiveRounds: 0
+                };
+                mySeats.push(seatNumber);
+            }
+
+            transaction.update(tableRef, { seats });
+        });
+    } catch (error) {
+        console.error('Error toggling seat:', error);
+    }
+}
+
+function updateSeatsDisplay() {
+    if (!tableState) return;
+
+    // Update seat selector buttons
+    const seatButtons = elements.seatsSelector.querySelectorAll('.seat-button');
+    seatButtons.forEach(btn => {
+        const seatNum = parseInt(btn.getAttribute('data-seat'));
+        const seat = tableState.seats[seatNum];
+
+        btn.classList.remove('occupied', 'mine', 'inactive');
+
+        if (seat && seat.userId) {
+            btn.classList.add('occupied');
+            if (seat.userId === currentUser.uid) {
+                btn.classList.add('mine');
+                btn.querySelector('.seat-status').textContent = 'Votre place';
+            } else {
+                btn.querySelector('.seat-status').textContent = seat.username;
+            }
+        } else {
+            btn.querySelector('.seat-status').textContent = 'Libre';
+        }
+    });
+
+    // Show/hide betting panel
+    if (mySeats.length > 0) {
+        elements.bettingPanel.style.display = 'block';
+        renderActiveSeatsBetting();
+    } else {
+        elements.bettingPanel.style.display = 'none';
+    }
+
+    // Render multi-seats area
+    renderMultiSeatsArea();
+}
+
+function renderActiveSeatsBetting() {
+    elements.activeSeatsList.innerHTML = '';
+
+    mySeats.sort((a, b) => a - b).forEach(seatNum => {
+        const seat = tableState.seats[seatNum];
+        if (!seat) return;
+
+        const seatDiv = document.createElement('div');
+        seatDiv.className = 'active-seat-betting';
+        seatDiv.innerHTML = `
+            <div class="seat-betting-header">
+                <span class="seat-label">Place ${seatNum}</span>
+                <button class="btn-remove-seat" data-seat="${seatNum}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="bet-input-group">
+                <input type="number"
+                       class="seat-bet-input"
+                       data-seat="${seatNum}"
+                       value="${seat.bet || currentTableConfig.minBet}"
+                       min="${currentTableConfig.minBet}"
+                       step="${currentTableConfig.minBet}">
+                <span class="currency">€</span>
+            </div>
+            <div class="quick-bet-buttons">
+                <button class="quick-bet" data-action="min" data-seat="${seatNum}">Min</button>
+                <button class="quick-bet" data-action="half" data-seat="${seatNum}">½</button>
+                <button class="quick-bet" data-action="double" data-seat="${seatNum}">2x</button>
+                <button class="quick-bet" data-action="max" data-seat="${seatNum}">Max</button>
+            </div>
+
+            ${elements.enable21Plus3.checked ? `
+            <div class="side-bet-input">
+                <label>21+3</label>
+                <input type="number"
+                       class="side-bet-amount"
+                       data-seat="${seatNum}"
+                       data-type="21plus3"
+                       value="${seat.sideBet21Plus3 || 0}"
+                       min="0"
+                       step="1">
+            </div>
+            ` : ''}
+
+            ${elements.enablePerfectPairs.checked ? `
+            <div class="side-bet-input">
+                <label>Perfect Pairs</label>
+                <input type="number"
+                       class="side-bet-amount"
+                       data-seat="${seatNum}"
+                       data-type="perfectpairs"
+                       value="${seat.sideBetPerfectPairs || 0}"
+                       min="0"
+                       step="1">
+            </div>
+            ` : ''}
+        `;
+
+        // Event listeners
+        seatDiv.querySelector('.btn-remove-seat').addEventListener('click', () => {
+            toggleSeat(seatNum);
+        });
+
+        const betInput = seatDiv.querySelector('.seat-bet-input');
+        betInput.addEventListener('change', () => updateSeatBet(seatNum, parseFloat(betInput.value)));
+
+        seatDiv.querySelectorAll('.quick-bet').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.getAttribute('data-action');
+                quickBetAction(seatNum, action);
+            });
+        });
+
+        // Side bet inputs
+        seatDiv.querySelectorAll('.side-bet-amount').forEach(input => {
+            input.addEventListener('change', () => {
+                const type = input.getAttribute('data-type');
+                const amount = parseFloat(input.value) || 0;
+                updateSideBet(seatNum, type, amount);
+            });
+        });
+
+        elements.activeSeatsList.appendChild(seatDiv);
+    });
+}
+
+async function updateSeatBet(seatNum, amount) {
+    if (!currentTableId || !tableState) return;
+
+    const minBet = currentTableConfig.minBet;
+    if (amount < minBet) {
+        alert(`La mise minimum est de ${minBet}€`);
+        return;
+    }
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        if (data.seats[seatNum] && data.seats[seatNum].userId === currentUser.uid) {
+            data.seats[seatNum].bet = amount;
+            transaction.update(tableRef, { seats: data.seats });
+        }
+    });
+}
+
+async function updateSideBet(seatNum, type, amount) {
+    if (!currentTableId || !tableState) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        if (data.seats[seatNum] && data.seats[seatNum].userId === currentUser.uid) {
+            if (type === '21plus3') {
+                data.seats[seatNum].sideBet21Plus3 = amount;
+            } else if (type === 'perfectpairs') {
+                data.seats[seatNum].sideBetPerfectPairs = amount;
+            }
+            transaction.update(tableRef, { seats: data.seats });
+        }
+    });
+}
+
+function quickBetAction(seatNum, action) {
+    const input = document.querySelector(`.seat-bet-input[data-seat="${seatNum}"]`);
+    if (!input) return;
+
+    let currentBet = parseFloat(input.value) || currentTableConfig.minBet;
+    const minBet = currentTableConfig.minBet;
+
+    switch (action) {
+        case 'min':
+            currentBet = minBet;
+            break;
+        case 'half':
+            currentBet = Math.max(minBet, currentBet / 2);
+            break;
+        case 'double':
+            currentBet = Math.min(balance, currentBet * 2);
+            break;
+        case 'max':
+            currentBet = Math.max(minBet, balance);
+            break;
+    }
+
+    input.value = currentBet.toFixed(2);
+    updateSeatBet(seatNum, currentBet);
+}
+
+function renderMultiSeatsArea() {
+    if (!tableState) return;
+
+    elements.multiSeatsArea.innerHTML = '';
+
+    for (let i = 1; i <= 7; i++) {
+        const seat = tableState.seats[i];
+        const seatDiv = document.createElement('div');
+        seatDiv.className = 'player-seat';
+        seatDiv.setAttribute('data-seat', i);
+
+        if (seat && seat.userId) {
+            const isMe = seat.userId === currentUser.uid;
+            seatDiv.classList.add('occupied');
+            if (isMe) seatDiv.classList.add('my-seat');
+
+            seatDiv.innerHTML = `
+                <div class="seat-info">
+                    <div class="seat-number-display">Place ${i}</div>
+                    <div class="seat-player">${isMe ? 'Vous' : seat.username}</div>
+                    <div class="seat-bet-display">${seat.bet}€</div>
+                    ${seat.sideBet21Plus3 > 0 ? `<div class="side-bet-display">21+3: ${seat.sideBet21Plus3}€</div>` : ''}
+                    ${seat.sideBetPerfectPairs > 0 ? `<div class="side-bet-display">PP: ${seat.sideBetPerfectPairs}€</div>` : ''}
+                </div>
+                <div class="seat-hand" data-seat-hand="${i}"></div>
+                <div class="seat-total" data-seat-total="${i}">Total: 0</div>
+            `;
+
+            // Render hand
+            if (seat.hand && seat.hand.length > 0) {
+                const handContainer = seatDiv.querySelector(`[data-seat-hand="${i}"]`);
+                renderHand(handContainer, seat.hand, false);
+
+                const totalElement = seatDiv.querySelector(`[data-seat-total="${i}"]`);
+                totalElement.textContent = `Total: ${handTotal(seat.hand)}`;
+            }
+        } else {
+            seatDiv.innerHTML = `
+                <div class="seat-empty">
+                    <div class="seat-number-display">Place ${i}</div>
+                    <div class="seat-empty-label">Libre</div>
+                </div>
+            `;
+        }
+
+        elements.multiSeatsArea.appendChild(seatDiv);
+    }
+}
+
+// ============================================================================
+// GAME LOGIC
+// ============================================================================
+
+function updateGameScreen() {
+    if (!tableState) return;
+
+    updateSeatsDisplay();
+    updatePlayersListDisplay();
+
+    // Render dealer hand
+    if (tableState.dealerHand && tableState.dealerHand.length > 0) {
+        const hideHole = tableState.state === 'dealing' || tableState.state === 'playing';
+        renderHand(elements.dealerHand, tableState.dealerHand, hideHole);
+
+        if (hideHole) {
+            elements.dealerTotal.textContent = 'Total: ?';
+        } else {
+            elements.dealerTotal.textContent = `Total: ${handTotal(tableState.dealerHand)}`;
+        }
+    } else {
+        elements.dealerHand.innerHTML = '';
+        elements.dealerTotal.textContent = 'Total: 0';
+    }
+
+    // Update game status
+    updateGameStatus();
+
+    // Update deal button
+    updateDealButton();
+
+    // Setup player action buttons
+    setupPlayerActionListeners();
+}
+
+function updateGameStatus() {
+    if (!tableState) return;
+
+    switch (tableState.state) {
+        case 'waiting':
+            setStatus('En attente de joueurs...', 'info');
+            break;
+        case 'betting':
+            setStatus('Placez vos mises !', 'info');
+            break;
+        case 'dealing':
+            setStatus('Distribution des cartes...', 'info');
+            break;
+        case 'playing':
+            setStatus('Les joueurs jouent leurs mains...', 'info');
+            break;
+        case 'dealer-turn':
+            setStatus('Tour du croupier...', 'info');
+            break;
+        default:
+            setStatus('Prêt à jouer', 'neutral');
+    }
+}
+
+function updateDealButton() {
+    if (!tableState || mySeats.length === 0) {
+        elements.dealBtn.disabled = true;
+        elements.dealBtn.textContent = 'En attente...';
+        return;
+    }
+
+    const allSeatsReady = mySeats.every(seatNum => {
+        const seat = tableState.seats[seatNum];
+        return seat && seat.bet >= currentTableConfig.minBet;
+    });
+
+    if (tableState.state === 'waiting' || tableState.state === 'betting') {
+        if (allSeatsReady) {
+            elements.dealBtn.disabled = false;
+            elements.dealBtn.textContent = 'Prêt à jouer';
+        } else {
+            elements.dealBtn.disabled = true;
+            elements.dealBtn.textContent = 'Définissez vos mises';
+        }
+    } else {
+        elements.dealBtn.disabled = true;
+        elements.dealBtn.textContent = 'Partie en cours...';
+    }
+}
+
+function updatePlayersListDisplay() {
+    if (!tableState) return;
+
+    elements.playersList.innerHTML = '';
+
+    const uniquePlayers = new Map();
+    Object.values(tableState.seats || {}).forEach(seat => {
+        if (seat && seat.userId) {
+            if (!uniquePlayers.has(seat.userId)) {
+                uniquePlayers.set(seat.userId, {
+                    username: seat.username,
+                    seatCount: 0
+                });
+            }
+            uniquePlayers.get(seat.userId).seatCount++;
+        }
+    });
+
+    if (uniquePlayers.size === 0) {
+        elements.playersList.innerHTML = '<div class="no-players">Aucun joueur</div>';
+        return;
+    }
+
+    uniquePlayers.forEach((player, userId) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player-item';
+        if (userId === currentUser.uid) {
+            playerDiv.classList.add('current-user');
+        }
+        playerDiv.innerHTML = `
+            <span class="player-name">${player.username}</span>
+            <span class="player-seats">${player.seatCount} place${player.seatCount > 1 ? 's' : ''}</span>
+        `;
+        elements.playersList.appendChild(playerDiv);
+    });
+}
+
+async function readyToPlay() {
+    if (!currentTableId || !currentUser || mySeats.length === 0) return;
+
+    // Validate bets
+    let totalBet = 0;
+    for (const seatNum of mySeats) {
+        const seat = tableState.seats[seatNum];
+        if (!seat) continue;
+
+        const mainBet = seat.bet || 0;
+        const sideBet1 = seat.sideBet21Plus3 || 0;
+        const sideBet2 = seat.sideBetPerfectPairs || 0;
+
+        if (mainBet < currentTableConfig.minBet) {
+            alert(`La mise minimum pour la place ${seatNum} est de ${currentTableConfig.minBet}€`);
+            return;
+        }
+
+        totalBet += mainBet + sideBet1 + sideBet2;
+    }
+
+    if (totalBet > balance) {
+        alert('Solde insuffisant pour ces mises');
+        return;
+    }
+
+    // Mark seats as ready
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        mySeats.forEach(seatNum => {
+            if (data.seats[seatNum]) {
+                data.seats[seatNum].status = 'ready';
+                data.seats[seatNum].inactiveRounds = 0;
+            }
+        });
+
+        transaction.update(tableRef, { seats: data.seats });
+    });
+
+    // Check if all players are ready, then start round
+    checkAndStartRound();
+}
+
+async function checkAndStartRound() {
+    if (!currentTableId || !tableState) return;
+
+    const seats = Object.values(tableState.seats || {});
+    if (seats.length === 0) return;
+
+    const allReady = seats.every(seat => seat.status === 'ready');
+
+    if (allReady && tableState.state === 'betting') {
+        await startRound();
+    }
+}
+
+async function startRound() {
+    if (!currentTableId) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+
+        // Create/shuffle deck if needed
+        if (!data.deck || data.deck.length < 52) {
+            data.deck = createShuffledDeck();
+        }
+
+        // Deal initial cards
+        data.dealerHand = [drawCardFromDeck(data.deck), drawCardFromDeck(data.deck)];
+
+        Object.keys(data.seats).forEach(seatNum => {
+            const seat = data.seats[seatNum];
+            if (seat && seat.status === 'ready') {
+                seat.hand = [drawCardFromDeck(data.deck), drawCardFromDeck(data.deck)];
+                seat.status = 'playing';
+            }
+        });
+
+        data.state = 'playing';
+        data.currentRound = (data.currentRound || 0) + 1;
+
+        transaction.update(tableRef, data);
+    });
+}
+
+function createShuffledDeck() {
+    const deck = [];
+    for (let i = 0; i < 6; i++) { // 6 decks
+        suits.forEach(suit => {
+            ranks.forEach(rank => {
+                deck.push({ suit, rank });
+            });
+        });
+    }
+
+    // Shuffle
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+
+    return deck;
+}
+
+function drawCardFromDeck(deck) {
+    if (deck.length === 0) return null;
+    return deck.pop();
+}
+
+// ============================================================================
+// SIDE BETS CALCULATIONS
+// ============================================================================
+
+function calculate21Plus3Payout(playerHand, dealerUpCard) {
+    if (!playerHand || playerHand.length < 2 || !dealerUpCard) return 0;
+
+    const cards = [playerHand[0], playerHand[1], dealerUpCard];
+    const suits = cards.map(c => c.suit);
+    const ranks = cards.map(c => c.rank);
+
+    // Suited trips (same rank, same suit) - 100:1
+    if (ranks[0] === ranks[1] && ranks[1] === ranks[2] &&
+        suits[0] === suits[1] && suits[1] === suits[2]) {
+        return 100;
+    }
+
+    // Straight flush - 40:1
+    const rankValues = ranks.map(r => {
+        if (r === 'A') return 14;
+        if (r === 'K') return 13;
+        if (r === 'Q') return 12;
+        if (r === 'J') return 11;
+        return parseInt(r);
+    }).sort((a, b) => a - b);
+
+    const isFlush = suits[0] === suits[1] && suits[1] === suits[2];
+    const isStraight = (rankValues[2] - rankValues[1] === 1 && rankValues[1] - rankValues[0] === 1) ||
+                       (rankValues[0] === 2 && rankValues[1] === 3 && rankValues[2] === 14); // A-2-3
+
+    if (isFlush && isStraight) return 40;
+
+    // Three of a kind - 30:1
+    if (ranks[0] === ranks[1] && ranks[1] === ranks[2]) return 30;
+
+    // Straight - 10:1
+    if (isStraight) return 10;
+
+    // Flush - 5:1
+    if (isFlush) return 5;
+
+    return 0;
+}
+
+function calculatePerfectPairsPayout(playerHand) {
+    if (!playerHand || playerHand.length < 2) return 0;
+
+    const card1 = playerHand[0];
+    const card2 = playerHand[1];
+
+    if (card1.rank !== card2.rank) return 0;
+
+    // Perfect pair (same rank, same suit) - 25:1
+    if (card1.suit === card2.suit) return 25;
+
+    // Colored pair (same rank, same color) - 12:1
+    const isRed1 = card1.suit === 'hearts' || card1.suit === 'diamonds';
+    const isRed2 = card2.suit === 'hearts' || card2.suit === 'diamonds';
+    if (isRed1 === isRed2) return 12;
+
+    // Mixed pair (same rank, different color) - 6:1
+    return 6;
+}
+
+// ============================================================================
+// PLAYER ACTIONS
+// ============================================================================
+
+async function playerHit(seatNum) {
+    if (!currentTableId || !tableState) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        const seat = data.seats[seatNum];
+
+        if (!seat || seat.userId !== currentUser.uid || seat.status !== 'playing') return;
+
+        const newCard = drawCardFromDeck(data.deck);
+        if (newCard) {
+            seat.hand.push(newCard);
+
+            const total = handTotal(seat.hand);
+            if (total > 21) {
+                seat.status = 'bust';
+            } else if (total === 21) {
+                seat.status = 'standing';
+            }
+
+            transaction.update(tableRef, data);
+        }
+    });
+}
+
+async function playerStand(seatNum) {
+    if (!currentTableId || !tableState) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        const seat = data.seats[seatNum];
+
+        if (!seat || seat.userId !== currentUser.uid || seat.status !== 'playing') return;
+
+        seat.status = 'standing';
+        transaction.update(tableRef, data);
+    });
+}
+
+async function playerDouble(seatNum) {
+    if (!currentTableId || !tableState) return;
+
+    const seat = tableState.seats[seatNum];
+    if (!seat || seat.hand.length !== 2) return;
+
+    const doubleBet = seat.bet * 2;
+    if (balance < doubleBet) {
+        alert('Solde insuffisant pour doubler');
+        return;
+    }
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        const seat = data.seats[seatNum];
+
+        if (!seat || seat.userId !== currentUser.uid || seat.status !== 'playing') return;
+
+        seat.bet = doubleBet;
+        const newCard = drawCardFromDeck(data.deck);
+        if (newCard) {
+            seat.hand.push(newCard);
+
+            const total = handTotal(seat.hand);
+            seat.status = total > 21 ? 'bust' : 'standing';
+
+            transaction.update(tableRef, data);
+        }
+    });
+
+    // Check if we need to start dealer turn
+    setTimeout(() => checkDealerTurn(), 500);
+}
+
+// ============================================================================
+// DEALER TURN & GAME RESOLUTION
+// ============================================================================
+
+async function checkDealerTurn() {
+    if (!currentTableId || !tableState) return;
+    if (tableState.state !== 'playing') return;
+
+    // Check if all players are done
+    const allPlayersDone = Object.values(tableState.seats || {}).every(seat => {
+        return !seat || seat.status !== 'playing';
+    });
+
+    if (allPlayersDone) {
+        await dealerTurn();
+    }
+}
+
+async function dealerTurn() {
+    if (!currentTableId) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+        data.state = 'dealer-turn';
+
+        // Dealer draws to 17
+        let dealerTotal = handTotal(data.dealerHand);
+        while (dealerTotal < 17) {
+            const newCard = drawCardFromDeck(data.deck);
+            if (newCard) {
+                data.dealerHand.push(newCard);
+                dealerTotal = handTotal(data.dealerHand);
+            } else {
+                break;
+            }
+        }
+
+        transaction.update(tableRef, data);
+    });
+
+    // Resolve all hands after dealer turn
+    setTimeout(() => resolveAllHands(), 1000);
+}
+
+async function resolveAllHands() {
+    if (!currentTableId || !tableState) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+    const dealerTotal = handTotal(tableState.dealerHand);
+    const dealerBust = dealerTotal > 21;
+
+    // Process each seat
+    for (const seatNum in tableState.seats) {
+        const seat = tableState.seats[seatNum];
+        if (!seat || !seat.userId) continue;
+
+        const playerTotal = handTotal(seat.hand);
+        const playerBust = seat.status === 'bust' || playerTotal > 21;
+
+        let mainPayout = 0;
+        let resultType = 'loss';
+
+        // Main bet resolution
+        if (playerBust) {
+            resultType = 'loss';
+            mainPayout = 0;
+        } else if (playerTotal === 21 && seat.hand.length === 2 && !dealerBust && handTotal(tableState.dealerHand) === 21) {
+            // Both have blackjack - push
+            resultType = 'push';
+            mainPayout = seat.bet;
+        } else if (playerTotal === 21 && seat.hand.length === 2) {
+            // Player blackjack
+            resultType = 'win';
+            mainPayout = seat.bet * 2.5; // 3:2 payout
+        } else if (dealerBust) {
+            resultType = 'win';
+            mainPayout = seat.bet * 2;
+        } else if (playerTotal > dealerTotal) {
+            resultType = 'win';
+            mainPayout = seat.bet * 2;
+        } else if (playerTotal === dealerTotal) {
+            resultType = 'push';
+            mainPayout = seat.bet;
+        } else {
+            resultType = 'loss';
+            mainPayout = 0;
+        }
+
+        // Side bets resolution
+        let sideBetsPayout = 0;
+
+        // 21+3 side bet
+        if (seat.sideBet21Plus3 > 0 && tableState.dealerHand.length >= 1) {
+            const multiplier = calculate21Plus3Payout(seat.hand, tableState.dealerHand[0]);
+            if (multiplier > 0) {
+                sideBetsPayout += seat.sideBet21Plus3 * (multiplier + 1);
+            }
+        }
+
+        // Perfect Pairs side bet
+        if (seat.sideBetPerfectPairs > 0) {
+            const multiplier = calculatePerfectPairsPayout(seat.hand);
+            if (multiplier > 0) {
+                sideBetsPayout += seat.sideBetPerfectPairs * (multiplier + 1);
+            }
+        }
+
+        const totalPayout = mainPayout + sideBetsPayout;
+        const profit = totalPayout - seat.bet - (seat.sideBet21Plus3 || 0) - (seat.sideBetPerfectPairs || 0);
+
+        // Apply result to user balance (only for current user's seats)
+        if (seat.userId === currentUser.uid) {
+            try {
+                const betAmount = seat.bet + (seat.sideBet21Plus3 || 0) + (seat.sideBetPerfectPairs || 0);
+                await applyGameResult(currentUser.uid, {
+                    betAmount: betAmount,
+                    payout: totalPayout,
+                    game: 'blackjack',
+                    metadata: {
+                        result: resultType,
+                        seatNumber: seatNum,
+                        blackjack: playerTotal === 21 && seat.hand.length === 2,
+                        sideBets: {
+                            '21plus3': seat.sideBet21Plus3 || 0,
+                            perfectPairs: seat.sideBetPerfectPairs || 0
+                        }
+                    }
+                });
+
+                // Log result
+                logResult(resultType, betAmount, profit);
+
+                // Update stats
+                stats.handsPlayed += 1;
+                if (resultType === 'win') {
+                    stats.handsWon += 1;
+                }
+                if (playerTotal === 21 && seat.hand.length === 2 && resultType === 'win') {
+                    stats.blackjacks += 1;
+                }
+                stats.totalProfit += profit;
+                updateStatsDisplay();
+            } catch (error) {
+                console.error('Error applying game result:', error);
+            }
+        }
+    }
+
+    // Reset table after 3 seconds
+    setTimeout(() => resetTable(), 3000);
+}
+
+async function resetTable() {
+    if (!currentTableId) return;
+
+    const tableRef = doc(db, 'blackjack-tables', currentTableId);
+
+    await runTransaction(db, async (transaction) => {
+        const tableDoc = await transaction.get(tableRef);
+        if (!tableDoc.exists()) return;
+
+        const data = tableDoc.data();
+
+        // Manage inactive players
+        const seatsToRemove = [];
+        Object.keys(data.seats).forEach(seatNum => {
+            const seat = data.seats[seatNum];
+            if (seat) {
+                if (seat.status === 'waiting') {
+                    seat.inactiveRounds = (seat.inactiveRounds || 0) + 1;
+                    if (seat.inactiveRounds >= 2) {
+                        seatsToRemove.push(seatNum);
+                    }
+                } else {
+                    // Reset for next round
+                    seat.hand = [];
+                    seat.status = 'waiting';
+                    seat.bet = 0;
+                    seat.sideBet21Plus3 = 0;
+                    seat.sideBetPerfectPairs = 0;
+                }
+            }
+        });
+
+        // Remove inactive seats
+        seatsToRemove.forEach(seatNum => {
+            delete data.seats[seatNum];
+        });
+
+        // Update my local seats list
+        if (currentUser) {
+            mySeats = mySeats.filter(seatNum => !seatsToRemove.includes(seatNum.toString()));
+        }
+
+        // Reset table state
+        data.dealerHand = [];
+        data.state = 'betting';
+
+        transaction.update(tableRef, data);
     });
 }
 
@@ -194,272 +1254,69 @@ function logResult(result, bet, profit) {
     }
 }
 
-function enableActions({ hit = false, stand = false, double = false, deal = false }) {
-    elements.hitBtn.disabled = !hit;
-    elements.standBtn.disabled = !stand;
-    elements.doubleBtn.disabled = !double;
-    elements.dealBtn.disabled = !deal;
-}
+// ============================================================================
+// PLAYER ACTION MANAGEMENT
+// ============================================================================
 
-function startRound() {
-    if (!balanceLoaded || !currentUser) return;
-    if (roundActive) return;
+function setupPlayerActionListeners() {
+    if (!tableState || !currentUser) return;
 
-    const bet = parseFloat(elements.betInput.value);
-    if (isNaN(bet) || bet <= 0) {
-        setStatus('Mise invalide.', 'warning');
-        return;
-    }
-    if (bet > balance) {
-        setStatus('Solde insuffisant pour cette mise.', 'warning');
-        return;
-    }
+    // Find the first seat that's in 'playing' status and belongs to current user
+    const activeSeat = mySeats.find(seatNum => {
+        const seat = tableState.seats[seatNum];
+        return seat && seat.status === 'playing' && seat.userId === currentUser.uid;
+    });
 
-    if (deck.length < 15) {
-        createDeck();
-        setStatus('Nouvelle pioche. Bonne chance !', 'info');
-    } else {
-        setStatus('Bonne chance !', 'info');
-    }
+    if (activeSeat) {
+        elements.actionControls.style.display = 'block';
+        elements.currentSeatNumber.textContent = activeSeat;
 
-    roundActive = true;
-    playerHasActed = false;
-    doubleAvailable = true;
-    roundBet = parseFloat(bet.toFixed(2));
-    playerBlackjack = false;
+        const seat = tableState.seats[activeSeat];
+        const canDouble = seat.hand.length === 2 && balance >= seat.bet * 2;
 
-    playerHand = [drawCard(), drawCard()];
-    dealerHand = [drawCard(), drawCard()];
+        elements.hitBtn.disabled = false;
+        elements.standBtn.disabled = false;
+        elements.doubleBtn.disabled = !canDouble;
 
-    renderHands(true);
+        // Remove old listeners
+        const newHitBtn = elements.hitBtn.cloneNode(true);
+        const newStandBtn = elements.standBtn.cloneNode(true);
+        const newDoubleBtn = elements.doubleBtn.cloneNode(true);
 
-    elements.dealBtn.disabled = true;
+        elements.hitBtn.parentNode.replaceChild(newHitBtn, elements.hitBtn);
+        elements.standBtn.parentNode.replaceChild(newStandBtn, elements.standBtn);
+        elements.doubleBtn.parentNode.replaceChild(newDoubleBtn, elements.doubleBtn);
 
-    if (handTotal(playerHand) === 21) {
-        playerBlackjack = true;
-        concludeRound('blackjack');
-    } else if (handTotal(dealerHand) === 21) {
-        concludeRound('dealer-blackjack');
-    } else {
-        enableActions({ hit: true, stand: true, double: balance >= roundBet * 2, deal: false });
-    }
-}
+        elements.hitBtn = newHitBtn;
+        elements.standBtn = newStandBtn;
+        elements.doubleBtn = newDoubleBtn;
 
-function playerHit() {
-    if (!roundActive) return;
-    playerHand.push(drawCard());
-    playerHasActed = true;
-    doubleAvailable = false;
-    renderHands(true);
-    elements.doubleBtn.disabled = true;
-
-    const total = handTotal(playerHand);
-    if (total > 21) {
-        concludeRound('player-bust');
-    } else if (total === 21) {
-        stand();
-    }
-}
-
-function stand() {
-    if (!roundActive) return;
-    resolveDealerTurn();
-}
-
-function doubleDown() {
-    if (!roundActive || !doubleAvailable) return;
-    if (balance < roundBet * 2) {
-        setStatus('Solde insuffisant pour doubler.', 'warning');
-        return;
-    }
-    roundBet = parseFloat((roundBet * 2).toFixed(2));
-    doubleAvailable = false;
-    playerHasActed = true;
-    playerHand.push(drawCard());
-    renderHands(true);
-
-    const total = handTotal(playerHand);
-    if (total > 21) {
-        concludeRound('player-bust');
-    } else {
-        resolveDealerTurn();
-    }
-}
-
-function resolveDealerTurn() {
-    enableActions({ hit: false, stand: false, double: false, deal: false });
-    renderHands(false);
-
-    let dealerTotal = handTotal(dealerHand);
-    while (dealerTotal < 17) {
-        dealerHand.push(drawCard());
-        renderHands(false);
-        dealerTotal = handTotal(dealerHand);
-    }
-
-    if (dealerTotal > 21) {
-        concludeRound('dealer-bust');
-    } else {
-        determineWinner();
-    }
-}
-
-function determineWinner() {
-    const playerTotal = handTotal(playerHand);
-    const dealerTotal = handTotal(dealerHand);
-
-    if (playerTotal > dealerTotal) {
-        concludeRound('player-win');
-    } else if (playerTotal < dealerTotal) {
-        concludeRound('dealer-win');
-    } else {
-        concludeRound('push');
-    }
-}
-
-async function concludeRound(outcome) {
-    roundActive = false;
-    enableActions({ hit: false, stand: false, double: false, deal: false });
-    renderHands(false);
-
-    let payout = 0;
-    let resultType = 'loss';
-    let statusTone = 'warning';
-    let statusText = '';
-    let blackjackWin = false;
-
-    const playerTotal = handTotal(playerHand);
-    const dealerTotal = handTotal(dealerHand);
-
-    switch (outcome) {
-        case 'blackjack':
-            payout = roundBet * 2.5;
-            resultType = 'win';
-            statusTone = 'success';
-            statusText = 'Blackjack ! Vous gagnez 3:2.';
-            blackjackWin = true;
-            break;
-        case 'dealer-blackjack':
-            if (handTotal(playerHand) === 21) {
-                payout = roundBet;
-                resultType = 'push';
-                statusTone = 'info';
-                statusText = 'Blackjack des deux côtés. Égalité.';
-            } else {
-                statusText = 'Le croupier a un blackjack.';
-            }
-            break;
-        case 'player-bust':
-            statusText = 'Vous dépassez 21. Perdu.';
-            break;
-        case 'dealer-bust':
-            payout = roundBet * 2;
-            resultType = 'win';
-            statusTone = 'success';
-            statusText = 'Le croupier bust. Vous gagnez !';
-            break;
-        case 'player-win':
-            payout = roundBet * 2;
-            resultType = 'win';
-            statusTone = 'success';
-            statusText = `Vous gagnez avec ${playerTotal} contre ${dealerTotal}.`;
-            break;
-        case 'dealer-win':
-            statusText = `Le croupier gagne avec ${dealerTotal}.`;
-            break;
-        case 'push':
-            payout = roundBet;
-            resultType = 'push';
-            statusTone = 'info';
-            statusText = 'Égalité, votre mise est restituée.';
-            break;
-        default:
-            statusText = 'Fin de la main.';
-    }
-
-    setStatus(statusText, statusTone);
-
-    let profit = parseFloat((payout - roundBet).toFixed(2));
-
-    try {
-        const outcome = await applyGameResult(currentUser.uid, {
-            betAmount: roundBet,
-            payout,
-            game: 'blackjack',
-            metadata: {
-                result: resultType,
-                blackjack: blackjackWin
-            }
+        // Add new listeners
+        elements.hitBtn.addEventListener('click', () => {
+            playerHit(activeSeat);
         });
-        balance = outcome.balance;
-        balanceLoaded = true;
-        updateBalanceDisplay();
-    } catch (error) {
-        console.error('Error applying blackjack result:', error);
-        setStatus('Erreur lors de la mise à jour du solde.', 'warning');
-    }
 
-    stats.handsPlayed += 1;
-    if (resultType === 'win') {
-        stats.handsWon += 1;
-    }
-    if (blackjackWin) {
-        stats.blackjacks += 1;
-    }
-    stats.totalProfit = parseFloat((stats.totalProfit + profit).toFixed(2));
-    updateStatsDisplay();
-    logResult(resultType, roundBet, profit);
+        elements.standBtn.addEventListener('click', () => {
+            playerStand(activeSeat);
+            setTimeout(() => checkDealerTurn(), 500);
+        });
 
-    elements.dealBtn.disabled = false;
+        elements.doubleBtn.addEventListener('click', () => {
+            playerDouble(activeSeat);
+        });
+    } else {
+        elements.actionControls.style.display = 'none';
+    }
 }
 
-function setInitialState() {
-    updateBalanceDisplay();
-    updateStatsDisplay();
-    resetHands();
-    enableActions({ hit: false, stand: false, double: false, deal: false });
-    setStatus('Placez votre mise et cliquez sur Distribuer.');
-}
-
-function syncStatsFromUser(data) {
-    stats.handsPlayed = data.blackjackHandsPlayed ?? 0;
-    stats.handsWon = data.blackjackWins ?? 0;
-    stats.blackjacks = data.blackjackBlackjacks ?? 0;
-    stats.totalProfit = parseFloat((data.blackjackTotalProfit ?? 0).toFixed(2));
-    updateStatsDisplay();
-}
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
 
 function setupEventListeners() {
-    elements.dealBtn.addEventListener('click', startRound);
-    elements.hitBtn.addEventListener('click', playerHit);
-    elements.standBtn.addEventListener('click', stand);
-    elements.doubleBtn.addEventListener('click', doubleDown);
+    elements.backToLobbyBtn.addEventListener('click', leaveTable);
 
-    document.querySelectorAll('.quick-bet').forEach(btn => {
-        btn.addEventListener('click', () => {
-            let currentBet = parseFloat(elements.betInput.value) || 0;
-            switch (btn.dataset.action) {
-                case 'half':
-                    elements.betInput.value = Math.max(1, currentBet / 2).toFixed(2);
-                    break;
-                case 'double':
-                    {
-                        const doubled = Math.max(1, currentBet * 2);
-                        const target = balanceLoaded ? Math.min(balance, doubled) : doubled;
-                        elements.betInput.value = Math.max(1, target).toFixed(2);
-                    }
-                    break;
-                case 'min':
-                    elements.betInput.value = '1.00';
-                    break;
-                case 'max':
-                    if (balanceLoaded) {
-                        elements.betInput.value = Math.max(1, balance).toFixed(2);
-                    }
-                    break;
-            }
-        });
-    });
+    elements.dealBtn.addEventListener('click', readyToPlay);
 
     elements.depositBtn.addEventListener('click', async () => {
         if (!currentUser) {
@@ -469,33 +1326,43 @@ function setupEventListeners() {
         const amount = prompt('Montant à déposer (€):');
         const depositAmount = parseFloat(amount);
         if (amount && !isNaN(depositAmount) && depositAmount > 0) {
-            try {
-                //await addFunds(currentUser.uid, depositAmount);
-                alert(`${depositAmount.toFixed(2)} € ajoutés à votre solde!`);
-            } catch (error) {
-                console.error('Error adding funds:', error);
-                alert('Erreur lors du dépôt');
-            }
+            alert(`${depositAmount.toFixed(2)} € ajoutés à votre solde!`);
         }
     });
 
     elements.logoutBtn.addEventListener('click', async () => {
         try {
-            if (unsubscribeUser) {
-                unsubscribeUser();
-            }
+            if (unsubscribeUser) unsubscribeUser();
+            if (unsubscribeTable) unsubscribeTable();
             await signOut(auth);
             window.location.href = 'login.html';
         } catch (error) {
             console.error('Error signing out:', error);
         }
     });
+
+    // Side bets toggles
+    elements.enable21Plus3.addEventListener('change', () => {
+        if (mySeats.length > 0) {
+            renderActiveSeatsBetting();
+        }
+    });
+
+    elements.enablePerfectPairs.addEventListener('change', () => {
+        if (mySeats.length > 0) {
+            renderActiveSeatsBetting();
+        }
+    });
 }
 
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
 function init() {
-    createDeck();
-    setInitialState();
+    renderLobby();
     setupEventListeners();
+    updateStatsDisplay();
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -515,14 +1382,12 @@ onAuthStateChanged(auth, async (user) => {
         if (!data) {
             balanceLoaded = false;
             updateBalanceDisplay();
-            elements.dealBtn.disabled = true;
             return;
         }
         balance = data.balance;
         balanceLoaded = true;
         updateBalanceDisplay();
         syncStatsFromUser(data);
-        elements.dealBtn.disabled = false;
     });
 });
 

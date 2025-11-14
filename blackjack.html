@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackjack - Casino</title>
+    <title>Blackjack Multijoueur - Casino</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="blackjack.css">
@@ -47,41 +47,83 @@
 
     <!-- Main Content -->
     <main class="blackjack-main">
-        <div class="blackjack-container">
+        <!-- Lobby Screen -->
+        <div id="lobbyScreen" class="lobby-container">
+            <div class="lobby-header">
+                <h1>🃏 Blackjack Multijoueur</h1>
+                <p class="lobby-description">Sélectionnez une table et rejoignez la partie</p>
+            </div>
+
+            <div class="tables-grid" id="tablesGrid">
+                <!-- Tables will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="blackjack-container" style="display: none;">
             <!-- Left Controls -->
             <aside class="blackjack-controls">
                 <div class="control-section">
+                    <button class="btn-back" id="backToLobbyBtn">
+                        <i class="fas fa-arrow-left"></i> Retour au Lobby
+                    </button>
+                </div>
+
+                <div class="control-section">
                     <div class="control-header">
                         <h2>🃏 Blackjack</h2>
-                        <span class="control-tag">3:2</span>
+                        <span class="control-tag" id="tableMinBet">1+</span>
                     </div>
                     <p class="game-description">
                         Visez 21 sans le dépasser. Le croupier s'arrête sur 17. Blackjack paie 3:2.
                     </p>
                 </div>
 
-                <div class="control-section">
-                    <label>Mise</label>
-                    <div class="bet-input-group">
-                        <input type="number" id="betAmount" value="5.00" min="1" step="1">
-                        <span class="currency">€</span>
+                <!-- Seat Selection -->
+                <div class="control-section" id="seatSelectionPanel">
+                    <label>Sélectionner vos places</label>
+                    <div class="seats-selector" id="seatsSelector">
+                        <!-- Dynamically generated -->
                     </div>
-                    <div class="quick-bet-buttons">
-                        <button class="quick-bet" data-action="half">½</button>
-                        <button class="quick-bet" data-action="double">2x</button>
-                        <button class="quick-bet" data-action="min">Min</button>
-                        <button class="quick-bet" data-action="max">Max</button>
+                </div>
+
+                <!-- Betting Panel (shown when seated) -->
+                <div class="control-section" id="bettingPanel" style="display: none;">
+                    <div class="active-seats-list" id="activeSeatsList">
+                        <!-- Active seats with bet inputs -->
                     </div>
                 </div>
 
                 <div class="control-section">
-                    <button class="btn-primary-action" id="dealBtn">Distribuer</button>
+                    <button class="btn-primary-action" id="dealBtn" disabled>En attente...</button>
                 </div>
 
-                <div class="control-section action-buttons">
-                    <button class="btn-secondary-action" id="hitBtn" disabled>Tirer</button>
-                    <button class="btn-secondary-action" id="standBtn" disabled>Rester</button>
-                    <button class="btn-secondary-action" id="doubleBtn" disabled>Double</button>
+                <!-- Side Bets Section -->
+                <div class="control-section side-bets-section">
+                    <h3>Side Bets</h3>
+                    <div class="side-bets-info">
+                        <div class="side-bet-option">
+                            <label>
+                                <input type="checkbox" id="enable21Plus3" class="side-bet-checkbox">
+                                <span class="side-bet-name">21+3</span>
+                                <span class="side-bet-payout">Paie jusqu'à 100:1</span>
+                            </label>
+                        </div>
+                        <div class="side-bet-option">
+                            <label>
+                                <input type="checkbox" id="enablePerfectPairs" class="side-bet-checkbox">
+                                <span class="side-bet-name">Perfect Pairs</span>
+                                <span class="side-bet-payout">Paie jusqu'à 25:1</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section players-section">
+                    <h3>Joueurs à la table</h3>
+                    <div class="players-list" id="playersList">
+                        <div class="no-players">Aucun joueur</div>
+                    </div>
                 </div>
 
                 <div class="control-section stats-section">
@@ -105,24 +147,19 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="control-section rules-section">
-                    <h3>Règles</h3>
-                    <ul>
-                        <li>Blackjack naturel paie 3:2</li>
-                        <li>Le croupier pioche jusqu'à 17 (soft 17 inclus)</li>
-                        <li>Double uniquement sur les deux premières cartes</li>
-                        <li>Pas de split ni d'assurance</li>
-                    </ul>
-                </div>
             </aside>
 
             <!-- Game Table -->
             <section class="blackjack-table">
                 <div class="table-header">
-                    <div class="table-status" id="gameStatus">Placez votre mise et cliquez sur Distribuer.</div>
+                    <div class="table-status" id="gameStatus">Sélectionnez une ou plusieurs places.</div>
+                    <div class="round-timer" id="roundTimer" style="display: none;">
+                        <span class="timer-label">Temps restant:</span>
+                        <span class="timer-value" id="timerValue">15s</span>
+                    </div>
                 </div>
 
+                <!-- Dealer Area -->
                 <div class="dealer-area">
                     <h3>Croupier</h3>
                     <div class="hand" id="dealerHand"></div>
@@ -131,10 +168,27 @@
 
                 <div class="table-divider"></div>
 
-                <div class="player-area">
-                    <h3>Joueur</h3>
-                    <div class="hand" id="playerHand"></div>
-                    <div class="hand-total" id="playerTotal">Total : 0</div>
+                <!-- Multi-seat Player Area -->
+                <div class="multi-seats-area" id="multiSeatsArea">
+                    <!-- Seats will be dynamically generated -->
+                </div>
+
+                <!-- Action Buttons (shown during player turn) -->
+                <div class="action-controls" id="actionControls" style="display: none;">
+                    <div class="current-seat-indicator" id="currentSeatIndicator">
+                        Place <span id="currentSeatNumber">1</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-action" id="hitBtn" disabled>
+                            <i class="fas fa-plus"></i> Tirer
+                        </button>
+                        <button class="btn-action" id="standBtn" disabled>
+                            <i class="fas fa-hand-paper"></i> Rester
+                        </button>
+                        <button class="btn-action" id="doubleBtn" disabled>
+                            <i class="fas fa-arrow-up"></i> Doubler
+                        </button>
+                    </div>
                 </div>
 
                 <div class="chip-tray">
