@@ -10,10 +10,19 @@ let dealerHand = [];
 let deck = [];
 let gameState = 'betting'; // betting, playing, dealer-turn, finished
 
-// DOM elements
+// Stats
+let stats = {
+    handsPlayed: 0,
+    handsWon: 0,
+    blackjacks: 0,
+    totalProfit: 0
+};
+
+// DOM elements - only reference what exists
 const elements = {
     userBalance: document.getElementById('userBalance'),
     logoutBtn: document.getElementById('logoutBtn'),
+    depositBtn: document.getElementById('depositBtn'),
 
     // Game UI
     currentBetDisplay: document.getElementById('currentBetDisplay'),
@@ -30,7 +39,14 @@ const elements = {
     playerTotal: document.getElementById('playerTotal'),
 
     // Status
-    gameStatus: document.getElementById('gameStatus')
+    gameStatus: document.getElementById('gameStatus'),
+
+    // Stats
+    handsPlayed: document.getElementById('handsPlayed'),
+    handsWon: document.getElementById('handsWon'),
+    blackjacks: document.getElementById('blackjacks'),
+    totalProfit: document.getElementById('totalProfit'),
+    resultsLog: document.getElementById('resultsLog')
 };
 
 // Card utilities
@@ -138,11 +154,18 @@ function updateDisplay() {
     if (elements.currentBetDisplay) {
         elements.currentBetDisplay.textContent = `${currentBet}€`;
     }
+
+    // Stats
+    if (elements.handsPlayed) elements.handsPlayed.textContent = stats.handsPlayed;
+    if (elements.handsWon) elements.handsWon.textContent = stats.handsWon;
+    if (elements.blackjacks) elements.blackjacks.textContent = stats.blackjacks;
+    if (elements.totalProfit) elements.totalProfit.textContent = `${stats.totalProfit.toFixed(2)}€`;
 }
 
-function setStatus(message) {
+function setStatus(message, type = 'neutral') {
     if (elements.gameStatus) {
         elements.gameStatus.textContent = message;
+        elements.gameStatus.className = `game-status ${type}`;
     }
 }
 
@@ -156,13 +179,54 @@ function updateUI() {
     if (elements.doubleBtn) elements.doubleBtn.disabled = !isPlaying || playerHand.length !== 2 || balance < currentBet;
     if (elements.clearBetBtn) elements.clearBetBtn.disabled = !isBetting || currentBet === 0;
 
+    // Disable chip buttons during game
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.disabled = !isBetting;
+    });
+
     updateDisplay();
+}
+
+function addResultToLog(result, amount) {
+    if (!elements.resultsLog) return;
+
+    const resultItem = document.createElement('div');
+    resultItem.className = `result-item result-${result}`;
+
+    let message = '';
+    let amountText = '';
+
+    if (result === 'win') {
+        message = 'Victoire';
+        amountText = `+${amount.toFixed(2)}€`;
+    } else if (result === 'blackjack') {
+        message = 'Blackjack!';
+        amountText = `+${amount.toFixed(2)}€`;
+    } else if (result === 'loss') {
+        message = 'Défaite';
+        amountText = `-${amount.toFixed(2)}€`;
+    } else if (result === 'push') {
+        message = 'Égalité';
+        amountText = '0€';
+    }
+
+    resultItem.innerHTML = `
+        <span>${message}</span>
+        <span>${amountText}</span>
+    `;
+
+    elements.resultsLog.insertBefore(resultItem, elements.resultsLog.firstChild);
+
+    // Keep only last 10 results
+    while (elements.resultsLog.children.length > 10) {
+        elements.resultsLog.removeChild(elements.resultsLog.lastChild);
+    }
 }
 
 // Game actions
 async function deal() {
     if (currentBet === 0 || currentBet > balance) {
-        alert('Mise invalide');
+        setStatus('Mise invalide', 'error');
         return;
     }
 
@@ -175,7 +239,7 @@ async function deal() {
         });
     } catch (error) {
         console.error('Error deducting bet:', error);
-        alert('Erreur lors de la mise');
+        setStatus('Erreur lors de la mise', 'error');
         return;
     }
 
@@ -185,12 +249,16 @@ async function deal() {
     dealerHand = [deck.pop(), deck.pop()];
     gameState = 'playing';
 
-    setStatus('Votre tour - Hit ou Stand?');
+    setStatus('Votre tour - Hit ou Stand?', 'info');
     updateUI();
 
     // Check for blackjack
     const playerTotal = calculateHand(playerHand);
-    if (playerTotal === 21) {
+    const dealerTotal = calculateHand(dealerHand);
+
+    if (playerTotal === 21 && dealerTotal === 21) {
+        setTimeout(() => stand(), 1000);
+    } else if (playerTotal === 21) {
         setTimeout(() => stand(), 1000);
     }
 }
@@ -214,7 +282,7 @@ async function stand() {
     if (gameState !== 'playing') return;
 
     gameState = 'dealer-turn';
-    setStatus('Tour du croupier...');
+    setStatus('Tour du croupier...', 'info');
     updateUI();
 
     await dealerPlay();
@@ -242,7 +310,7 @@ async function double() {
         }
     } catch (error) {
         console.error('Error doubling:', error);
-        alert('Erreur lors du doublement');
+        setStatus('Erreur lors du doublement', 'error');
     }
 }
 
@@ -278,17 +346,29 @@ async function dealerPlay() {
 
 async function endGame(result, message) {
     gameState = 'finished';
-    setStatus(message);
 
     let payout = 0;
+    let profit = 0;
 
     if (result === 'blackjack') {
         payout = currentBet + (currentBet * 1.5);
+        profit = currentBet * 1.5;
+        stats.blackjacks++;
+        stats.handsWon++;
     } else if (result === 'win') {
         payout = currentBet * 2;
+        profit = currentBet;
+        stats.handsWon++;
     } else if (result === 'push') {
         payout = currentBet;
+        profit = 0;
+    } else if (result === 'loss') {
+        payout = 0;
+        profit = -currentBet;
     }
+
+    stats.handsPlayed++;
+    stats.totalProfit += profit;
 
     if (payout > 0) {
         try {
@@ -302,12 +382,18 @@ async function endGame(result, message) {
         }
     }
 
+    const statusType = result === 'loss' ? 'error' : result === 'push' ? 'neutral' : 'success';
+    setStatus(message, statusType);
+
+    addResultToLog(result, Math.abs(profit));
+    updateUI();
+
     setTimeout(() => {
         currentBet = 0;
         gameState = 'betting';
         playerHand = [];
         dealerHand = [];
-        setStatus('Placez votre mise');
+        setStatus('Placez votre mise', 'neutral');
         updateUI();
     }, 3000);
 }
@@ -321,6 +407,13 @@ function setupEventListeners() {
         });
     }
 
+    if (elements.depositBtn) {
+        elements.depositBtn.addEventListener('click', () => {
+            // Deposit modal logic would go here
+            alert('Fonctionnalité de dépôt à venir');
+        });
+    }
+
     if (elements.dealBtn) elements.dealBtn.addEventListener('click', deal);
     if (elements.hitBtn) elements.hitBtn.addEventListener('click', hit);
     if (elements.standBtn) elements.standBtn.addEventListener('click', stand);
@@ -328,8 +421,10 @@ function setupEventListeners() {
 
     if (elements.clearBetBtn) {
         elements.clearBetBtn.addEventListener('click', () => {
-            currentBet = 0;
-            updateUI();
+            if (gameState === 'betting') {
+                currentBet = 0;
+                updateUI();
+            }
         });
     }
 
@@ -392,6 +487,6 @@ onAuthStateChanged(auth, async (user) => {
     });
 
     setupEventListeners();
-    setStatus('Placez votre mise');
+    setStatus('Placez votre mise', 'neutral');
     updateUI();
 });

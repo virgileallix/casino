@@ -1,0 +1,54 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="plinkoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="plinkoBallGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" fill="url(#plinkoGradient)"/>
+
+  <!-- Plinko board shape -->
+  <path d="M 12 10 L 52 10 L 58 54 L 6 54 Z" fill="rgba(0,0,0,0.2)"/>
+
+  <!-- Pins -->
+  <g fill="#00d084">
+    <circle cx="32" cy="18" r="2"/>
+    <circle cx="24" cy="24" r="2"/>
+    <circle cx="32" cy="24" r="2"/>
+    <circle cx="40" cy="24" r="2"/>
+    <circle cx="20" cy="30" r="2"/>
+    <circle cx="28" cy="30" r="2"/>
+    <circle cx="36" cy="30" r="2"/>
+    <circle cx="44" cy="30" r="2"/>
+    <circle cx="16" cy="36" r="2"/>
+    <circle cx="24" cy="36" r="2"/>
+    <circle cx="32" cy="36" r="2"/>
+    <circle cx="40" cy="36" r="2"/>
+    <circle cx="48" cy="36" r="2"/>
+    <circle cx="20" cy="42" r="2"/>
+    <circle cx="28" cy="42" r="2"/>
+    <circle cx="36" cy="42" r="2"/>
+    <circle cx="44" cy="42" r="2"/>
+  </g>
+
+  <!-- Ball -->
+  <circle cx="32" cy="14" r="3.5" fill="#ffd700" filter="url(#plinkoBallGlow)" stroke="#fff" stroke-width="1"/>
+
+  <!-- Multiplier slots at bottom -->
+  <g font-size="6" fill="#fff" font-weight="bold" text-anchor="middle">
+    <text x="12" y="52">8x</text>
+    <text x="22" y="52">3x</text>
+    <text x="32" y="52">1x</text>
+    <text x="42" y="52">3x</text>
+    <text x="52" y="52">8x</text>
+  </g>
+</svg>

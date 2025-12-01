@@ -1,0 +1,36 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="chip1Gradient" cx="40%" cy="40%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#e8e8e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+    </radialGradient>
+    <filter id="chip1Shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Main circle with gradient -->
+  <circle cx="50" cy="50" r="48" fill="url(#chip1Gradient)" filter="url(#chip1Shadow)" stroke="#333" stroke-width="2"/>
+
+  <!-- Edge markers -->
+  <g stroke="#999" stroke-width="3" fill="none">
+    <path d="M 50 2 L 50 15"/>
+    <path d="M 50 85 L 50 98"/>
+    <path d="M 2 50 L 15 50"/>
+    <path d="M 85 50 L 98 50"/>
+    <path d="M 14 14 L 22 22"/>
+    <path d="M 78 78 L 86 86"/>
+    <path d="M 14 86 L 22 78"/>
+    <path d="M 78 22 L 86 14"/>
+  </g>
+
+  <!-- Inner dashed circle -->
+  <circle cx="50" cy="50" r="35" fill="none" stroke="#666" stroke-width="2" stroke-dasharray="8,4"/>
+
+  <!-- Value -->
+  <text x="50" y="58" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#333" text-anchor="middle">1</text>
+
+  <!-- Currency symbol -->
+  <text x="50" y="75" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#666" text-anchor="middle">€</text>
+</svg>

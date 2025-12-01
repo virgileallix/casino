@@ -1,0 +1,36 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="chip100Gradient" cx="40%" cy="40%">
+      <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ffed4e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d4af37;stop-opacity:1" />
+    </linearGradient>
+    <filter id="chip100Shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <circle cx="50" cy="50" r="48" fill="url(#chip100Gradient)" filter="url(#chip100Shadow)" stroke="#000" stroke-width="2"/>
+
+  <g stroke="url(#goldGradient)" stroke-width="3" fill="none">
+    <path d="M 50 2 L 50 15"/>
+    <path d="M 50 85 L 50 98"/>
+    <path d="M 2 50 L 15 50"/>
+    <path d="M 85 50 L 98 50"/>
+    <path d="M 14 14 L 22 22"/>
+    <path d="M 78 78 L 86 86"/>
+    <path d="M 14 86 L 22 78"/>
+    <path d="M 78 22 L 86 14"/>
+  </g>
+
+  <circle cx="50" cy="50" r="35" fill="none" stroke="url(#goldGradient)" stroke-width="2" stroke-dasharray="8,4"/>
+
+  <text x="50" y="56" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="url(#goldGradient)" text-anchor="middle">100</text>
+
+  <text x="50" y="75" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="url(#goldGradient)" text-anchor="middle">€</text>
+</svg>

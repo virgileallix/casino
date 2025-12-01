@@ -1,0 +1,42 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bjGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c92a2a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#862e9c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" fill="url(#bjGradient)"/>
+
+  <!-- Card 1 (Ace of Spades) -->
+  <g transform="translate(10, 16) rotate(-15)">
+    <rect width="16" height="24" rx="2" fill="#fff"/>
+    <text x="8" y="10" font-size="10" font-weight="bold" fill="#000" text-anchor="middle">A</text>
+    <text x="8" y="20" font-size="12" fill="#000" text-anchor="middle">♠</text>
+  </g>
+
+  <!-- Card 2 (King of Hearts) -->
+  <g transform="translate(24, 12) rotate(0)">
+    <rect width="16" height="24" rx="2" fill="#fff"/>
+    <text x="8" y="10" font-size="10" font-weight="bold" fill="#c92a2a" text-anchor="middle">K</text>
+    <text x="8" y="20" font-size="12" fill="#c92a2a" text-anchor="middle">♥</text>
+  </g>
+
+  <!-- Card 3 (Queen back) -->
+  <g transform="translate(38, 16) rotate(15)">
+    <rect width="16" height="24" rx="2" fill="#1a1f2e"/>
+    <rect x="2" y="2" width="12" height="20" rx="1" fill="none" stroke="#00d084" stroke-width="1" stroke-dasharray="1,1"/>
+  </g>
+
+  <!-- Chip stack -->
+  <g transform="translate(18, 40)">
+    <ellipse cx="14" cy="0" rx="10" ry="3" fill="#1a1a1a"/>
+    <ellipse cx="14" cy="-2" rx="10" ry="3" fill="#00d084"/>
+    <ellipse cx="14" cy="-4" rx="10" ry="3" fill="#ffd700"/>
+    <ellipse cx="14" cy="-6" rx="10" ry="3" fill="#ff6b6b"/>
+  </g>
+
+  <!-- "21" text -->
+  <text x="32" y="58" font-size="10" font-weight="bold" fill="#ffd700" text-anchor="middle" opacity="0.8">21</text>
+</svg>

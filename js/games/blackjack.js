@@ -61,7 +61,7 @@ const elements = {
     tablesGrid: document.getElementById('tablesGrid'),
 
     // Game Screen
-    gameScreen: document.getElementById('gameScreen'),
+    gameScreen: document.getElementById('liveGameScreen'),
     backToLobbyBtn: document.getElementById('backToLobbyBtn'),
     tableMinBet: document.getElementById('tableMinBet'),
 
@@ -112,6 +112,7 @@ const elements = {
 // ============================================================================
 
 function setStatus(message, tone = 'neutral') {
+    if (!elements.gameStatus) return;
     elements.gameStatus.textContent = message;
     elements.gameStatus.className = `table-status ${tone}`;
 }
@@ -126,10 +127,10 @@ function updateBalanceDisplay() {
 }
 
 function updateStatsDisplay() {
-    elements.stats.handsPlayed.textContent = stats.handsPlayed;
-    elements.stats.handsWon.textContent = stats.handsWon;
-    elements.stats.blackjacks.textContent = stats.blackjacks;
-    elements.stats.totalProfit.textContent = `${stats.totalProfit.toFixed(2)} €`;
+    if (elements.stats.handsPlayed) elements.stats.handsPlayed.textContent = stats.handsPlayed;
+    if (elements.stats.handsWon) elements.stats.handsWon.textContent = stats.handsWon;
+    if (elements.stats.blackjacks) elements.stats.blackjacks.textContent = stats.blackjacks;
+    if (elements.stats.totalProfit) elements.stats.totalProfit.textContent = `${stats.totalProfit.toFixed(2)} €`;
 }
 
 function syncStatsFromUser(data) {
@@ -204,6 +205,7 @@ function renderHand(container, hand, hideHole = false) {
 // ============================================================================
 
 function renderLobby() {
+    if (!elements.tablesGrid) return;
     elements.tablesGrid.innerHTML = '';
 
     TABLE_CONFIGS.forEach(config => {
@@ -303,9 +305,9 @@ async function joinTable(tableId) {
     });
 
     // Switch to game screen
-    elements.lobbyScreen.style.display = 'none';
-    elements.gameScreen.style.display = 'grid';
-    elements.tableMinBet.textContent = currentTableConfig.name;
+    if (elements.lobbyScreen) elements.lobbyScreen.style.display = 'none';
+    if (elements.gameScreen) elements.gameScreen.style.display = 'grid';
+    if (elements.tableMinBet) elements.tableMinBet.textContent = currentTableConfig.name;
 
     renderSeatsSelector();
 }
@@ -339,8 +341,8 @@ function leaveTable() {
     mySeats = [];
     tableState = null;
 
-    elements.gameScreen.style.display = 'none';
-    elements.lobbyScreen.style.display = 'block';
+    if (elements.gameScreen) elements.gameScreen.style.display = 'none';
+    if (elements.lobbyScreen) elements.lobbyScreen.style.display = 'block';
 }
 
 // ============================================================================
@@ -348,6 +350,7 @@ function leaveTable() {
 // ============================================================================
 
 function renderSeatsSelector() {
+    if (!elements.seatsSelector) return;
     elements.seatsSelector.innerHTML = '';
 
     for (let i = 1; i <= 7; i++) {
@@ -429,6 +432,7 @@ function updateSeatsDisplay() {
     if (!tableState) return;
 
     // Update seat selector buttons
+    if (!elements.seatsSelector) return;
     const seatButtons = elements.seatsSelector.querySelectorAll('.seat-button');
     seatButtons.forEach(btn => {
         const seatNum = parseInt(btn.getAttribute('data-seat'));
@@ -462,6 +466,7 @@ function updateSeatsDisplay() {
 }
 
 function renderActiveSeatsBetting() {
+    if (!elements.activeSeatsList) return;
     elements.activeSeatsList.innerHTML = '';
 
     mySeats.sort((a, b) => a - b).forEach(seatNum => {
@@ -685,6 +690,7 @@ function quickBetAction(seatNum, action) {
 
 function renderMultiSeatsArea() {
     if (!tableState) return;
+    if (!elements.multiSeatsArea) return;
 
     elements.multiSeatsArea.innerHTML = '';
 
@@ -810,18 +816,20 @@ function updateGameScreen() {
     updatePlayersListDisplay();
 
     // Render dealer hand
-    if (tableState.dealerHand && tableState.dealerHand.length > 0) {
-        const hideHole = tableState.state === 'dealing' || tableState.state === 'playing';
-        renderHand(elements.dealerHand, tableState.dealerHand, hideHole);
+    if (elements.dealerHand && elements.dealerTotal) {
+        if (tableState.dealerHand && tableState.dealerHand.length > 0) {
+            const hideHole = tableState.state === 'dealing' || tableState.state === 'playing';
+            renderHand(elements.dealerHand, tableState.dealerHand, hideHole);
 
-        if (hideHole) {
-            elements.dealerTotal.textContent = 'Total: ?';
+            if (hideHole) {
+                elements.dealerTotal.textContent = 'Total: ?';
+            } else {
+                elements.dealerTotal.textContent = `Total: ${handTotal(tableState.dealerHand)}`;
+            }
         } else {
-            elements.dealerTotal.textContent = `Total: ${handTotal(tableState.dealerHand)}`;
+            elements.dealerHand.innerHTML = '';
+            elements.dealerTotal.textContent = 'Total: 0';
         }
-    } else {
-        elements.dealerHand.innerHTML = '';
-        elements.dealerTotal.textContent = 'Total: 0';
     }
 
     // Update game status
@@ -964,6 +972,8 @@ function updateGameStatus() {
 }
 
 function updateDealButton() {
+    if (!elements.dealBtn) return;
+
     if (!tableState || mySeats.length === 0) {
         elements.dealBtn.disabled = true;
         elements.dealBtn.textContent = 'En attente...';
