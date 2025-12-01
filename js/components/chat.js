@@ -7,7 +7,7 @@ import {
     orderBy,
     limit,
     onSnapshot
-} from 'js/core/firebase-config.js';
+} from '../core/firebase-config.js';
 
 const DEFAULT_LIMIT = 100;
 const MESSAGE_MAX_LENGTH = 250;

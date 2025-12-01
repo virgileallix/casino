@@ -1,7 +1,7 @@
-import { auth, db } from 'js/core/firebase-config.js';
+import { auth, db } from '../core/firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-import { getUserBalance } from 'js/core/balance-manager.js';
+import { getUserBalance } from '../core/balance-manager.js';
 
 let currentUser = null;
 

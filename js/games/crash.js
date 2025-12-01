@@ -1,5 +1,5 @@
-import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from 'js/core/firebase-config.js';
-import { updateBalance, getUserBalance, getUserProfile } from 'js/core/balance-manager.js';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, orderBy, limit, onSnapshot } from '../core/firebase-config.js';
+import { updateBalance, getUserBalance, getUserProfile } from '../core/balance-manager.js';
 
 let currentUser = null;
 let currentGameId = null;

@@ -2,7 +2,7 @@
  * Global Deposit Modal Initializer
  * This script should be included on all pages to enable the deposit modal
  */
-import { initializeDepositModal, openDepositModal } from 'js/components/deposit-modal.js';
+import { initializeDepositModal, openDepositModal } from '../components/deposit-modal.js';
 
 // Initialize the deposit modal when the page loads
 document.addEventListener('DOMContentLoaded', () => {

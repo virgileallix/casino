@@ -1,5 +1,5 @@
-import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'js/core/firebase-config.js';
-import { initializeUserBalance } from 'js/core/balance-manager.js';
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from '../core/firebase-config.js';
+import { initializeUserBalance } from '../core/balance-manager.js';
 
 // Check if user is already logged in
 onAuthStateChanged(auth, (user) => {

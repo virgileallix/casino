@@ -1,5 +1,5 @@
-import { auth, signOut, onAuthStateChanged } from 'js/core/firebase-config.js';
-import { initializeUserBalance, subscribeToUserData, applyGameResult } from 'js/core/balance-manager.js';
+import { auth, signOut, onAuthStateChanged } from '../core/firebase-config.js';
+import { initializeUserBalance, subscribeToUserData, applyGameResult } from '../core/balance-manager.js';
 
 const ROULETTE_SEQUENCE = [
     { number: 0, color: 'green' },

@@ -1,5 +1,5 @@
-import { auth, onAuthStateChanged } from 'js/core/firebase-config.js';
-import { isAdmin } from 'js/core/balance-manager.js';
+import { auth, onAuthStateChanged } from '../core/firebase-config.js';
+import { isAdmin } from '../core/balance-manager.js';
 
 let adminLinkAdded = false;
 

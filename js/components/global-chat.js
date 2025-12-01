@@ -1,6 +1,6 @@
-import { initializeChat } from 'js/components/chat.js';
-import { auth, onAuthStateChanged } from 'js/core/firebase-config.js';
-import { subscribeToUserData } from 'js/core/balance-manager.js';
+import { initializeChat } from '../components/chat.js';
+import { auth, onAuthStateChanged } from '../core/firebase-config.js';
+import { subscribeToUserData } from '../core/balance-manager.js';
 
 let chatInstance = null;
 let currentUser = null;

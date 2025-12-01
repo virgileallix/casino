@@ -1,4 +1,4 @@
-import { db, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction } from 'js/core/firebase-config.js';
+import { db, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction } from '../core/firebase-config.js';
 
 const INITIAL_BALANCE = 100;
 

@@ -1,6 +1,6 @@
-import { auth, onAuthStateChanged } from 'js/core/firebase-config.js';
-import { isAdmin, getAllUsers } from 'js/core/balance-manager.js';
-import { db, doc, updateDoc, setDoc } from 'js/core/firebase-config.js';
+import { auth, onAuthStateChanged } from '../core/firebase-config.js';
+import { isAdmin, getAllUsers } from '../core/balance-manager.js';
+import { db, doc, updateDoc, setDoc } from '../core/firebase-config.js';
 
 const REQUIRED_FIELDS = {
     balance: 0,

@@ -1,5 +1,5 @@
-import { auth, signOut, onAuthStateChanged, db, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction, serverTimestamp } from 'js/core/firebase-config.js';
-import { initializeUserBalance, subscribeToUserData, applyGameResult } from 'js/core/balance-manager.js';
+import { auth, signOut, onAuthStateChanged, db, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction, serverTimestamp } from '../core/firebase-config.js';
+import { initializeUserBalance, subscribeToUserData, applyGameResult } from '../core/balance-manager.js';
 
 // Card deck constants
 const suits = ['clubs', 'diamonds', 'hearts', 'spades'];

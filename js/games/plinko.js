@@ -1,5 +1,5 @@
-import { auth, signOut, onAuthStateChanged } from 'js/core/firebase-config.js';
-import { initializeUserBalance, subscribeToUserData, addFunds, applyGameResult } from 'js/core/balance-manager.js';
+import { auth, signOut, onAuthStateChanged } from '../core/firebase-config.js';
+import { initializeUserBalance, subscribeToUserData, addFunds, applyGameResult } from '../core/balance-manager.js';
 
 let currentUser = null;
 let unsubscribeBalance = null;

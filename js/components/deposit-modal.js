@@ -1,5 +1,5 @@
-import { auth, onAuthStateChanged } from 'js/core/firebase-config.js';
-import { addFunds, subscribeToUserData } from 'js/core/balance-manager.js';
+import { auth, onAuthStateChanged } from '../core/firebase-config.js';
+import { addFunds, subscribeToUserData } from '../core/balance-manager.js';
 
 let currentUser = null;
 let depositModal = null;

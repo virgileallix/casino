@@ -1,5 +1,5 @@
-import { auth, onAuthStateChanged, signOut } from 'js/core/firebase-config.js';
-import { db, doc, getDoc, updateDoc, setDoc } from 'js/core/firebase-config.js';
+import { auth, onAuthStateChanged, signOut } from '../core/firebase-config.js';
+import { db, doc, getDoc, updateDoc, setDoc } from '../core/firebase-config.js';
 
 let currentUser = null;
 let migrationNeeded = false;

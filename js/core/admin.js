@@ -1,4 +1,4 @@
-import { auth, signOut, onAuthStateChanged } from 'js/core/firebase-config.js';
+import { auth, signOut, onAuthStateChanged } from '../core/firebase-config.js';
 import {
     isAdmin,
     getAllUsers,
@@ -6,7 +6,7 @@ import {
     setUserAdmin,
     deleteUser,
     resetUserStats
-} from 'js/core/balance-manager.js';
+} from '../core/balance-manager.js';
 
 let currentUser = null;
 let allUsers = [];
