@@ -1036,25 +1036,44 @@ async function readyToPlay() {
         return;
     }
 
-    // Mark seats as ready
-    const tableRef = doc(db, 'blackjack-tables', currentTableId);
-    await runTransaction(db, async (transaction) => {
-        const tableDoc = await transaction.get(tableRef);
-        if (!tableDoc.exists()) return;
-
-        const data = tableDoc.data();
-        mySeats.forEach(seatNum => {
-            if (data.seats[seatNum]) {
-                data.seats[seatNum].status = 'ready';
-                data.seats[seatNum].inactiveRounds = 0;
+    // CRITICAL FIX: Deduct bets BEFORE marking as ready
+    try {
+        // Apply negative game result to deduct the bets
+        await applyGameResult(currentUser.uid, {
+            betAmount: totalBet,
+            payout: 0,  // No payout yet, this just deducts the bet
+            game: 'blackjack',
+            metadata: {
+                action: 'place_bets',
+                tableId: currentTableId,
+                seats: mySeats
             }
         });
 
-        transaction.update(tableRef, { seats: data.seats });
-    });
+        // Mark seats as ready
+        const tableRef = doc(db, 'blackjack-tables', currentTableId);
+        await runTransaction(db, async (transaction) => {
+            const tableDoc = await transaction.get(tableRef);
+            if (!tableDoc.exists()) return;
 
-    // Vérifie immédiatement si tous les joueurs nécessaires sont prêts
-    checkAndStartRound();
+            const data = tableDoc.data();
+            mySeats.forEach(seatNum => {
+                if (data.seats[seatNum]) {
+                    data.seats[seatNum].status = 'ready';
+                    data.seats[seatNum].inactiveRounds = 0;
+                    data.seats[seatNum].betsDeducted = true;  // Mark that bets were deducted
+                }
+            });
+
+            transaction.update(tableRef, { seats: data.seats });
+        });
+
+        // Vérifie immédiatement si tous les joueurs nécessaires sont prêts
+        checkAndStartRound();
+    } catch (error) {
+        console.error('Error deducting bets:', error);
+        alert('Erreur lors de la déduction des mises. Veuillez réessayer.');
+    }
 }
 
 async function checkAndStartRound(force = false) {
@@ -1319,36 +1338,53 @@ async function playerDouble(seatNum) {
     const seat = tableState.seats[seatNum];
     if (!seat || seat.hand.length !== 2) return;
 
-    const doubleBet = seat.bet * 2;
-    if (balance < doubleBet) {
+    const additionalBet = seat.bet;  // Need to add same amount
+    if (balance < additionalBet) {
         alert('Solde insuffisant pour doubler');
         return;
     }
 
-    const tableRef = doc(db, 'blackjack-tables', currentTableId);
-    await runTransaction(db, async (transaction) => {
-        const tableDoc = await transaction.get(tableRef);
-        if (!tableDoc.exists()) return;
+    try {
+        // CRITICAL FIX: Deduct the additional bet for doubling
+        await applyGameResult(currentUser.uid, {
+            betAmount: additionalBet,
+            payout: 0,
+            game: 'blackjack',
+            metadata: {
+                action: 'double_down',
+                tableId: currentTableId,
+                seatNumber: seatNum
+            }
+        });
 
-        const data = tableDoc.data();
-        const seat = data.seats[seatNum];
+        const tableRef = doc(db, 'blackjack-tables', currentTableId);
+        await runTransaction(db, async (transaction) => {
+            const tableDoc = await transaction.get(tableRef);
+            if (!tableDoc.exists()) return;
 
-        if (!seat || seat.userId !== currentUser.uid || seat.status !== 'playing') return;
+            const data = tableDoc.data();
+            const seat = data.seats[seatNum];
 
-        seat.bet = doubleBet;
-        const newCard = drawCardFromDeck(data.deck);
-        if (newCard) {
-            seat.hand.push(newCard);
+            if (!seat || seat.userId !== currentUser.uid || seat.status !== 'playing') return;
 
-            const total = handTotal(seat.hand);
-            seat.status = total > 21 ? 'bust' : 'standing';
+            seat.bet = seat.bet * 2;  // Double the bet
+            const newCard = drawCardFromDeck(data.deck);
+            if (newCard) {
+                seat.hand.push(newCard);
 
-            transaction.update(tableRef, data);
-        }
-    });
+                const total = handTotal(seat.hand);
+                seat.status = total > 21 ? 'bust' : 'standing';
 
-    // Check if we need to start dealer turn
-    setTimeout(() => checkDealerTurn(), 500);
+                transaction.update(tableRef, data);
+            }
+        });
+
+        // Check if we need to start dealer turn
+        setTimeout(() => checkDealerTurn(), 500);
+    } catch (error) {
+        console.error('Error doubling down:', error);
+        alert('Erreur lors du doublement de la mise.');
+    }
 }
 
 // ============================================================================
@@ -1418,28 +1454,36 @@ async function resolveAllHands() {
         let mainPayout = 0;
         let resultType = 'loss';
 
+        // IMPROVED: Better blackjack and payout logic
+        const playerHasBlackjack = playerTotal === 21 && seat.hand.length === 2;
+        const dealerHasBlackjack = handTotal(tableState.dealerHand) === 21 && tableState.dealerHand.length === 2;
+
         // Main bet resolution
         if (playerBust) {
             resultType = 'loss';
             mainPayout = 0;
-        } else if (playerTotal === 21 && seat.hand.length === 2 && !dealerBust && handTotal(tableState.dealerHand) === 21) {
-            // Both have blackjack - push
+        } else if (playerHasBlackjack && dealerHasBlackjack) {
+            // Both have blackjack - push (return bet only)
             resultType = 'push';
             mainPayout = seat.bet;
-        } else if (playerTotal === 21 && seat.hand.length === 2) {
-            // Player blackjack
+        } else if (playerHasBlackjack) {
+            // Player blackjack wins - 3:2 payout (bet + 1.5x bet)
             resultType = 'win';
-            mainPayout = seat.bet * 2.5; // 3:2 payout
+            mainPayout = seat.bet + (seat.bet * 1.5);
         } else if (dealerBust) {
+            // Dealer busts, player wins - 1:1 payout
             resultType = 'win';
             mainPayout = seat.bet * 2;
         } else if (playerTotal > dealerTotal) {
+            // Player wins - 1:1 payout
             resultType = 'win';
             mainPayout = seat.bet * 2;
         } else if (playerTotal === dealerTotal) {
+            // Push - return bet
             resultType = 'push';
             mainPayout = seat.bet;
         } else {
+            // Player loses
             resultType = 'loss';
             mainPayout = 0;
         }
@@ -1464,29 +1508,35 @@ async function resolveAllHands() {
         }
 
         const totalPayout = mainPayout + sideBetsPayout;
-        const profit = totalPayout - seat.bet - (seat.sideBet21Plus3 || 0) - (seat.sideBetPerfectPairs || 0);
+        const betAmount = seat.bet + (seat.sideBet21Plus3 || 0) + (seat.sideBetPerfectPairs || 0);
+        // CRITICAL FIX: Since bets were already deducted, profit = payout only
+        const profit = totalPayout;
 
         // Apply result to user balance (only for current user's seats)
         if (seat.userId === currentUser.uid) {
             try {
-                const betAmount = seat.bet + (seat.sideBet21Plus3 || 0) + (seat.sideBetPerfectPairs || 0);
-                await applyGameResult(currentUser.uid, {
-                    betAmount: betAmount,
-                    payout: totalPayout,
-                    game: 'blackjack',
-                    metadata: {
-                        result: resultType,
-                        seatNumber: seatNum,
-                        blackjack: playerTotal === 21 && seat.hand.length === 2,
-                        sideBets: {
-                            '21plus3': seat.sideBet21Plus3 || 0,
-                            perfectPairs: seat.sideBetPerfectPairs || 0
+                // Only add the payout back (bet was already deducted in readyToPlay)
+                if (totalPayout > 0) {
+                    await applyGameResult(currentUser.uid, {
+                        betAmount: 0,  // Already deducted
+                        payout: totalPayout,  // Add back winnings
+                        game: 'blackjack',
+                        metadata: {
+                            action: 'payout',
+                            result: resultType,
+                            seatNumber: seatNum,
+                            blackjack: playerTotal === 21 && seat.hand.length === 2,
+                            sideBets: {
+                                '21plus3': seat.sideBet21Plus3 || 0,
+                                perfectPairs: seat.sideBetPerfectPairs || 0
+                            }
                         }
-                    }
-                });
+                    });
+                }
 
-                // Log result
-                logResult(resultType, betAmount, profit);
+                // Log result with correct profit calculation
+                const actualProfit = totalPayout - betAmount;
+                logResult(resultType, betAmount, actualProfit);
 
                 // Update stats
                 stats.handsPlayed += 1;
@@ -1496,7 +1546,7 @@ async function resolveAllHands() {
                 if (playerTotal === 21 && seat.hand.length === 2 && resultType === 'win') {
                     stats.blackjacks += 1;
                 }
-                stats.totalProfit += profit;
+                stats.totalProfit += actualProfit;
                 updateStatsDisplay();
             } catch (error) {
                 console.error('Error applying game result:', error);
@@ -1519,14 +1569,15 @@ async function resetTable() {
 
         const data = tableDoc.data();
 
-        // Manage inactive players
+        // Manage inactive players - IMPROVED: Give more time before removing
         const seatsToRemove = [];
         Object.keys(data.seats).forEach(seatNum => {
             const seat = data.seats[seatNum];
             if (seat) {
                 if (seat.status === 'waiting') {
                     seat.inactiveRounds = (seat.inactiveRounds || 0) + 1;
-                    if (seat.inactiveRounds >= 2) {
+                    // IMPROVED: Remove only after 3 inactive rounds instead of 2
+                    if (seat.inactiveRounds >= 3) {
                         seatsToRemove.push(seatNum);
                     }
                 } else {
@@ -1536,6 +1587,7 @@ async function resetTable() {
                     seat.bet = 0;
                     seat.sideBet21Plus3 = 0;
                     seat.sideBetPerfectPairs = 0;
+                    seat.betsDeducted = false;  // Reset deduction flag
                 }
             }
         });

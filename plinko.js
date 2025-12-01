@@ -195,50 +195,7 @@ function getBoardGeometry() {
     return { slotCount, slotSpacing, startX, boxWidth, boxHeight, pinGapY, startY };
 }
 
-// Probabilities based on binomial distribution (more realistic)
-function calculateBinomialProbability(n, k) {
-    if (k < 0 || k > n) return 0;
-    if (n === 0) return 1;
 
-    let coefficient = 1;
-    const effectiveK = Math.min(k, n - k);
-
-    for (let i = 1; i <= effectiveK; i++) {
-        coefficient = (coefficient * (n - effectiveK + i)) / i;
-    }
-
-    return coefficient * Math.pow(0.5, n);
-}
-
-// Get weighted random multiplier based on true probabilities
-function getWeightedMultiplierIndex(slotCount) {
-    if (slotCount <= 1) return 0;
-    const numBoxes = slotCount;
-    const probabilities = [];
-    const steps = numBoxes - 1;
-
-    // Calculate binomial probabilities for each position
-    for (let i = 0; i < numBoxes; i++) {
-        probabilities.push(calculateBinomialProbability(steps, i));
-    }
-
-    // Normalize probabilities
-    const sum = probabilities.reduce((a, b) => a + b, 0);
-    const normalizedProbs = probabilities.map(p => p / sum);
-
-    // Weighted random selection
-    const random = Math.random();
-    let cumulative = 0;
-
-    for (let i = 0; i < normalizedProbs.length; i++) {
-        cumulative += normalizedProbs[i];
-        if (random <= cumulative) {
-            return i;
-        }
-    }
-
-    return Math.floor(numBoxes / 2); // fallback to middle
-}
 
 // Colors for multipliers
 const multiplierColors = {
@@ -252,7 +209,7 @@ function initGame() {
     // Create engine
     engine = Engine.create();
     world = engine.world;
-    world.gravity.y = 1;
+    world.gravity.y = 0.8;  // Slightly less gravity for smoother fall
 
     // Create renderer
     render = Render.create({
@@ -262,12 +219,16 @@ function initGame() {
             width: canvasWidth,
             height: canvasHeight,
             wireframes: false,
-            background: '#1a1f2e'
+            background: '#1a1f2e',
+            pixelRatio: window.devicePixelRatio || 1
         }
     });
 
-    // Create runner
-    runner = Runner.create();
+    // Create runner with better timing
+    runner = Runner.create({
+        isFixed: false,
+        delta: 1000 / 60  // 60 FPS
+    });
 
     setupBoard();
     updateMultipliers();
@@ -305,9 +266,9 @@ function setupBoard() {
 
     const { slotCount, slotSpacing, startX, boxWidth, boxHeight, pinGapY, startY } = geometry;
     const currentMultipliers = getCurrentMultipliers();
-    const pinRadius = 4.5;
+    const pinRadius = 5;
 
-    // Create pins
+    // Create pins with better visual style
     for (let row = 0; row < currentRows; row++) {
         const pinsInRow = row + 1;
         const offset = (slotCount - pinsInRow) / 2;
@@ -318,10 +279,13 @@ function setupBoard() {
 
             const pin = Bodies.circle(x, y, pinRadius, {
                 isStatic: true,
-                restitution: 0.8,
-                friction: 0,
+                restitution: 0.85,  // More bouncy pins like Stake
+                friction: 0.001,
+                slop: 0.05,
                 render: {
-                    fillStyle: '#4f596e'
+                    fillStyle: '#5865f2',
+                    strokeStyle: '#7289da',
+                    lineWidth: 2
                 }
             });
             pins.push(pin);
@@ -366,7 +330,24 @@ function setupBoard() {
     pins.push(leftWall, rightWall);
 }
 
-// Drop ball with improved physics and predetermined outcome
+// Generate weighted multiplier index using binomial distribution
+function getWeightedMultiplierIndex(slotCount) {
+    // Use binomial distribution for natural plinko outcomes
+    const rows = currentRows;
+    let position = 0;
+
+    // Each row: 50% chance to go left or right (binomial)
+    for (let i = 0; i < rows; i++) {
+        if (Math.random() < 0.5) {
+            position++;
+        }
+    }
+
+    // Position is now 0 to rows, map to slot index
+    return Math.min(slotCount - 1, position);
+}
+
+// Drop ball with realistic physics
 function dropBall() {
     const geometry = getBoardGeometry();
     if (!geometry) {
@@ -383,51 +364,65 @@ function dropBall() {
         return;
     }
 
-    const ballRadius = 6;
+    const ballRadius = 7;
     const boardCenterX = startX + ((slotCount - 1) * slotSpacing) / 2;
-    const spawnX = boardCenterX + (Math.random() - 0.5) * slotSpacing * 0.4;
+    // Smaller random spawn variation for more consistent drops
+    const spawnX = boardCenterX + (Math.random() - 0.5) * slotSpacing * 0.15;
     const startY = 30;
 
     // Pre-determine the outcome based on binomial probability
     const targetIndex = getWeightedMultiplierIndex(slotCount);
 
     const ball = Bodies.circle(spawnX, startY, ballRadius, {
-        restitution: 0.8,
-        friction: 0.001,
-        density: 0.002,
+        restitution: 0.75,  // Slightly less bouncy for more realistic feel
+        friction: 0.002,
+        frictionAir: 0.001,  // Add air resistance
+        density: 0.0015,
         label: 'ball',
-        targetIndex: targetIndex, // Store target for guidance
+        targetIndex: targetIndex,
         render: {
-            fillStyle: '#00d084'
+            fillStyle: '#00d084',
+            strokeStyle: '#00ff9d',
+            lineWidth: 2
+        },
+        collisionFilter: {
+            group: -1  // Prevent ball-to-ball collisions
         }
     });
 
     balls.push(ball);
     World.add(world, ball);
 
-    // Add initial random velocity
+    // Add minimal initial velocity - let physics do the work
     Body.setVelocity(ball, {
-        x: (Math.random() - 0.5) * 2,
-        y: 0
+        x: (Math.random() - 0.5) * 0.5,
+        y: 1
     });
 
-    // Apply subtle guidance forces to reach target
+    // Very subtle guidance only when ball is off-course
+    let lastGuidanceTime = Date.now();
     let guidanceInterval = setInterval(() => {
         if (!ball.position || ball.position.y > canvasHeight - 150) {
             clearInterval(guidanceInterval);
             return;
         }
 
+        const now = Date.now();
+        if (now - lastGuidanceTime < 100) return; // Limit guidance frequency
+        lastGuidanceTime = now;
+
         const targetX = startX + targetIndex * slotSpacing;
-
         const distanceToTarget = targetX - ball.position.x;
-        const guidanceForce = distanceToTarget * 0.00008; // Subtle force
 
-        Body.applyForce(ball, ball.position, {
-            x: guidanceForce,
-            y: 0
-        });
-    }, 50);
+        // Only apply force if significantly off target
+        if (Math.abs(distanceToTarget) > slotSpacing * 0.8) {
+            const guidanceForce = distanceToTarget * 0.00003; // Much more subtle
+            Body.applyForce(ball, ball.position, {
+                x: guidanceForce,
+                y: 0
+            });
+        }
+    }, 100);
 }
 
 // Handle ball landing in multiplier box
