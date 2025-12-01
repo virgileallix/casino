@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash - Casino Originals</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../../css/common/global.css">
+    <link rel="stylesheet" href="../../css/games/crash.css">
+    <link rel="stylesheet" href="../../css/common/deposit-modal.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="../../pages/leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="../../pages/games/roulette.html" class="nav-link">Roulette</a>
+                <a href="../../pages/games/vip.html" class="nav-link">VIP</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">---</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-chat" id="chatToggleBtn">
+                    <span>💬</span>
+                    <span>Chat</span>
+                </button>
+                <button class="btn-profile" id="profileBtn">
+                    <span class="profile-icon">👤</span>
+                    <span>Profil</span>
+                </button>
+                <button class="btn-admin" id="adminBtn">
+                    <span class="admin-icon">⚙️</span>
+                    <span>Admin</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="game-main">
+        <div class="game-container">
+            <!-- Game Header -->
+            <div class="game-header">
+                <div class="game-title-section">
+                    <i class="fas fa-rocket game-icon-header"></i>
+                    <div>
+                        <h1 class="game-title">Crash</h1>
+                        <p class="game-subtitle">Encaissez avant le crash!</p>
+                    </div>
+                </div>
+                <button class="btn-back" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
+
+            <div class="game-layout">
+                <!-- Left Panel - Game -->
+                <div class="game-panel-left">
+                    <!-- Crash Game Display -->
+                    <div class="crash-display">
+                        <div class="crash-status" id="crashStatus">En attente...</div>
+                        <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+                        <canvas id="crashCanvas"></canvas>
+                        <div class="crash-history" id="crashHistory">
+                            <!-- History will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Game Controls -->
+                    <div class="crash-controls">
+                        <div class="bet-input-group">
+                            <label>Mise (€)</label>
+                            <div class="bet-controls">
+                                <button class="bet-btn" id="betHalf">
+                                    <i class="fas fa-divide"></i>
+                                </button>
+                                <input type="number" id="betAmount" value="1.00" min="0.10" step="0.10" class="bet-input">
+                                <button class="bet-btn" id="betDouble">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="auto-cashout-group">
+                            <label>
+                                <input type="checkbox" id="autoCashoutEnabled">
+                                Auto Cashout à
+                            </label>
+                            <input type="number" id="autoCashoutValue" value="2.00" min="1.01" step="0.01" class="cashout-input" disabled>
+                            <span>x</span>
+                        </div>
+
+                        <button class="btn-place-bet" id="placeBetBtn">
+                            <i class="fas fa-check"></i>
+                            <span>Placer la mise</span>
+                        </button>
+
+                        <button class="btn-cashout hidden" id="cashoutBtn">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>ENCAISSER</span>
+                            <span class="cashout-amount" id="cashoutAmount">0.00 €</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Stats & Live Bets -->
+                <div class="game-panel-right">
+                    <!-- Stats -->
+                    <div class="stats-section">
+                        <h3><i class="fas fa-chart-line"></i> Statistiques</h3>
+                        <div class="stat-row">
+                            <span>Total misé</span>
+                            <span id="totalWagered">0.00 €</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Total gagné</span>
+                            <span id="totalWon">0.00 €</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Profit</span>
+                            <span id="totalProfit">0.00 €</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Parties jouées</span>
+                            <span id="gamesPlayed">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Meilleur cashout</span>
+                            <span id="bestCashout">0.00x</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Bets -->
+                    <div class="live-bets-section">
+                        <h3><i class="fas fa-users"></i> Paris en direct</h3>
+                        <div class="live-bets-list" id="liveBetsList">
+                            <div class="empty-bets">Aucun pari actif</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Global Chat Container -->
+    <div id="globalChatContainer">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button class="chat-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-body" id="globalChatPanel">
+            <ul class="chat-messages" data-chat-messages></ul>
+            <div class="chat-empty" data-chat-empty hidden>
+                <div class="chat-empty-icon">💬</div>
+                <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
+            </div>
+            <form class="chat-form" data-chat-form>
+                <input
+                    type="text"
+                    class="chat-input"
+                    data-chat-input
+                    placeholder="Écrivez votre message..."
+                    maxlength="250"
+                    autocomplete="off"
+                />
+                <button type="submit" class="chat-send" data-chat-send>Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/components/global-deposit.js"></script>
+    <script type="module" src="../../js/games/crash.js"></script>
+    <script type="module">
+        import { initializeGlobalChat } from '../../js/components/global-chat.js';
+        import { initializeAdminNav } from '../../js/components/admin-nav.js';
+        import { initializeURLCleaner } from '../../js/components/url-cleaner.js';
+        initializeGlobalChat();
+        initializeAdminNav();
+        initializeURLCleaner();
+    </script>
+</body>
+</html>

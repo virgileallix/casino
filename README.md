@@ -1,63 +1,143 @@
-# Casino Web App
+# 🎰 Casino Originals - Plateforme de Jeux en Ligne
 
-Projet full front-end alimenté par Firebase (Auth + Firestore) proposant plusieurs jeux originaux inspirés des plateformes crypto-casino modernes.
+Plateforme de casino en ligne moderne avec de multiples jeux originaux, système d'authentification Firebase, gestion de solde en temps réel et chat global.
 
-## Jeux disponibles
+## 🎮 Jeux Disponibles
 
-- **Blackjack** – règles officielles (Blackjack 3:2, croupier stand sur soft 17, double sur deux premières cartes). Jeu complet avec visuels haute définition issus du dépôt open source [`hayeah/playing-cards-assets`](https://github.com/hayeah/playing-cards-assets).
-- **Dice** – reproduction du jeu « Roll Over / Under » façon Stake, house edge configurée à 1 %, nouvelle animation de roulage avec pré-révélation et slider dynamique pour ajouter du suspense.
-- **Plinko** – moteur physique Matter.js avec tables de multiplicateurs basées sur les probabilités binomiales.
-- **Mines** – grille 5×5 configurable (2 à 24 mines), calcul dynamique des multiplicateurs, cashout progressif et historique détaillé.
+- **🎲 Plinko** - Physique réaliste style Stake avec distribution binomiale
+- **🃏 Blackjack Multijoueur** - Tables multijoueurs avec side bets (21+3, Perfect Pairs)
+- **🎰 Roulette** - Roulette européenne classique
+- **🎯 Dice** - Jeu de dés avec prédiction
+- **💣 Mines** - Démineur avec multiplicateurs
+- **🗼 Tower** - Montée progressive à risque
+- **🎱 Keno** - Loterie numérique
+- **📈 Crash** - Jeu de multiplicateur en temps réel
+- **🎰 Slots** - Machines à sous
+- **📦 Cases** - Ouverture de caisses mystère
 
-Chaque jeu :
-- se connecte au profil Firebase de l’utilisateur,
-- déduit les mises et crédite les gains via une transaction Firestore atomique,
-- enregistre des statistiques (volume misé, victoires, meilleurs gains, etc.) visibles sur l’accueil.
-
-## Démarrage rapide
-
-1. **Installer les dépendances Live Server / bundler** (selon votre stack) ou utiliser un simple serveur statique (`npx serve`, `python -m http.server`, etc.).
-2. **Configurer Firebase :**
-   - Activer Authentication (email/password + Google si souhaité).
-   - Activer Firestore en mode production et publier les règles fournies dans `firestore.rules`.
-   - Mettre à jour les clés dans `firebase-config.js` si nécessaire.
-3. **Lancer le serveur statique** depuis la racine du projet et ouvrir `index.html`.
-
-## Arborescence principale
+## 📁 Structure du Projet
 
 ```
-assets/cards/        # jeu complet de cartes PNG (52 cartes + dos) issu du repo open source
-assets/images/       # vignettes SVG custom pour les jeux
-blackjack.html/.css/.js
-dice.html/.css/.js
-plinko.html/.css/.js
-mines.html/.css/.js
-balance-manager.js   # gestion Firestore (solde + stats)
-firebase-config.js
-index.html / styles.css
+casino/
+├── assets/              # Ressources statiques
+│   ├── images/         # Images et SVG
+│   └── cards/          # Cartes de jeu
+├── css/
+│   ├── common/         # Styles globaux et composants
+│   │   ├── global.css
+│   │   ├── index.css
+│   │   ├── admin.css
+│   │   └── deposit-modal.css
+│   └── games/          # Styles spécifiques aux jeux
+├── js/
+│   ├── core/           # Modules de base
+│   │   ├── firebase-config.js
+│   │   ├── balance-manager.js
+│   │   ├── auth.js
+│   │   └── admin.js
+│   ├── components/     # Composants réutilisables
+│   │   ├── global-chat.js
+│   │   ├── admin-nav.js
+│   │   ├── deposit-modal.js
+│   │   └── url-cleaner.js
+│   ├── games/          # Logique des jeux
+│   │   ├── plinko.js
+│   │   ├── blackjack.js
+│   │   └── ...
+│   ├── index.js
+│   ├── leaderboard.js
+│   └── profile.js
+├── pages/
+│   ├── games/          # Pages des jeux
+│   ├── admin/          # Administration
+│   ├── auth/           # Authentification
+│   ├── leaderboard.html
+│   └── profile.html
+├── index.html          # Page d'accueil
+├── firebase.json
+├── firestore.rules
+└── .gitignore
 ```
 
-## Règles Blackjack implémentées
+## 🚀 Fonctionnalités
 
-- Pioche à un seul paquet, reshuffle automatique lorsqu’il reste < 15 cartes.
-- Blackjack naturel paie 3:2, identité du croupier vérifiée pour push.
-- Double autorisé uniquement sur les deux premières cartes (vérification du solde).
-- Pas d’assurance ni split (pour garder l’expérience fluide).
-- Historique des mains et statistiques dédiées (mains jouées, victoires, nombre de blackjacks, profit cumulé).
+### Système d'Authentification
+- 📧 Connexion par email/mot de passe
+- 🔐 Gestion sécurisée via Firebase Auth
+- 👤 Profils utilisateurs persistants
 
-## Sécurité Firestore
+### Gestion de Solde
+- 💰 Système de balance en temps réel avec Firestore
+- 📊 Historique des transactions
+- 🎯 Statistiques par jeu (gains, parties jouées, meilleurs scores)
+- 🔒 Transactions atomiques pour éviter les exploits
 
-Les règles livrées (`firestore.rules`) assurent :
+### Interface Utilisateur
+- 🎨 Design moderne et responsive
+- 💬 Chat global en temps réel
+- 🏆 Classement des joueurs (leaderboard)
+- 👥 Système VIP avec avantages
 
-- Un utilisateur ne peut lire/écrire que son propre document `users/{uid}`.
-- Schéma strict : champs autorisés + valeurs numériques >= 0 (balance, profits, compteurs de parties).
-- Documents créés avec les champs par défaut si manquants.
+### Administration
+- 🛠️ Panel admin pour gestion des utilisateurs
+- 📈 Statistiques globales
+- 🔄 Outils de migration de données
 
-Publiez les règles via la console Firebase ou `firebase deploy --only firestore:rules`.
+## 🛠️ Technologies Utilisées
 
-## Crédits
+- **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
+- **Backend**: Firebase (Auth, Firestore, Hosting)
+- **Physique**: Matter.js (pour Plinko)
+- **Temps réel**: Firestore Realtime Updates
 
-- Cartes : [hayeah/playing-cards-assets](https://github.com/hayeah/playing-cards-assets) (domaine public / CC0).
-- Matter.js : moteur physique open source utilisé pour Plinko.
+## 📦 Installation
 
-Bon jeu ! 🎰
+```bash
+# Cloner le repository
+git clone <your-repo-url>
+cd casino
+
+# Configurer Firebase
+# 1. Créer un projet Firebase
+# 2. Copier la configuration dans js/core/firebase-config.js
+# 3. Activer Authentication (Email/Password)
+# 4. Créer une base Firestore
+```
+
+## 🔧 Configuration Firebase
+
+1. **Firestore Rules**: Utiliser le fichier `firestore.rules`
+2. **Authentication**: Activer Email/Password dans Firebase Console
+3. **Collections nécessaires**:
+   - `users` - Profils utilisateurs et balances
+   - `blackjack-tables` - État des tables de blackjack
+   - `globalChat` - Messages du chat global
+
+## 🎯 Améliorations Récentes
+
+### Plinko (Style Stake)
+- ✨ Physique améliorée avec gravité optimisée
+- 🎯 Distribution binomiale naturelle
+- 🎨 Pins stylisés bleu/violet
+- 🎲 Balle plus réaliste avec bordure lumineuse
+- 🎬 Runner 60 FPS
+
+### Blackjack Multijoueur
+- 🐛 FIX: Mises déduites AVANT le début de la partie
+- 💰 FIX: Calcul correct des profits
+- 🎲 FIX: Double down gère correctement les mises
+- 🏆 Meilleure détection des blackjacks (payout 3:2)
+- ⏰ Joueurs inactifs retirés après 3 rounds
+
+## 🤝 Contribution
+
+Ce projet est en développement actif. Les contributions sont les bienvenues !
+
+## 📄 Crédits
+
+- Cartes: [hayeah/playing-cards-assets](https://github.com/hayeah/playing-cards-assets) (CC0)
+- Matter.js: Moteur physique pour Plinko
+
+---
+
+Développé avec ❤️ en utilisant Claude Code

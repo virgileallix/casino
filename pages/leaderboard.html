@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Casino</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../css/common/global.css">
+    <style>
+        .leaderboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .leaderboard-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .leaderboard-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .leaderboard-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .leaderboard-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .leaderboard-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .leaderboard-table {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .leaderboard-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table thead {
+            background: var(--secondary-bg);
+        }
+
+        .leaderboard-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .leaderboard-table td {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .leaderboard-table tbody tr {
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background: var(--secondary-bg);
+        }
+
+        .rank-cell {
+            font-weight: 700;
+            font-size: 1.1rem;
+            width: 60px;
+            text-align: center;
+        }
+
+        .rank-medal {
+            font-size: 1.5rem;
+        }
+
+        .player-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .player-level {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-positive {
+            color: var(--success-color);
+        }
+
+        .stat-negative {
+            color: var(--error-color);
+        }
+
+        .current-user-row {
+            background: var(--primary-color-alpha) !important;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-table {
+                overflow-x: auto;
+            }
+
+            .leaderboard-table table {
+                min-width: 600px;
+            }
+
+            .leaderboard-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="../pages/leaderboard.html" class="nav-link active">Leaderboard</a>
+                <a href="../pages/games/dice.html" class="nav-link">Dice</a>
+                <a href="../pages/games/plinko.html" class="nav-link">Plinko</a>
+                <a href="../pages/games/mines.html" class="nav-link">Mines</a>
+                <a href="../pages/games/blackjack.html" class="nav-link">Blackjack</a>
+                <a href="../pages/games/tower.html" class="nav-link">Tower</a>
+                <a href="../pages/games/vip.html" class="nav-link">VIP</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">---</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-chat" id="chatToggleBtn">
+                    <span>💬</span>
+                    <span>Chat</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <h1>🏆 Leaderboard</h1>
+                <p>Classement des meilleurs joueurs du casino</p>
+            </div>
+
+            <div class="leaderboard-tabs">
+                <button class="leaderboard-tab active" data-tab="wagered">💰 Total Misé</button>
+                <button class="leaderboard-tab" data-tab="profit">📈 Profit Net</button>
+                <button class="leaderboard-tab" data-tab="wins">🎯 Total Gagné</button>
+                <button class="leaderboard-tab" data-tab="games">🎮 Parties Jouées</button>
+            </div>
+
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Joueur</th>
+                            <th id="statHeader">Total Misé</th>
+                            <th>Parties</th>
+                            <th>Niveau VIP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr>
+                            <td colspan="5" class="loading-state">
+                                <div class="loading-spinner">🎰</div>
+                                <p>Chargement du classement...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>À propos</h3>
+                <a href="#">À propos de nous</a>
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Politique de confidentialité</a>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <a href="#">Centre d'aide</a>
+                <a href="#">Contact</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h3>Responsable</h3>
+                <a href="#">Jeu responsable</a>
+                <a href="#">18+</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Casino. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Global Chat Container -->
+    <div id="globalChatContainer">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button class="chat-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-body" id="globalChatPanel">
+            <ul class="chat-messages" data-chat-messages></ul>
+            <div class="chat-empty" data-chat-empty hidden>
+                <div class="chat-empty-icon">💬</div>
+                <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
+            </div>
+            <form class="chat-form" data-chat-form>
+                <input
+                    type="text"
+                    class="chat-input"
+                    data-chat-input
+                    placeholder="Écrivez votre message..."
+                    maxlength="250"
+                    autocomplete="off"
+                />
+                <button type="submit" class="chat-send" data-chat-send>Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../js/leaderboard.js"></script>
+    <script type="module">
+        import { initializeGlobalChat } from '../js/components/global-chat.js';
+        initializeGlobalChat();
+    </script>
+    <script type="module">
+        import { initializeAdminNav } from '../js/components/admin-nav.js';
+        import { initializeURLCleaner } from '../js/components/url-cleaner.js';
+        initializeAdminNav();
+        initializeURLCleaner();
+    </script>
+</body>
+</html>

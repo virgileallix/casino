@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plinko - Casino</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../../css/common/global.css">
+    <link rel="stylesheet" href="../../css/games/plinko.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="../../pages/leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="../../pages/games/roulette.html" class="nav-link">Roulette</a>
+                <a href="../../pages/games/dice.html" class="nav-link">Dice</a>
+                <a href="../../pages/games/plinko.html" class="nav-link active">Plinko</a>
+                <a href="../../pages/games/mines.html" class="nav-link">Mines</a>
+                <a href="../../pages/games/blackjack.html" class="nav-link">Blackjack</a>
+                <a href="../../pages/games/tower.html" class="nav-link">Tower</a>
+                <a href="../../pages/games/vip.html" class="nav-link">VIP</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-chat" id="chatToggleBtn">
+                    <span>💬</span>
+                    <span>Chat</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="plinko-main">
+        <div class="plinko-container">
+            <!-- Left Panel - Controls -->
+            <aside class="plinko-controls">
+                <div class="control-section">
+                    <div class="control-header">
+                        <h2>🎯 Plinko</h2>
+                        <span class="control-tag">Original</span>
+                    </div>
+                    <p class="game-description">Choisis ton risque, sélectionne le nombre de lignes et laisse la bille tracer ta chance.</p>
+                </div>
+
+                <div class="control-section">
+                    <label>Mise</label>
+                    <div class="bet-input-group">
+                        <input type="number" id="betAmount" value="1.00" min="0.1" step="0.1">
+                        <span class="currency">€</span>
+                    </div>
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet" data-action="half">½</button>
+                        <button class="quick-bet" data-action="double">2x</button>
+                        <button class="quick-bet" data-action="min">Min</button>
+                        <button class="quick-bet" data-action="max">Max</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Risque</label>
+                    <div class="risk-buttons">
+                        <button class="risk-btn" data-risk="low">Faible</button>
+                        <button class="risk-btn active" data-risk="medium">Moyen</button>
+                        <button class="risk-btn" data-risk="high">Élevé</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Lignes</label>
+                    <div class="rows-buttons">
+                        <button class="rows-btn" data-rows="8">8</button>
+                        <button class="rows-btn" data-rows="12">12</button>
+                        <button class="rows-btn active" data-rows="16">16</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <button class="btn-play-plinko" id="playBtn">
+                        <span>Lancer la bille</span>
+                    </button>
+                </div>
+
+                <div class="control-section stats-section">
+                    <h3>Statistiques</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Parties</span>
+                            <span class="stat-value" id="gamesPlayed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total gagné</span>
+                            <span class="stat-value win" id="totalWon">0.00 €</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Plus gros gain</span>
+                            <span class="stat-value win" id="biggestWin">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="plinko-content">
+                <div class="plinko-game">
+                    <div class="plinko-game-header">
+                        <div class="risk-pill">
+                            <span id="currentRiskLabel">Risque moyen</span>
+                        </div>
+                        <div class="rows-pill">
+                            <span id="currentRowsLabel">16 lignes</span>
+                        </div>
+                    </div>
+
+                    <div class="plinko-multipliers" id="multipliersTop"></div>
+
+                    <div class="plinko-board">
+                        <canvas id="plinkoCanvas"></canvas>
+                    </div>
+
+                    <div class="plinko-multipliers" id="multipliersBottom"></div>
+                </div>
+
+                <div class="plinko-history">
+                    <div class="history-header">
+                        <h3>Historique des parties</h3>
+                        <span class="history-subtitle">Derniers 20 drops</span>
+                    </div>
+                    <div class="history-columns">
+                        <span>Mise</span>
+                        <span>Multiplicateur</span>
+                        <span>Profit</span>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="no-history">Aucune partie jouée</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script type="module" src="../../js/games/plinko.js"></script>
+
+    <!-- Global Chat Container -->
+    <div id="globalChatContainer">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button class="chat-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-body" id="globalChatPanel">
+            <ul class="chat-messages" data-chat-messages></ul>
+            <div class="chat-empty" data-chat-empty hidden>
+                <div class="chat-empty-icon">💬</div>
+                <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
+            </div>
+            <form class="chat-form" data-chat-form>
+                <input
+                    type="text"
+                    class="chat-input"
+                    data-chat-input
+                    placeholder="Écrivez votre message..."
+                    maxlength="250"
+                    autocomplete="off"
+                />
+                <button type="submit" class="chat-send" data-chat-send>Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeGlobalChat } from '../../js/components/global-chat.js';
+        initializeGlobalChat();
+    </script>
+    <script type="module">
+        import { initializeAdminNav } from '../../js/components/admin-nav.js';
+        import { initializeURLCleaner } from '../../js/components/url-cleaner.js';
+        initializeAdminNav();
+        initializeURLCleaner();
+    </script>
+</body>
+</html>

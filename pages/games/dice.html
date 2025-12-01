@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice - Casino</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../../css/common/global.css">
+    <link rel="stylesheet" href="../../css/games/dice.css">
+    <link rel="stylesheet" href="../../css/common/deposit-modal.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Casino</a>
+                <a href="../../pages/leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="../../pages/games/roulette.html" class="nav-link">Roulette</a>
+                <a href="../../pages/games/dice.html" class="nav-link active">Dice</a>
+                <a href="../../pages/games/plinko.html" class="nav-link">Plinko</a>
+                <a href="../../pages/games/mines.html" class="nav-link">Mines</a>
+                <a href="../../pages/games/blackjack.html" class="nav-link">Blackjack</a>
+                <a href="../../pages/games/tower.html" class="nav-link">Tower</a>
+                <a href="../../pages/games/vip.html" class="nav-link">VIP</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">1,000.00 €</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-chat" id="chatToggleBtn">
+                    <span>💬</span>
+                    <span>Chat</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dice-main">
+        <div class="dice-container">
+            <!-- Left Panel - Controls -->
+            <aside class="dice-controls">
+                <div class="control-section">
+                    <div class="control-header">
+                        <h2>🎲 Dice</h2>
+                        <span class="control-tag">Original</span>
+                    </div>
+                    <p class="game-description">Choisis ton risque, ajuste ton seuil et roule le dé comme sur Stake.</p>
+                </div>
+
+                <div class="control-section">
+                    <label>Mise</label>
+                    <div class="bet-input-group">
+                        <input type="number" id="betAmount" value="1.00" min="0.1" step="0.1">
+                        <span class="currency">€</span>
+                    </div>
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet" data-action="half">½</button>
+                        <button class="quick-bet" data-action="double">2x</button>
+                        <button class="quick-bet" data-action="min">Min</button>
+                        <button class="quick-bet" data-action="max">Max</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Profit sur gain</label>
+                    <div class="profit-display">
+                        <span id="profitAmount">0.00 €</span>
+                        <span class="multiplier" id="multiplierDisplay">1.00x</span>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>Prédiction</label>
+                    <div class="prediction-buttons">
+                        <button class="prediction-btn active" id="rollOverBtn" data-prediction="over">
+                            <span class="prediction-label">Roll Over</span>
+                            <span class="prediction-caption">Gagne si résultat &gt; cible</span>
+                        </button>
+                        <button class="prediction-btn" id="rollUnderBtn" data-prediction="under">
+                            <span class="prediction-label">Roll Under</span>
+                            <span class="prediction-caption">Gagne si résultat &lt; cible</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label>
+                        <span>Nombre cible</span>
+                        <span id="winChanceDisplay" class="win-chance">49.50%</span>
+                    </label>
+                    <div class="target-input-container">
+                        <input type="range" id="targetSlider" min="2" max="98" value="50.5" step="0.01">
+                        <input type="number" id="targetInput" min="2" max="98" value="50.5" step="0.01">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <button class="btn-play-dice" id="playBtn">
+                        <span>Lancer le dé</span>
+                    </button>
+                </div>
+
+                <div class="control-section stats-section">
+                    <h3>Statistiques</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Parties</span>
+                            <span class="stat-value" id="gamesPlayed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Victoires</span>
+                            <span class="stat-value" id="wins">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Défaites</span>
+                            <span class="stat-value" id="losses">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Winrate</span>
+                            <span class="stat-value" id="winRate">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="dice-content">
+                <div class="dice-game">
+                    <div class="dice-game-header">
+                        <div class="result-chip">
+                            <span class="result-label">Dernier résultat</span>
+                            <span class="result-number" id="resultNumber">50.00</span>
+                        </div>
+                        <div class="dice-info-cards">
+                            <div class="info-card">
+                                <span class="info-label">Multiplicateur</span>
+                                <span class="info-value" id="infoMultiplier">1.98x</span>
+                            </div>
+                            <div class="info-card">
+                                <span class="info-label">Chances</span>
+                                <span class="info-value" id="infoWinChance">49.50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                <div class="dice-visual">
+                    <canvas id="diceCanvas" width="800" height="260"></canvas>
+                    <div class="slider-track">
+                        <div class="slider-roll" id="sliderRoll"></div>
+                        <div class="slider-fill-under" id="sliderFillUnder"></div>
+                        <div class="slider-fill-over" id="sliderFillOver"></div>
+                        <div class="slider-marker" id="sliderMarker"></div>
+                        <div class="result-marker" id="resultMarker"></div>
+                    </div>
+                        <div class="slider-labels">
+                            <span>0</span>
+                            <span>25</span>
+                            <span>50</span>
+                            <span>75</span>
+                            <span>100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dice-history">
+                    <div class="history-header">
+                        <h3>Historique des lancers</h3>
+                        <span class="history-subtitle">Suivi en temps réel</span>
+                    </div>
+                    <div class="history-columns">
+                        <span>Résultat</span>
+                        <span>Cible</span>
+                        <span>Mise</span>
+                        <span>Profit</span>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="no-history">Aucune partie jouée</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Global Chat Container -->
+    <div id="globalChatContainer">
+        <div class="chat-header">
+            <h3>💬 Chat Global</h3>
+            <button class="chat-close" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-body" id="globalChatPanel">
+            <ul class="chat-messages" data-chat-messages></ul>
+            <div class="chat-empty" data-chat-empty hidden>
+                <div class="chat-empty-icon">💬</div>
+                <p>Aucun message pour le moment.<br>Soyez le premier à discuter!</p>
+            </div>
+            <form class="chat-form" data-chat-form>
+                <input
+                    type="text"
+                    class="chat-input"
+                    data-chat-input
+                    placeholder="Écrivez votre message..."
+                    maxlength="250"
+                    autocomplete="off"
+                />
+                <button type="submit" class="chat-send" data-chat-send>Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/components/global-deposit.js"></script>
+    <script type="module" src="../../js/games/dice.js"></script>
+    <script type="module">
+        import { initializeGlobalChat } from '../../js/components/global-chat.js';
+        initializeGlobalChat();
+    </script>
+    <script type="module">
+        import { initializeAdminNav } from '../../js/components/admin-nav.js';
+        import { initializeURLCleaner } from '../../js/components/url-cleaner.js';
+        initializeAdminNav();
+        initializeURLCleaner();
+    </script>
+</body>
+</html>

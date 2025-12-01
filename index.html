@@ -6,9 +6,9 @@
     <title>Casino Originals - Le meilleur casino en ligne</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="deposit-modal.css">
+    <link rel="stylesheet" href="css/common/global.css">
+    <link rel="stylesheet" href="css/common/index.css">
+    <link rel="stylesheet" href="css/common/deposit-modal.css">
 </head>
 <body>
     <!-- Header -->
@@ -23,9 +23,9 @@
             </a>
             <nav class="nav">
                 <a href="index.html" class="nav-link active">Casino</a>
-                <a href="leaderboard.html" class="nav-link">Leaderboard</a>
-                <a href="roulette.html" class="nav-link">Roulette</a>
-                <a href="vip.html" class="nav-link">VIP</a>
+                <a href="pages/leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="pages/games/roulette.html" class="nav-link">Roulette</a>
+                <a href="pages/games/vip.html" class="nav-link">VIP</a>
             </nav>
             <div class="user-section">
                 <div class="balance">
@@ -179,7 +179,7 @@
             </div>
             <div class="games-grid">
                 <!-- Dice -->
-                <a href="dice.html" class="game-card dice-card">
+                <a href="pages/games/dice.html" class="game-card dice-card">
                     <div class="game-card-header">
                         <div class="game-icon">🎲</div>
                         <div class="game-badge">Popular</div>
@@ -204,7 +204,7 @@
                 </a>
 
                 <!-- Roulette -->
-                <a href="roulette.html" class="game-card roulette-card">
+                <a href="pages/games/roulette.html" class="game-card roulette-card">
                     <div class="game-card-header">
                         <div class="game-icon">🎡</div>
                         <div class="game-badge">Nouveau</div>
@@ -229,7 +229,7 @@
                 </a>
 
                 <!-- Plinko -->
-                <a href="plinko.html" class="game-card plinko-card">
+                <a href="pages/games/plinko.html" class="game-card plinko-card">
                     <div class="game-card-header">
                         <div class="game-icon">🎯</div>
                         <div class="game-badge hot">Hot</div>
@@ -254,7 +254,7 @@
                 </a>
 
                 <!-- Mines -->
-                <a href="mines.html" class="game-card mines-card">
+                <a href="pages/games/mines.html" class="game-card mines-card">
                     <div class="game-card-header">
                         <div class="game-icon">💣</div>
                         <div class="game-badge">New</div>
@@ -279,7 +279,7 @@
                 </a>
 
                 <!-- Blackjack -->
-                <a href="blackjack.html" class="game-card blackjack-card">
+                <a href="pages/games/blackjack.html" class="game-card blackjack-card">
                     <div class="game-card-header">
                         <div class="game-icon">🃏</div>
                     </div>
@@ -303,7 +303,7 @@
                 </a>
 
                 <!-- Tower -->
-                <a href="tower.html" class="game-card tower-card">
+                <a href="pages/games/tower.html" class="game-card tower-card">
                     <div class="game-card-header">
                         <div class="game-icon">🗼</div>
                     </div>
@@ -327,7 +327,7 @@
                 </a>
 
                 <!-- Keno -->
-                <a href="keno.html" class="game-card keno-card">
+                <a href="pages/games/keno.html" class="game-card keno-card">
                     <div class="game-card-header">
                         <div class="game-icon">🎱</div>
                         <div class="game-badge">New</div>
@@ -352,7 +352,7 @@
                 </a>
 
                 <!-- Cases -->
-                <a href="cases.html" class="game-card cases-card">
+                <a href="pages/games/cases.html" class="game-card cases-card">
                     <div class="game-card-header">
                         <div class="game-icon">📦</div>
                         <div class="game-badge hot">Hot</div>
@@ -377,7 +377,7 @@
                 </a>
 
                 <!-- Slots -->
-                <a href="slots.html" class="game-card slots-card">
+                <a href="pages/games/slots.html" class="game-card slots-card">
                     <div class="game-card-header">
                         <div class="game-icon">🎰</div>
                         <div class="game-badge hot">Hot</div>
@@ -402,7 +402,7 @@
                 </a>
 
                 <!-- Crash -->
-                <a href="crash.html" class="game-card crash-card">
+                <a href="pages/games/crash.html" class="game-card crash-card">
                     <div class="game-card-header">
                         <div class="game-icon">🚀</div>
                         <div class="game-badge">New</div>
@@ -459,7 +459,7 @@
         <section class="leaderboard-teaser">
             <div class="section-header">
                 <h2 class="section-title">Top joueurs</h2>
-                <a href="leaderboard.html" class="view-all-link">Voir le classement complet →</a>
+                <a href="pages/leaderboard.html" class="view-all-link">Voir le classement complet →</a>
             </div>
             <div class="top-players" id="topPlayersPreview">
                 <!-- Top 3 players will be loaded here -->
@@ -481,16 +481,16 @@
             </div>
             <div class="footer-section">
                 <h3>Jeux</h3>
-                <a href="dice.html">Dice</a>
-                <a href="plinko.html">Plinko</a>
-                <a href="mines.html">Mines</a>
-                <a href="blackjack.html">Blackjack</a>
-                <a href="tower.html">Tower</a>
+                <a href="pages/games/dice.html">Dice</a>
+                <a href="pages/games/plinko.html">Plinko</a>
+                <a href="pages/games/mines.html">Mines</a>
+                <a href="pages/games/blackjack.html">Blackjack</a>
+                <a href="pages/games/tower.html">Tower</a>
             </div>
             <div class="footer-section">
                 <h3>Casino</h3>
-                <a href="leaderboard.html">Leaderboard</a>
-                <a href="vip.html">Programme VIP</a>
+                <a href="pages/leaderboard.html">Leaderboard</a>
+                <a href="pages/games/vip.html">Programme VIP</a>
                 <a href="#">Promotions</a>
             </div>
             <div class="footer-section">
@@ -532,12 +532,12 @@
         </div>
     </div>
 
-    <script type="module" src="global-deposit.js"></script>
-    <script type="module" src="index.js"></script>
+    <script type="module" src="js/components/global-deposit.js"></script>
+    <script type="module" src="js/index.js"></script>
     <script type="module">
-        import { initializeGlobalChat } from './global-chat.js';
-        import { initializeAdminNav } from './admin-nav.js';
-        import { initializeURLCleaner } from './url-cleaner.js';
+        import { initializeGlobalChat } from 'js/components/global-chat.js';
+        import { initializeAdminNav } from 'js/components/admin-nav.js';
+        import { initializeURLCleaner } from 'js/components/url-cleaner.js';
         initializeGlobalChat();
         initializeAdminNav();
         initializeURLCleaner();
