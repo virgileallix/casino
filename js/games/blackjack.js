@@ -1001,6 +1001,7 @@ function updateDealButton() {
 
 function updatePlayersListDisplay() {
     if (!tableState) return;
+    if (!elements.playersList) return;
 
     elements.playersList.innerHTML = '';
 
