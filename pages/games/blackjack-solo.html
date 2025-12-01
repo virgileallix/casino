@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Solo - Casino Originals</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../../css/common/global.css">
+    <style>
+        .blackjack-solo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+        }
+
+        .game-status {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .game-status.neutral { background: rgba(79, 89, 110, 0.3); color: #b1bad3; }
+        .game-status.info { background: rgba(0, 208, 132, 0.2); color: var(--accent-primary); }
+        .game-status.success { background: rgba(0, 208, 132, 0.3); color: var(--accent-primary); }
+        .game-status.error { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .game-area {
+            background: linear-gradient(160deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
+            border: 1px solid rgba(0, 208, 132, 0.15);
+            border-radius: 18px;
+            padding: 30px;
+        }
+
+        .dealer-section, .player-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: #b1bad3;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hand-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .cards-container {
+            display: flex;
+            gap: -20px;
+            flex-wrap: wrap;
+            min-height: 140px;
+            align-items: center;
+        }
+
+        .card {
+            width: 80px;
+            height: 112px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-left: -20px;
+            transition: transform 0.2s ease;
+        }
+
+        .card:first-child {
+            margin-left: 0;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            z-index: 10;
+        }
+
+        .card.card-back {
+            background: linear-gradient(135deg, #c92a2a 0%, #862e9c 100%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 3rem;
+        }
+
+        .card.red {
+            color: #ff0000;
+        }
+
+        .card.black {
+            color: #000;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .card-suit {
+            font-size: 2.5rem;
+        }
+
+        /* Sidebar */
+        .game-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .betting-panel, .controls-panel, .stats-panel {
+            background: linear-gradient(160deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
+            border: 1px solid rgba(0, 208, 132, 0.15);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f4f6fb;
+            margin-bottom: 20px;
+        }
+
+        .current-bet {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bet-label {
+            font-size: 0.9rem;
+            color: #b1bad3;
+            margin-bottom: 5px;
+        }
+
+        .bet-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .chips-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .chip-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip-btn:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .chip-1 { background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%); color: #333; }
+        .chip-5 { background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%); color: white; }
+        .chip-10 { background: linear-gradient(135deg, #4dabf7 0%, #1864ab 100%); color: white; }
+        .chip-25 { background: linear-gradient(135deg, #51cf66 0%, #2b8a3e 100%); color: white; }
+        .chip-50 { background: linear-gradient(135deg, #ff922b 0%, #d9480f 100%); color: white; }
+        .chip-100 { background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%); color: #d4af37; }
+
+        .quick-bet-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-bet-btn {
+            padding: 10px;
+            background: rgba(79, 89, 110, 0.3);
+            border: 1px solid rgba(79, 89, 110, 0.5);
+            border-radius: 8px;
+            color: #b1bad3;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-bet-btn:hover {
+            background: rgba(0, 208, 132, 0.2);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-deal {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #00b377 100%);
+            color: white;
+        }
+
+        .btn-hit {
+            background: linear-gradient(135deg, #4dabf7 0%, #1864ab 100%);
+            color: white;
+        }
+
+        .btn-stand {
+            background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
+            color: white;
+        }
+
+        .btn-double {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #1a1a1a;
+        }
+
+        .btn-clear {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #b1bad3;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .results-log {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .result-item.result-win, .result-item.result-blackjack {
+            background: rgba(0, 208, 132, 0.2);
+        }
+
+        .result-item.result-loss {
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        .result-item.result-push {
+            background: rgba(79, 89, 110, 0.3);
+        }
+
+        @media (max-width: 968px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="../../index.html" class="logo">
+                <img src="../../assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
+                <div class="logo-text">
+                    <span class="logo-title">Casino</span>
+                    <span class="logo-subtitle">Originals</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="../../index.html" class="nav-link">Casino</a>
+                <a href="../leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="blackjack-solo.html" class="nav-link active">Blackjack Solo</a>
+                <a href="blackjack.html" class="nav-link">Blackjack Multi</a>
+            </nav>
+            <div class="user-section">
+                <div class="balance">
+                    <span class="balance-label">Solde:</span>
+                    <span class="balance-amount" id="userBalance">---</span>
+                </div>
+                <button class="btn-secondary" id="depositBtn">Dépôt</button>
+                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="blackjack-solo-container">
+        <div class="game-header">
+            <h1>🃏 Blackjack Solo</h1>
+            <div class="game-status neutral" id="gameStatus">Placez votre mise</div>
+        </div>
+
+        <div class="game-layout">
+            <!-- Game Area -->
+            <div class="game-area">
+                <!-- Dealer Section -->
+                <div class="dealer-section">
+                    <div class="section-title">
+                        <span>🎩 Croupier</span>
+                        <span class="hand-total" id="dealerTotal">0</span>
+                    </div>
+                    <div class="cards-container" id="dealerCards">
+                        <!-- Dealer cards rendered here -->
+                    </div>
+                </div>
+
+                <!-- Player Section -->
+                <div class="player-section">
+                    <div class="section-title">
+                        <span>👤 Vous</span>
+                        <span class="hand-total" id="playerTotal">0</span>
+                    </div>
+                    <div class="cards-container" id="playerCards">
+                        <!-- Player cards rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="game-sidebar">
+                <!-- Betting Panel -->
+                <div class="betting-panel">
+                    <h3 class="panel-title">💰 Mise</h3>
+                    <div class="current-bet">
+                        <div class="bet-label">Mise actuelle</div>
+                        <div class="bet-amount" id="currentBetDisplay">0€</div>
+                    </div>
+
+                    <div class="chips-grid">
+                        <button class="chip-btn chip-1" data-value="1">1</button>
+                        <button class="chip-btn chip-5" data-value="5">5</button>
+                        <button class="chip-btn chip-10" data-value="10">10</button>
+                        <button class="chip-btn chip-25" data-value="25">25</button>
+                        <button class="chip-btn chip-50" data-value="50">50</button>
+                        <button class="chip-btn chip-100" data-value="100">100</button>
+                    </div>
+
+                    <div class="quick-bet-buttons">
+                        <button class="quick-bet-btn" id="minBetBtn">Min</button>
+                        <button class="quick-bet-btn" id="halfBetBtn">1/2</button>
+                        <button class="quick-bet-btn" id="maxBetBtn">Max</button>
+                    </div>
+
+                    <button class="action-btn btn-clear" id="clearBetBtn">Effacer</button>
+                </div>
+
+                <!-- Controls Panel -->
+                <div class="controls-panel">
+                    <h3 class="panel-title">🎮 Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-deal" id="dealBtn" disabled>DEAL</button>
+                        <button class="action-btn btn-hit" id="hitBtn" disabled>HIT</button>
+                        <button class="action-btn btn-stand" id="standBtn" disabled>STAND</button>
+                        <button class="action-btn btn-double" id="doubleBtn" disabled>DOUBLE</button>
+                    </div>
+                </div>
+
+                <!-- Stats Panel -->
+                <div class="stats-panel">
+                    <h3 class="panel-title">📊 Statistiques</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Mains jouées</div>
+                            <div class="stat-value" id="handsPlayed">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Victoires</div>
+                            <div class="stat-value" id="handsWon">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Blackjacks</div>
+                            <div class="stat-value" id="blackjacks">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Profit total</div>
+                            <div class="stat-value" id="totalProfit">0€</div>
+                        </div>
+                    </div>
+
+                    <div class="results-log" id="resultsLog">
+                        <!-- Recent results -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../js/games/blackjack-solo.js"></script>
+</body>
+</html>
