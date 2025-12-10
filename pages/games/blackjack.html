@@ -3,178 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackjack Multijoueur - Casino Originals</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Blackjack | Casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../../css/common/global.css">
     <link rel="stylesheet" href="../../css/games/blackjack.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <a href="../../index.html" class="logo">
-                <img src="../../assets/images/logo-icon.svg" alt="Casino Originals" class="logo-icon">
-                <div class="logo-text">
-                    <span class="logo-title">Casino</span>
-                    <span class="logo-subtitle">Originals</span>
-                </div>
-            </a>
-            <nav class="nav">
-                <a href="../../index.html" class="nav-link">Casino</a>
-                <a href="../leaderboard.html" class="nav-link">Leaderboard</a>
-                <a href="blackjack-solo.html" class="nav-link">Blackjack Solo</a>
-                <a href="blackjack.html" class="nav-link active">Blackjack Multi</a>
-            </nav>
-            <div class="user-section">
-                <div class="balance">
-                    <span class="balance-label">Solde:</span>
-                    <span class="balance-amount" id="userBalance">---</span>
-                </div>
-                <button class="btn-secondary" id="depositBtn">Dépôt</button>
-                <button class="btn-logout" id="logoutBtn">Déconnexion</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Lobby Screen -->
-    <div id="lobbyScreen" class="blackjack-main">
-        <div class="lobby-container">
+    <!-- Main Content -->
+    <main class="blackjack-main">
+        <div class="lobby-container" id="lobbyScreen">
             <div class="lobby-header">
-                <h1>🎰 Blackjack Live Multijoueur</h1>
-                <p class="lobby-description">Rejoignez une table et jouez en temps réel avec d'autres joueurs</p>
+                <h1>Lobby Blackjack</h1>
+                <p class="lobby-description">Choisissez votre table et rejoignez la partie</p>
             </div>
 
             <div class="tables-grid" id="tablesGrid">
-                <!-- Tables dynamically generated -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Game Screen -->
-    <div id="liveGameScreen" class="blackjack-game-container" style="display: none;">
-        <div class="game-header">
-            <h2>Table <span id="tableMinBet">---</span></h2>
-            <button class="btn-back" id="backToLobbyBtn">
-                <i class="fas fa-arrow-left"></i> Retour au lobby
-            </button>
-        </div>
-
-        <div class="game-status-bar">
-            <div class="game-status" id="gameStatus">En attente de joueurs...</div>
-            <div class="round-timer" id="roundTimer" style="display: none;">
-                ⏱️ <span id="timerValue">15s</span>
+                <!-- Tables will be injected here -->
             </div>
         </div>
 
-        <div class="game-layout">
-            <!-- Left Panel: Table -->
-            <div class="game-area">
-                <!-- Dealer Section -->
-                <div class="dealer-section">
-                    <div class="dealer-info">
-                        <span class="dealer-label">🎩 Croupier</span>
-                        <span class="dealer-total" id="dealerTotal">Total: 0</span>
-                    </div>
-                    <div class="dealer-hand" id="dealerHand">
-                        <!-- Dealer cards rendered here -->
+        <div class="blackjack-game-container" id="liveGameScreen" style="display: none;">
+            <div class="game-header">
+                <button class="btn-back" id="backToLobbyBtn">
+                    <i class="fas fa-arrow-left"></i> Quitter
+                </button>
+                <h2 id="tableMinBet">Table</h2>
+                <div class="game-status-bar">
+                    <span class="game-status" id="gameStatus">En attente...</span>
+                    <div class="round-timer" id="roundTimer" style="display: none;">
+                        <i class="far fa-clock"></i> <span id="timerValue">15s</span>
                     </div>
                 </div>
-
-                <!-- Players Section -->
-                <div class="players-section">
-                    <div id="multiSeatsArea">
-                        <!-- Player seats rendered here -->
-                    </div>
+                <div class="user-balance-display">
+                    Solde: <span id="gameUserBalance">---</span>
                 </div>
             </div>
 
-            <!-- Right Panel: Controls -->
-            <div class="control-panel">
-                <!-- Seat Selection -->
-                <div class="panel-card" id="seatSelectionPanel">
-                    <h3 class="panel-title">🪑 Places disponibles</h3>
-                    <div class="seats-selector" id="seatsSelector">
-                        <!-- Seat buttons rendered here -->
+            <div class="game-layout">
+                <!-- Game Area -->
+                <div class="game-area" id="gameArea">
+                    <div class="dealer-section">
+                        <div class="dealer-info">
+                            <span class="dealer-label">DEALER</span>
+                            <span class="dealer-total" id="dealerTotal">Total: 0</span>
+                        </div>
+                        <div class="dealer-hand" id="dealerHand"></div>
+                    </div>
+
+                    <div class="players-section">
+                        <div id="multiSeatsArea">
+                            <!-- Seats populated by JS -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- Betting Panel -->
-                <div class="panel-card" id="bettingPanel" style="display: none;">
-                    <h3 class="panel-title">💰 Mises</h3>
-
-                    <!-- Chip Selector -->
-                    <div class="chip-selector">
-                        <button class="chip-btn chip-1" data-value="1">1</button>
-                        <button class="chip-btn chip-5" data-value="5">5</button>
-                        <button class="chip-btn chip-10 selected" data-value="10">10</button>
-                        <button class="chip-btn chip-25" data-value="25">25</button>
-                        <button class="chip-btn chip-50" data-value="50">50</button>
-                        <button class="chip-btn chip-100" data-value="100">100</button>
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <!-- Seat Selector -->
+                    <div class="panel-card seats-config">
+                        <h3 class="panel-title">Choisir une place</h3>
+                        <div class="seats-selector" id="seatsSelector">
+                            <!-- Seat buttons -->
+                        </div>
                     </div>
 
-                    <!-- Side Bets -->
-                    <div class="side-bets-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="enable21Plus3">
-                            <span>21+3 Side Bet</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="enablePerfectPairs">
-                            <span>Perfect Pairs</span>
-                        </label>
+                    <!-- Betting Controls -->
+                    <div class="panel-card betting-controls" id="bettingPanel" style="display: none;">
+                        <h3 class="panel-title">Mise</h3>
+                        
+                        <div class="active-seats-list" id="activeSeatsList"></div>
+
+                        <div class="side-bets-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable21Plus3"> 21+3 (Side Bet)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enablePerfectPairs"> Perfect Pairs (Side Bet)
+                            </label>
+                        </div>
+
+                        <div class="chip-selector" id="chipSelector">
+                            <button class="chip-btn chip-1" data-value="1">1</button>
+                            <button class="chip-btn chip-5" data-value="5">5</button>
+                            <button class="chip-btn chip-10 selected" data-value="10">10</button>
+                            <button class="chip-btn chip-25" data-value="25">25</button>
+                            <button class="chip-btn chip-50" data-value="50">50</button>
+                            <button class="chip-btn chip-100" data-value="100">100</button>
+                        </div>
+
+                        <button class="btn-action btn-deal" id="dealBtn" disabled>Placer les mises</button>
                     </div>
 
-                    <!-- Active Seats Betting -->
-                    <div class="active-seats-list" id="activeSeatsList">
-                        <!-- Active seats rendered here -->
+                    <!-- Action Controls -->
+                    <div class="panel-card action-controls" id="actionControls" style="display: none;">
+                        <h3 class="panel-title">Actions <small id="currentSeatIndicator" style="font-size: 0.8em; color: var(--accent-primary);">(Place <span id="currentSeatNumber">?</span>)</small></h3>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-hit" id="hitBtn">Tirer (HIT)</button>
+                            <button class="btn-action btn-stand" id="standBtn">Rester (STAND)</button>
+                            <button class="btn-action btn-double" id="doubleBtn">Doubler (x2)</button>
+                        </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="action-buttons">
-                        <button class="btn-action btn-deal" id="dealBtn" disabled>
-                            Prêt à jouer
-                        </button>
+                    <!-- Players List -->
+                    <div class="panel-card">
+                        <h3 class="panel-title">Joueurs</h3>
+                        <div class="players-list" id="playersList"></div>
                     </div>
 
-                    <!-- Auto-rebet -->
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="autoRebetToggle">
-                        <span>🔄 Auto-Rebet</span>
-                    </label>
-                </div>
-
-                <!-- Action Controls (during play) -->
-                <div class="panel-card" id="actionControls" style="display: none;">
-                    <h3 class="panel-title">🎮 Actions</h3>
-                    <div id="currentSeatIndicator">
-                        Place <span id="currentSeatNumber">-</span>
+                    <!-- Stats -->
+                    <div class="panel-card stats-card">
+                        <div class="stat-row">
+                            <span>Mains jouées</span>
+                            <span id="handsPlayed">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Victoires</span>
+                            <span id="handsWon">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Blackjacks</span>
+                            <span id="blackjacks">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Profit total</span>
+                            <span id="totalProfit">0.00€</span>
+                        </div>
                     </div>
-                    <div class="action-buttons">
-                        <button class="btn-action btn-hit" id="hitBtn">HIT</button>
-                        <button class="btn-action btn-stand" id="standBtn">STAND</button>
-                        <button class="btn-action btn-double" id="doubleBtn">DOUBLE</button>
-                    </div>
-                </div>
 
-                <!-- Players List -->
-                <div class="panel-card">
-                    <h3 class="panel-title">👥 Joueurs</h3>
-                    <div class="players-list" id="playersList">
-                        <!-- Players rendered here -->
-                    </div>
-                </div>
-
-                <!-- Results Log -->
-                <div class="panel-card">
-                    <h3 class="panel-title">📊 Résultats récents</h3>
-                    <div class="results-log" id="resultsLog">
-                        <!-- Results rendered here -->
+                     <!-- Results Log -->
+                     <div class="panel-card" style="margin-top: 10px;">
+                        <h3 class="panel-title">Historique</h3>
+                        <div class="results-log" id="resultsLog"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script type="module" src="../../js/games/blackjack.js"></script>
+    <script type="module">
+        // Inject auth check if not present in main script, or rely on global
+        import { auth } from '../../js/core/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = '../../index.html';
+            }
+        });
+    </script>
 </body>
 </html>

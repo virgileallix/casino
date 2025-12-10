@@ -1,443 +1,374 @@
-/* Plinko Styles - Stake-inspired */
+/* Plinko Styles - Premium Dark Neon */
+
+:root {
+    --bg-dark: #0f212e;
+    --bg-panel: #1a2c38;
+    --accent-green: #00e701;
+    --text-primary: #ffffff;
+    --text-secondary: #b1bad3;
+}
+
+body {
+    background-color: var(--bg-dark);
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
 
 .plinko-main {
-    padding: 30px 20px 50px;
-    max-width: 1700px;
+    padding: 30px;
+    max-width: 1400px;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
 }
 
 .plinko-container {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 30px;
-}
-
-.plinko-controls {
-    background: linear-gradient(160deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
-    border: 1px solid rgba(0, 208, 132, 0.08);
-    border-radius: 18px;
-    padding: 28px;
-    position: sticky;
-    top: 20px;
-    align-self: start;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
-}
-
-.control-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    gap: 30px;
+    width: 100%;
+    align-items: flex-start;
+}
+
+/* Controls Sidebar */
+.plinko-controls {
+    width: 350px;
+    flex-shrink: 0;
+    background: var(--bg-panel);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .control-header h2 {
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: #f4f6fb;
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--text-primary);
 }
 
 .control-tag {
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-size: 0.75rem;
+    background: rgba(0, 231, 1, 0.1);
+    color: var(--accent-green);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: rgba(0, 208, 132, 0.2);
-    color: var(--accent-primary);
-    font-weight: 600;
 }
 
 .game-description {
-    color: rgba(177, 186, 211, 0.75);
-    font-size: 0.95rem;
-    line-height: 1.6;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 10px;
+    line-height: 1.4;
 }
 
 .control-section {
-    margin-top: 28px;
+    margin-top: 24px;
 }
 
 .control-section label {
     display: block;
-    margin-bottom: 12px;
-    color: rgba(177, 186, 211, 0.85);
-    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
 }
 
+/* Input Group */
 .bet-input-group {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .bet-input-group input {
     width: 100%;
-    padding: 14px 48px 14px 16px;
-    background: rgba(16, 21, 31, 0.9);
-    border: 1px solid rgba(79, 89, 110, 0.4);
-    border-radius: 12px;
-    color: #f4f6fb;
-    font-size: 1.05rem;
+    background: #0f1923;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 40px 12px 14px;
+    color: #fff;
     font-weight: 600;
-    transition: border 0.2s ease, box-shadow 0.2s ease;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
 }
 
 .bet-input-group input:focus {
-    outline: none;
-    border-color: rgba(0, 208, 132, 0.6);
-    box-shadow: 0 6px 20px rgba(0, 208, 132, 0.1);
+    border-color: var(--accent-green);
 }
 
 .currency {
     position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(177, 186, 211, 0.7);
+    right: 14px;
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
+/* Quick Buttons */
 .quick-bet-buttons {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .quick-bet {
-    padding: 10px;
-    background: rgba(16, 21, 31, 0.9);
-    border: 1px solid rgba(79, 89, 110, 0.4);
-    border-radius: 10px;
-    color: rgba(177, 186, 211, 0.8);
-    font-size: 0.85rem;
-    font-weight: 600;
+    background: #0f1923;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    padding: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: background 0.2s;
 }
 
 .quick-bet:hover {
-    color: var(--accent-primary);
-    border-color: rgba(0, 208, 132, 0.6);
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
 }
 
+/* Risk/Rows Buttons */
 .risk-buttons,
 .rows-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    display: flex;
+    background: #0f1923;
+    padding: 4px;
+    border-radius: 8px;
+    gap: 4px;
 }
 
 .risk-btn,
 .rows-btn {
-    padding: 12px;
-    background: rgba(16, 21, 31, 0.9);
-    border: 1px solid rgba(79, 89, 110, 0.4);
-    border-radius: 12px;
-    color: rgba(177, 186, 211, 0.8);
-    font-weight: 600;
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 10px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
 }
 
 .risk-btn:hover,
 .rows-btn:hover {
-    border-color: rgba(0, 208, 132, 0.6);
-    color: var(--accent-primary);
+    color: #fff;
 }
 
 .risk-btn.active,
 .rows-btn.active {
-    border-color: rgba(0, 208, 132, 0.6);
-    color: #f4f6fb;
-    background: rgba(0, 208, 132, 0.18);
-    box-shadow: inset 0 0 0 1px rgba(0, 208, 132, 0.2);
+    background: #2d4052;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Play Button */
 .btn-play-plinko {
     width: 100%;
-    padding: 16px;
-    border-radius: 16px;
-    background: linear-gradient(120deg, #00d084 0%, #00e0a1 100%);
+    background: var(--accent-green);
+    color: #050505;
     border: none;
-    color: #0f141f;
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    border-radius: 8px;
+    padding: 16px;
+    font-weight: 800;
+    font-size: 1.1rem;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-transform: uppercase;
+    transition: transform 0.1s;
 }
 
 .btn-play-plinko:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 35px rgba(0, 208, 132, 0.4);
+    filter: brightness(1.1);
 }
 
-.btn-play-plinko:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
+.btn-play-plinko:active {
+    transform: scale(0.98);
 }
 
+/* Stats */
 .stats-section {
-    background: rgba(16, 21, 31, 0.9);
-    border: 1px solid rgba(79, 89, 110, 0.4);
-    border-radius: 14px;
-    padding: 18px;
-}
-
-.stats-section h3 {
-    font-size: 1rem;
-    margin-bottom: 16px;
-    color: #f4f6fb;
+    background: #0f1923;
+    padding: 16px;
+    border-radius: 12px;
 }
 
 .stat-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .stat-item {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.stat-label {
-    color: rgba(177, 186, 211, 0.6);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    justify-content: space-between;
+    font-size: 0.9rem;
 }
 
 .stat-value {
-    color: #f4f6fb;
+    color: #fff;
     font-weight: 700;
 }
 
 .stat-value.win {
-    color: var(--accent-primary);
+    color: var(--accent-green);
 }
 
+/* Game Area */
 .plinko-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 20px;
 }
 
 .plinko-game {
-    background: linear-gradient(145deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
-    border: 1px solid rgba(0, 208, 132, 0.08);
+    background: var(--bg-panel);
     border-radius: 20px;
-    padding: 26px 30px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    overflow: hidden;
-}
-
-.plinko-game::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top right, rgba(0, 208, 132, 0.22), transparent 55%);
-    pointer-events: none;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    min-height: 600px;
 }
 
 .plinko-game-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    z-index: 1;
+    gap: 15px;
+    margin-bottom: 20px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
 }
 
 .risk-pill,
 .rows-pill {
-    padding: 10px 18px;
-    border-radius: 14px;
-    background: rgba(15, 20, 31, 0.85);
-    border: 1px solid rgba(79, 89, 110, 0.3);
-    color: #f4f6fb;
-    font-size: 0.9rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.plinko-multipliers {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin: 20px 0 16px;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
-}
-
-.plinko-multipliers .multiplier-box {
-    min-width: 62px;
-    padding: 8px 10px;
-    text-align: center;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    border: 1px solid transparent;
-    background: rgba(15, 20, 31, 0.9);
-    color: rgba(177, 186, 211, 0.8);
-    transition: transform 0.2s ease, border 0.2s ease;
-}
-
-.plinko-multipliers .multiplier-box.low {
-    color: var(--accent-primary);
-    border-color: rgba(0, 208, 132, 0.25);
-}
-
-.plinko-multipliers .multiplier-box.very-low {
-    color: rgba(177, 186, 211, 0.5);
-    border-color: rgba(79, 89, 110, 0.2);
-}
-
-.plinko-multipliers .multiplier-box.medium {
-    color: #f6c657;
-    border-color: rgba(246, 198, 87, 0.25);
-}
-
-.plinko-multipliers .multiplier-box.high {
-    color: #ff6666;
-    border-color: rgba(255, 102, 102, 0.3);
-}
-
-.plinko-multipliers .multiplier-box.big-win {
-    color: #8b5cf6;
-    border-color: rgba(139, 92, 246, 0.35);
-}
-
+/* Canvas */
 .plinko-board {
-    position: relative;
-    z-index: 1;
-    padding: 16px 0;
     display: flex;
     justify-content: center;
+    width: 100%;
+    margin-top: 10px;
 }
 
 #plinkoCanvas {
-    width: 100%;
-    max-width: 760px;
+    /* Responsive sizing handled by render logic, but max width here */
+    max-width: 100%;
     height: auto;
-    border-radius: 20px;
-    background: rgba(15, 20, 31, 0.85);
-    border: 1px solid rgba(79, 89, 110, 0.35);
-    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
+    /* We don't set background here, we draw it in canvas or let it be transparent */
+    background: radial-gradient(circle at 50% 10%, #1a2c38 0%, #0f212e 100%);
+    border-radius: 12px;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
 }
 
+/* Hide HTML multipliers since we draw them now? 
+   Actually, previous HTML used HTML divs for multipliers. 
+   My new JS draws them on Canvas.
+   So we should HIDE the HTML multipliers element or simply ensure the HTML structure is empty.
+   But existing HTML (which I just read) has #multipliersTop and Bottom.
+   I should hide them in CSS.
+*/
+.plinko-multipliers {
+    display: none;
+}
+
+/* History */
 .plinko-history {
-    background: linear-gradient(160deg, rgba(26, 31, 46, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
-    border: 1px solid rgba(79, 89, 110, 0.35);
-    border-radius: 18px;
-    padding: 24px 26px 26px;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    background: var(--bg-panel);
+    border-radius: 16px;
+    padding: 20px;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
-.plinko-history .history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 16px;
-}
-
-.plinko-history h3 {
+.history-header h3 {
+    margin: 0;
     font-size: 1.2rem;
-    font-weight: 700;
-    color: #f4f6fb;
-}
-
-.history-subtitle {
-    color: rgba(177, 186, 211, 0.55);
-    font-size: 0.85rem;
-}
-
-.history-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(177, 186, 211, 0.45);
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(79, 89, 110, 0.2);
 }
 
 .history-list {
-    max-height: 320px;
-    overflow-y: auto;
-    margin-top: 12px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .history-item {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(79, 89, 110, 0.15);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-size: 0.9rem;
     align-items: center;
-    color: rgba(177, 186, 211, 0.8);
-    font-size: 0.95rem;
+    animation: slideIn 0.3s ease;
 }
 
-.history-item:last-child {
-    border-bottom: none;
-}
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
 
-.history-bet {
-    color: rgba(177, 186, 211, 0.65);
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .history-multiplier {
-    font-weight: 700;
+    font-weight: 800;
+    text-align: center;
 }
 
-.history-win {
-    justify-self: end;
-    font-weight: 700;
-}
-
-.history-multiplier.big-win,
-.history-win.big-win {
+.history-multiplier.big-win {
     color: #8b5cf6;
 }
 
+.history-multiplier.medium-win {
+    color: #ffa500;
+}
+
+.history-multiplier.small-win {
+    color: var(--accent-green);
+}
+
 .history-multiplier.loss {
-    color: rgba(177, 186, 211, 0.5);
+    color: #555;
 }
 
-.history-multiplier.medium-win,
-.history-win.medium-win {
-    color: #f6c657;
+.history-win {
+    text-align: right;
+    font-weight: 700;
 }
 
-.history-multiplier.small-win,
-.history-win.small-win {
-    color: var(--accent-primary);
-}
-
-.history-win.loss {
-    color: #ff6666;
-}
-
-.no-history {
-    text-align: center;
-    padding: 30px 0;
-    color: rgba(177, 186, 211, 0.5);
-    font-size: 0.95rem;
-}
-
-@media (max-width: 1200px) {
+/* Responsive */
+@media (max-width: 900px) {
     .plinko-container {
-        grid-template-columns: 1fr;
+        flex-direction: column;
     }
 
     .plinko-controls {
-        position: static;
+        width: 100%;
+        box-sizing: border-box;
     }
 }

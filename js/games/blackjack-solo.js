@@ -1,5 +1,6 @@
 import { auth, onAuthStateChanged } from '../core/firebase-config.js';
 import { subscribeToUserData, applyGameResult } from '../core/balance-manager.js';
+import { renderHandResults } from '../core/card-utils.js';
 
 // Game state
 let currentUser = null;
@@ -50,14 +51,16 @@ const elements = {
 };
 
 // Card utilities
-const suits = ['♠', '♥', '♦', '♣'];
+const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
 const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-function createDeck() {
+function createDeck(decks = 6) {
     const newDeck = [];
-    for (let suit of suits) {
-        for (let value of values) {
-            newDeck.push({ suit, value });
+    for (let d = 0; d < decks; d++) {
+        for (let suit of suits) {
+            for (let value of values) {
+                newDeck.push({ suit, value });
+            }
         }
     }
     return shuffleDeck(newDeck);
@@ -95,40 +98,15 @@ function calculateHand(hand) {
     return total;
 }
 
-function renderCard(card, faceDown = false) {
-    const cardDiv = document.createElement('div');
-    cardDiv.className = 'card';
-
-    if (faceDown) {
-        cardDiv.classList.add('card-back');
-        cardDiv.innerHTML = '🂠';
-    } else {
-        const isRed = ['♥', '♦'].includes(card.suit);
-        cardDiv.classList.add(isRed ? 'red' : 'black');
-        cardDiv.innerHTML = `
-            <div class="card-value">${card.value}</div>
-            <div class="card-suit">${card.suit}</div>
-        `;
-    }
-
-    return cardDiv;
-}
-
 function updateDisplay() {
     // Cards
     if (elements.dealerCards) {
-        elements.dealerCards.innerHTML = '';
-        dealerHand.forEach((card, index) => {
-            const faceDown = gameState === 'playing' && index === 1;
-            elements.dealerCards.appendChild(renderCard(card, faceDown));
-        });
+        const faceDown = gameState === 'playing'; // Hide second card while playing
+        renderHandResults(elements.dealerCards, dealerHand, faceDown);
     }
 
     if (elements.playerCards) {
-        elements.playerCards.innerHTML = '';
-        playerHand.forEach(card => {
-            elements.playerCards.appendChild(renderCard(card));
-        });
+        renderHandResults(elements.playerCards, playerHand);
     }
 
     // Totals
@@ -139,6 +117,7 @@ function updateDisplay() {
 
     if (elements.dealerTotal) {
         if (gameState === 'playing') {
+            // Show only first card value if hidden
             elements.dealerTotal.textContent = dealerHand.length > 0 ? getCardValue(dealerHand[0]) : 0;
         } else {
             elements.dealerTotal.textContent = calculateHand(dealerHand);
@@ -244,23 +223,37 @@ async function deal() {
     }
 
     // Initialize deck
-    deck = createDeck();
+    deck = createDeck(6); // Use 6 decks
     playerHand = [deck.pop(), deck.pop()];
     dealerHand = [deck.pop(), deck.pop()];
     gameState = 'playing';
 
-    setStatus('Votre tour - Hit ou Stand?', 'info');
-    updateUI();
-
-    // Check for blackjack
+    // Check for blackjack immediately
     const playerTotal = calculateHand(playerHand);
     const dealerTotal = calculateHand(dealerHand);
 
-    if (playerTotal === 21 && dealerTotal === 21) {
-        setTimeout(() => stand(), 1000);
-    } else if (playerTotal === 21) {
-        setTimeout(() => stand(), 1000);
+    // Check dealer blackjack (natural)
+    // If dealer upcard is A or 10, technically should check peek, but for simple solo:
+    // We will just let the player play unless both have simple blackjack conditions logic
+
+    // Simplification: Check immediate wins
+    if (playerTotal === 21) {
+        // Player has natural Blackjack
+        // Check if dealer also has 21 (needs to reveal)
+        gameState = 'dealer-turn';
+        updateUI(); // Show dealer hidden card
+        setTimeout(() => {
+            if (dealerTotal === 21) {
+                endGame('push', 'Double Blackjack! Égalité.');
+            } else {
+                endGame('blackjack', 'Blackjack! Vous gagnez 3:2!');
+            }
+        }, 1000);
+        return;
     }
+
+    setStatus('Votre tour - Hit ou Stand?', 'info');
+    updateUI();
 }
 
 function hit() {
@@ -300,13 +293,19 @@ async function double() {
 
         currentBet *= 2;
         playerHand.push(deck.pop());
-        updateUI();
 
+        // Force stand after double (unless bust)
         const playerTotal = calculateHand(playerHand);
+
         if (playerTotal > 21) {
+            updateUI();
             endGame('loss', 'Vous avez dépassé 21! Vous perdez.');
         } else {
-            setTimeout(() => stand(), 500);
+            gameState = 'dealer-turn'; // Show card first then dealer moves
+            updateUI();
+            setTimeout(() => {
+                dealerPlay();
+            }, 1000);
         }
     } catch (error) {
         console.error('Error doubling:', error);
@@ -317,23 +316,21 @@ async function double() {
 async function dealerPlay() {
     let dealerTotal = calculateHand(dealerHand);
 
+    updateDisplay(); // Ensure hidden card is revealed
+
     while (dealerTotal < 17) {
         await new Promise(resolve => setTimeout(resolve, 800));
         dealerHand.push(deck.pop());
         dealerTotal = calculateHand(dealerHand);
-        updateUI();
+        updateDisplay();
     }
 
     // Determine winner
     const playerTotal = calculateHand(playerHand);
     const playerBlackjack = playerTotal === 21 && playerHand.length === 2;
-    const dealerBlackjack = dealerTotal === 21 && dealerHand.length === 2;
+    const dealerBlackjack = dealerTotal === 21 && dealerHand.length === 2; // Shouldn't happen here usually if checked at start, but good safety
 
-    if (playerBlackjack && dealerBlackjack) {
-        endGame('push', 'Double Blackjack! Égalité.');
-    } else if (playerBlackjack) {
-        endGame('blackjack', 'Blackjack! Vous gagnez 3:2!');
-    } else if (dealerTotal > 21) {
+    if (dealerTotal > 21) {
         endGame('win', 'Le croupier dépasse 21! Vous gagnez!');
     } else if (playerTotal > dealerTotal) {
         endGame('win', 'Vous gagnez!');
@@ -490,3 +487,4 @@ onAuthStateChanged(auth, async (user) => {
     setStatus('Placez votre mise', 'neutral');
     updateUI();
 });
+

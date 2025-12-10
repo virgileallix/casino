@@ -174,29 +174,41 @@ function renderHand(container, hand, hideHole = false) {
     if (!hand || hand.length === 0) return;
 
     hand.forEach((card, index) => {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'card';
-        cardDiv.style.setProperty('--index', index);
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'card-image-container';
+        cardContainer.style.setProperty('--index', index);
+        cardContainer.style.zIndex = index; // Ensure proper stacking
+
+        const img = document.createElement('img');
+        img.className = 'card-image';
 
         if (hideHole && index === 1) {
-            cardDiv.classList.add('face-down');
+            img.src = 'assets/cards/back.png'; // Ensure this asset exists or use a colorful back
+            // If specific back asset missing, maybe use a default or color
+            // I'll assume standard naming or just a placeholder class logic if image fails
+            // Actually, let's use a class to force a background if image is missing?
+            // But better to try to point to a valid back.
+            // If 'assets/cards/back.png' doesn't exist, we might see a broken image.
+            // Let's assume standard card set has a back. Or create a fallback.
+            cardContainer.classList.add('hidden-card');
         } else {
-            const suitSymbols = {
-                hearts: '♥',
-                diamonds: '♦',
-                clubs: '♣',
-                spades: '♠'
-            };
-
-            const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
-            cardDiv.style.setProperty('--card-color', isRed ? '#dc143c' : '#000');
-            cardDiv.setAttribute('data-display', card.rank);
-            cardDiv.setAttribute('data-suit', suitSymbols[card.suit] || '');
+            img.src = getCardImage(card);
         }
 
-        cardDiv.classList.add('deal');
-        setTimeout(() => cardDiv.classList.remove('deal'), 600);
-        container.appendChild(cardDiv);
+        img.alt = `${card.rank} of ${card.suit}`;
+        img.onerror = () => { img.src = 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Card_back_01.svg'; }; // Fallback
+
+        cardContainer.appendChild(img);
+
+        // Animation
+        cardContainer.style.opacity = '0';
+        cardContainer.style.transform = 'translateY(-20px)';
+        container.appendChild(cardContainer);
+
+        setTimeout(() => {
+            cardContainer.style.opacity = '1';
+            cardContainer.style.transform = 'translateY(0)';
+        }, 50 * index);
     });
 }
 
@@ -717,20 +729,20 @@ function renderMultiSeatsArea() {
             const side21HTML = show21plus3 ? `
                 <div class="side-bet-circle side-21" data-seat-side21="${i}">
                     ${renderChipStackHTML(seat.sideBet21Plus3 || 0, {
-                        label: '21+3',
-                        type: 'side',
-                        emptyLabel: '21+3'
-                    })}
+                label: '21+3',
+                type: 'side',
+                emptyLabel: '21+3'
+            })}
                 </div>
             ` : '';
 
             const sidePerfectHTML = showPerfectPairs ? `
                 <div class="side-bet-circle side-pp" data-seat-sidepp="${i}">
                     ${renderChipStackHTML(seat.sideBetPerfectPairs || 0, {
-                        label: 'Perfect Pairs',
-                        type: 'side',
-                        emptyLabel: 'Perfect Pairs'
-                    })}
+                label: 'Perfect Pairs',
+                type: 'side',
+                emptyLabel: 'Perfect Pairs'
+            })}
                 </div>
             ` : '';
 
@@ -1269,7 +1281,7 @@ function calculate21Plus3Payout(playerHand, dealerUpCard) {
 
     const isFlush = suits[0] === suits[1] && suits[1] === suits[2];
     const isStraight = (rankValues[2] - rankValues[1] === 1 && rankValues[1] - rankValues[0] === 1) ||
-                       (rankValues[0] === 2 && rankValues[1] === 3 && rankValues[2] === 14); // A-2-3
+        (rankValues[0] === 2 && rankValues[1] === 3 && rankValues[2] === 14); // A-2-3
 
     if (isFlush && isStraight) return 40;
 
